@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Family Investment Portfolio Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <!-- Top Navigation Header -->
+  <header class="navbar">
+    <div class="nav-brand">
+      <div class="brand-icon">📈</div>
+      <div>
+        <h1 class="brand-title">Family Investment Portfolio</h1>
+        <p class="text-xs text-gray-400 font-normal">PP & JJ Wealth Growth Engine</p>
+      </div>
+    </div>
+    <nav class="nav-tabs">
+      <button class="nav-tab-btn active" data-view="view-overview"><span>✨</span> Overview</button>
+      <button class="nav-tab-btn" data-view="view-allocation"><span>📊</span> Allocation <span class="hidden sm:inline">&amp; Holdings</span></button>
+      <button class="nav-tab-btn" data-view="view-owner"><span>⚔️</span> Owner Race <span class="hidden sm:inline">(PP vs JJ)</span></button>
+      <button class="nav-tab-btn" data-view="view-simulator"><span>🚀</span> <span class="hidden sm:inline">Retirement </span>Simulator</button>
+    </nav>
+    <div class="auth-controls">
+      <button id="btn-google-login" class="btn-google">
+        <svg class="w-4 h-4" viewBox="0 0 24 24">
+          <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+          <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+          <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+          <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+        </svg>
+        Sign in with Google
+      </button>
+      <div id="user-profile-badge" class="user-badge" style="display: none;">
+        <img id="user-avatar-img" class="user-avatar" src="" alt="Avatar">
+        <span id="user-email-display" class="text-xs font-semibold text-gray-200">user@gmail.com</span>
+        <button id="btn-logout" class="btn-logout" title="Sign out">✕</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Demo Banner -->
+  <div id="demo-mode-banner" class="demo-banner" style="display: none;">
+    <div class="flex items-center gap-2">
+      <span>💡</span>
+      <span><strong>Demo Mode Active:</strong> กำลังแสดงข้อมูลจำลอง — กด Sign in with Google เพื่อดึงข้อมูลจริงจาก Google Sheet</span>
+    </div>
+  </div>
+
+  <!-- Loading Overlay -->
+  <div id="global-loading-spinner" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center" style="display: none;">
+    <div class="text-center">
+      <div class="w-12 h-12 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
+      <p class="text-gray-300 font-medium text-sm">กำลังโหลดข้อมูลพอร์ตการลงทุน...</p>
+    </div>
+  </div>
+
+  <main class="main-content">
+
+    <!-- ===== VIEW 1: OVERVIEW ===== -->
+    <section id="view-overview" class="view-container">
+
+      <!-- Hero KPI Cards -->
+      <div class="kpi-grid">
+        <!-- Net Worth -->
+        <div class="glass-card kpi-card">
+          <div class="kpi-header">
+            <span class="kpi-title">Total Net Worth (มูลค่าพอร์ตสุทธิ)</span>
+            <span class="text-emerald-400 text-lg">📈</span>
+          </div>
+          <div class="kpi-value" style="color:#10b981;">฿<span id="kpi-net-worth">0</span></div>
+          <div class="text-xs text-gray-400">มูลค่าตลาดรวมทั้งหมด ณ ปัจจุบัน</div>
+        </div>
+
+        <!-- Capital Deposited -->
+        <div class="glass-card kpi-card">
+          <div class="kpi-header">
+            <span class="kpi-title">Capital Deposited (เงินต้นออมสะสม)</span>
+            <span class="text-blue-400 text-lg">🏦</span>
+          </div>
+          <div class="kpi-value">฿<span id="kpi-capital">0</span></div>
+          <div class="text-xs text-gray-400">เงินต้นทั้งหมดที่เติมเข้ามาลงทุน</div>
+        </div>
+
+        <!-- Wealth Gain -->
+        <div class="glass-card kpi-card">
+          <div class="kpi-header">
+            <span class="kpi-title">Total Wealth Gain (ดอกผลเงินทำงาน)</span>
+            <span class="text-emerald-400 text-lg">🌱</span>
+          </div>
+          <div class="kpi-value" style="color:#10b981;">฿<span id="kpi-wealth-gain">0</span></div>
+          <div class="text-xs text-gray-400">Unrealized P&L + Realized P&L + Dividends</div>
+        </div>
+
+        <!-- ROI -->
+        <div class="glass-card kpi-card">
+          <div class="kpi-header">
+            <span class="kpi-title">Overall Return (ROI % p.a.)</span>
+            <div class="roi-btn-group">
+              <button class="roi-btn" data-period="1Y">1Y</button>
+              <button class="roi-btn" data-period="3Y">3Y</button>
+              <button class="roi-btn" data-period="5Y">5Y</button>
+              <button class="roi-btn active" data-period="ALL">ALL</button>
+            </div>
+          </div>
+          <div class="kpi-value text-emerald-400" id="kpi-roi-val">+0.00%</div>
+          <div class="text-xs text-gray-400" id="kpi-roi-sub">CAGR ทบต้นเฉลี่ยต่อปี (All-Time)</div>
+        </div>
+      </div>
+
+      <!-- Freedom Milestone -->
+      <div class="glass-card milestone-container">
+        <div class="flex flex-wrap items-center justify-between gap-4 mb-2">
+          <div>
+            <h2 class="text-base font-bold text-white flex items-center gap-2">
+              <span>🎯</span> Financial Freedom Milestone Progress
+            </h2>
+            <p class="text-xs text-gray-400">คำนวณจาก FV ของพอร์ตปัจจุบัน ทบต้นตามอัตราที่กำหนด เทียบกับเป้าหมาย</p>
+          </div>
+          <div class="flex items-center gap-3">
+            <div class="flex items-center gap-1.5 bg-slate-900/60 px-3 py-1.5 rounded-lg border border-gray-800">
+              <span class="text-xs text-gray-400">เป้าหมายเกษียณ (฿):</span>
+              <input id="milestone-target-input" type="text" class="bg-transparent text-xs text-cyan-300 font-bold w-28 outline-none border-b border-cyan-500/40 focus:border-cyan-400" value="30,000,000">
+            </div>
+            <div class="flex items-center gap-1.5 bg-slate-900/60 px-3 py-1.5 rounded-lg border border-gray-800">
+              <span class="text-xs text-gray-400">ผลตอบแทนคาดหวัง (% p.a.):</span>
+              <input id="milestone-return-input" type="number" class="bg-transparent text-xs text-emerald-300 font-bold w-12 outline-none border-b border-emerald-500/40 focus:border-emerald-400" value="7.0" step="0.5">
+            </div>
+            <div class="flex items-center gap-1.5 bg-slate-900/60 px-3 py-1.5 rounded-lg border border-gray-800">
+              <span class="text-xs text-gray-400">ปีที่เหลือก่อนเกษียณ:</span>
+              <input id="milestone-years-input" type="number" class="bg-transparent text-xs text-amber-300 font-bold w-10 outline-none border-b border-amber-500/40 focus:border-amber-400" value="17" step="1">
+            </div>
+          </div>
+        </div>
+        <div class="progress-track">
+          <div id="milestone-progress-bar" class="progress-fill" style="width: 0%;"></div>
+        </div>
+        <div class="flex justify-between items-center text-xs mt-1">
+          <span class="text-gray-300 font-medium">FV ของพอร์ตปัจจุบัน คิดเป็น <strong id="milestone-progress-pct" class="text-cyan-400 font-bold">0.0%</strong> ของเป้าหมาย</span>
+          <span class="text-gray-400">FV พอร์ตปัจจุบัน (ยังไม่ออม): <strong id="milestone-fv-val" class="text-emerald-300 font-bold">฿0</strong></span>
+        </div>
+      </div>
+
+      <!-- Wealth Growth Chart — Full Width -->
+      <div class="glass-card p-5 mb-5">
+        <div class="flex flex-wrap items-center justify-between mb-3 gap-3">
+          <div>
+            <h3 class="chart-title">Wealth Growth History (เงินต้น VS มูลค่าพอร์ตจริง)</h3>
+            <p class="text-xs text-gray-400">ระยะห่างระหว่างสองเส้น = "ดอกผลสะสมที่เงินทำงาน" (ยิ่งห่าง ยิ่งดี)</p>
+          </div>
+          <div class="flex gap-1.5 bg-slate-900/60 p-1 rounded-xl border border-gray-800">
+            <button class="chart-range-btn active" data-range="ALL" data-chart="wealth">ALL</button>
+            <button class="chart-range-btn" data-range="5Y" data-chart="wealth">5Y</button>
+            <button class="chart-range-btn" data-range="3Y" data-chart="wealth">3Y</button>
+            <button class="chart-range-btn" data-range="1Y" data-chart="wealth">1Y</button>
+          </div>
+        </div>
+        <div style="height:380px; position:relative;">
+          <canvas id="wealthGrowthChart"></canvas>
+        </div>
+      </div>
+
+      <!-- Monthly Inflow Chart -->
+      <div class="glass-card p-5 mb-5">
+        <div class="mb-3">
+          <h3 class="chart-title">Monthly Savings Inflow (เงินออมเติมใหม่รายเดือน)</h3>
+          <p class="text-xs text-gray-400">วินัยการเติมเงินออมเพิ่มในแต่ละเดือน (ย้อนหลัง 24 เดือน)</p>
+        </div>
+        <div style="height:220px; position:relative;">
+          <canvas id="monthlyInflowChart"></canvas>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ===== VIEW 2: ALLOCATION & HOLDINGS ===== -->
+    <section id="view-allocation" class="view-container hidden">
+
+      <!-- Donut Allocation Chart — Full Width with Legend Below -->
+      <div class="glass-card p-5 mb-5">
+        <h3 class="text-base font-bold text-white mb-1">Asset Class Allocation</h3>
+        <p class="text-xs text-gray-400 mb-4">สัดส่วนการจัดสรรเงินตามประเภทสินทรัพย์</p>
+        <div class="flex flex-col items-center">
+          <div class="relative" style="width:260px; height:260px;">
+            <canvas id="allocationChart"></canvas>
+            <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+              <span class="text-xs text-gray-400 font-medium">Total Value</span>
+              <span id="allocation-total-val" class="text-xl font-bold text-emerald-400">฿0</span>
+            </div>
+          </div>
+          <!-- Legend Below -->
+          <div id="allocation-legend" class="flex flex-wrap justify-center gap-x-5 gap-y-2 mt-4 text-xs text-white"></div>
+        </div>
+      </div>
+
+      <!-- Holdings Table — Full Width -->
+      <div class="glass-card p-5">
+        <div class="flex flex-wrap items-start justify-between gap-3 mb-4">
+          <div>
+            <h3 class="text-base font-bold text-white flex items-center gap-2">
+              <span>📋</span> Asset Performance & Holdings
+              <span id="asset-count-badge" class="ml-2 px-2.5 py-0.5 bg-cyan-950/60 border border-cyan-500/30 text-cyan-300 text-xs font-semibold rounded-lg">0 Assets</span>
+            </h3>
+            <p class="text-xs text-gray-400">รายละเอียดรายการสินทรัพย์ ราคาตลาด ต้นทุนเฉลี่ย และกำไรขาดทุน</p>
+          </div>
+
+          <!-- Filters Row -->
+          <div class="flex flex-wrap items-center gap-2">
+            <!-- Owner Filter -->
+            <div class="flex bg-slate-900/80 p-0.5 rounded-lg border border-gray-800 text-xs">
+              <button class="alloc-owner-btn px-3 py-1 rounded-md font-semibold text-gray-300 active" data-owner="TOTAL">Family</button>
+              <button class="alloc-owner-btn px-3 py-1 rounded-md font-semibold text-cyan-400" data-owner="PP">PP</button>
+              <button class="alloc-owner-btn px-3 py-1 rounded-md font-semibold text-amber-400" data-owner="JJ">JJ</button>
+            </div>
+            <!-- Class Filter -->
+            <div class="relative">
+              <button id="class-filter-btn" class="flex items-center gap-1.5 px-3 py-1.5 bg-slate-900/80 border border-gray-800 rounded-lg text-xs text-gray-300 hover:border-cyan-500 transition-all">
+                <span>🔽</span> Asset Class
+              </button>
+              <div id="class-filter-dropdown" class="hidden absolute right-0 top-8 z-20 bg-slate-900 border border-gray-700 rounded-xl p-3 min-w-[170px] shadow-2xl">
+                <div id="class-filter-options" class="flex flex-col gap-1.5"></div>
+              </div>
+            </div>
+            <!-- Search -->
+            <input id="asset-search-input" type="text" placeholder="🔍 ค้นหา..." class="bg-slate-900/80 border border-gray-800 rounded-lg px-3 py-1.5 text-xs text-white outline-none focus:border-cyan-400 w-40">
+          </div>
+        </div>
+
+        <!-- Table -->
+        <div class="holdings-table-wrap">
+          <table class="w-full text-left text-xs">
+            <thead class="bg-slate-900/90 text-gray-400 font-semibold sticky top-0 backdrop-blur-md">
+              <tr>
+                <th class="px-4 py-3 sortable-th" data-sort="asset_name">Asset Name <span class="sort-icon">⇅</span></th>
+                <th class="px-4 py-3 sortable-th" data-sort="class">Class <span class="sort-icon">⇅</span></th>
+                <th class="px-4 py-3 sortable-th" data-sort="owner">Owner <span class="sort-icon">⇅</span></th>
+                <th class="px-4 py-3 text-right">Units</th>
+                <th class="px-4 py-3 text-right">Avg Cost</th>
+                <th class="px-4 py-3 text-right">Price</th>
+                <th class="px-4 py-3 text-right sortable-th" data-sort="total_cost">Total Cost <span class="sort-icon">⇅</span></th>
+                <th class="px-4 py-3 text-right sortable-th active-sort" data-sort="market_value">Market Value <span class="sort-icon">▼</span></th>
+                <th class="px-4 py-3 text-right sortable-th" data-sort="unrealized_pl">Unrealized P&L <span class="sort-icon">⇅</span></th>
+                <th class="px-4 py-3 text-right sortable-th" data-sort="unrealized_pl_pct">Unrealized % <span class="sort-icon">⇅</span></th>
+                <th class="px-4 py-3 text-right sortable-th" data-sort="realized_pl">Realized P&L <span class="sort-icon">⇅</span></th>
+              </tr>
+            </thead>
+            <tbody id="asset-holdings-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ===== VIEW 3: OWNER BREAKDOWN & RACE ===== -->
+    <section id="view-owner" class="view-container hidden">
+
+      <!-- Filter Row -->
+      <div class="glass-card p-4 mb-5 flex flex-wrap items-center justify-between gap-4">
+        <div class="flex items-center gap-2">
+          <span class="text-sm font-semibold text-gray-300">มุมมองพอร์ต:</span>
+          <div class="flex bg-slate-900/80 p-1 rounded-xl border border-gray-800">
+            <button class="owner-filter-btn px-4 py-1.5 text-xs font-semibold rounded-lg text-gray-300 hover:text-white transition-all active" data-owner="TOTAL">👨‍👩‍👧 Total Family</button>
+            <button class="owner-filter-btn px-4 py-1.5 text-xs font-semibold rounded-lg text-cyan-400 hover:text-cyan-300 transition-all" data-owner="PP">PP Only</button>
+            <button class="owner-filter-btn px-4 py-1.5 text-xs font-semibold rounded-lg text-amber-400 hover:text-amber-300 transition-all" data-owner="JJ">JJ Only</button>
+          </div>
+        </div>
+        <div id="race-leader-banner" class="px-4 py-2 bg-gradient-to-r from-amber-500/20 to-cyan-500/20 border border-amber-500/30 text-amber-300 font-bold text-sm rounded-xl">
+          🏆 PP vs JJ Competitive Savings Race
+        </div>
+      </div>
+
+      <!-- PP & JJ Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
+        <!-- PP Card -->
+        <div class="glass-card p-5 border-l-4 border-l-cyan-400">
+          <div class="flex justify-between items-center mb-3">
+            <span class="text-sm font-bold text-cyan-300">📊 PP Portfolio</span>
+            <span class="px-2.5 py-0.5 bg-cyan-950 text-cyan-300 text-xs rounded-full border border-cyan-800">Individual Port</span>
+          </div>
+          <div class="mb-2">
+            <span class="text-xs text-gray-400 block mb-0.5">Net Worth</span>
+            <strong class="text-3xl font-extrabold text-cyan-300">฿<span id="pp-card-networth">0</span></strong>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-slate-900/50 p-3 rounded-xl mt-3">
+            <div>
+              <span class="block text-xs text-gray-400 mb-0.5">Capital Deposited</span>
+              <strong class="text-xl font-bold text-gray-200">฿<span id="pp-card-capital">0</span></strong>
+            </div>
+            <div>
+              <span class="block text-xs text-gray-400 mb-0.5">Unrealized P&L</span>
+              <strong class="text-xl font-bold" id="pp-card-pl">+0</strong>
+            </div>
+          </div>
+        </div>
+
+        <!-- JJ Card -->
+        <div class="glass-card p-5 border-l-4 border-l-amber-400">
+          <div class="flex justify-between items-center mb-3">
+            <span class="text-sm font-bold text-amber-300">📊 JJ Portfolio</span>
+            <span class="px-2.5 py-0.5 bg-amber-950 text-amber-300 text-xs rounded-full border border-amber-800">Individual Port</span>
+          </div>
+          <div class="mb-2">
+            <span class="text-xs text-gray-400 block mb-0.5">Net Worth</span>
+            <strong class="text-3xl font-extrabold text-amber-300">฿<span id="jj-card-networth">0</span></strong>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-slate-900/50 p-3 rounded-xl mt-3">
+            <div>
+              <span class="block text-xs text-gray-400 mb-0.5">Capital Deposited</span>
+              <strong class="text-xl font-bold text-gray-200">฿<span id="jj-card-capital">0</span></strong>
+            </div>
+            <div>
+              <span class="block text-xs text-gray-400 mb-0.5">Unrealized P&L</span>
+              <strong class="text-xl font-bold" id="jj-card-pl">+0</strong>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Race Chart -->
+      <div class="glass-card p-5">
+        <div class="flex flex-wrap items-center justify-between mb-3 gap-3">
+          <div>
+            <h3 class="chart-title">PP vs JJ Growth Race (กราฟเส้นแข่งขันเปรียบเทียบการออม)</h3>
+            <p class="text-xs text-gray-400">เส้นเงินต้นและมูลค่าพอร์ตของ PP และ JJ วิ่งคู่กันตั้งแต่เริ่มต้นถึงปัจจุบัน</p>
+          </div>
+          <div class="flex gap-1.5 bg-slate-900/60 p-1 rounded-xl border border-gray-800">
+            <button class="chart-range-btn active" data-range="ALL" data-chart="race">ALL</button>
+            <button class="chart-range-btn" data-range="5Y" data-chart="race">5Y</button>
+            <button class="chart-range-btn" data-range="3Y" data-chart="race">3Y</button>
+            <button class="chart-range-btn" data-range="1Y" data-chart="race">1Y</button>
+          </div>
+        </div>
+        <div style="height:420px; position:relative;">
+          <canvas id="ppJjRaceChart"></canvas>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ===== VIEW 4: RETIREMENT SIMULATOR ===== -->
+    <section id="view-simulator" class="view-container hidden">
+
+      <div class="sim-grid">
+        <!-- Input Controls -->
+        <div class="glass-card p-5">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-sm font-bold text-white flex items-center gap-2"><span>⚙️</span> Simulation Parameters</h3>
+            <button id="sim-reset-btn" class="text-xs text-cyan-400 hover:underline">รีเซ็ตค่า</button>
+          </div>
+
+          <div class="sim-input-group">
+            <label>ฐานเงินทุนปัจจุบัน ณ วันนี้ — แก้ไขได้:</label>
+            <div class="input-with-suffix">
+              <input id="sim-base-wealth" type="number" value="0" step="100000">
+              <span class="input-suffix">THB</span>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div class="sim-input-group">
+              <label>อายุปัจจุบัน (ปี):</label>
+              <input id="sim-current-age" type="number" value="38">
+            </div>
+            <div class="sim-input-group">
+              <label>อายุที่ตั้งใจเกษียณ:</label>
+              <input id="sim-retire-age" type="number" value="55">
+            </div>
+          </div>
+
+          <div class="sim-input-group">
+            <label>💰 เงินออมเติมเพิ่มต่อเดือน:</label>
+            <div class="input-with-suffix">
+              <input id="sim-monthly-savings" type="number" value="35000" step="5000">
+              <span class="input-suffix">THB</span>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div class="sim-input-group">
+              <label>📈 เพิ่มเงินออมต่อปี (Step-up):</label>
+              <div class="input-with-suffix">
+                <input id="sim-step-up" type="number" value="5.0" step="0.5">
+                <span class="input-suffix">%</span>
+              </div>
+            </div>
+            <div class="sim-input-group">
+              <label>🎯 ROI ช่วงสะสม:</label>
+              <div class="input-with-suffix">
+                <input id="sim-return-rate" type="number" value="7.0" step="0.5">
+                <span class="input-suffix">%</span>
+              </div>
+            </div>
+          </div>
+
+          <hr class="border-gray-800 my-3">
+
+          <div class="grid grid-cols-2 gap-3">
+            <div class="sim-input-group">
+              <label>💵 Yield หลังเกษียณ:</label>
+              <div class="input-with-suffix">
+                <input id="sim-retire-yield" type="number" value="4.0" step="0.5">
+                <span class="input-suffix">%</span>
+              </div>
+            </div>
+            <div class="sim-input-group">
+              <label>🎈 เงินเฟ้อคาดการณ์:</label>
+              <div class="input-with-suffix">
+                <input id="sim-inflation" type="number" value="2.5" step="0.5">
+                <span class="input-suffix">%</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="sim-input-group">
+            <label>🛒 ค่าใช้จ่ายครอบครัวปัจจุบัน/เดือน:</label>
+            <div class="input-with-suffix">
+              <input id="sim-living-cost" type="number" value="50000" step="5000">
+              <span class="input-suffix">THB</span>
+            </div>
+          </div>
+
+          <p class="text-xs text-gray-500 mt-2">* ค่าใช้จ่ายหลังเกษียณคำนวณจากปัจจุบัน ทบต้นตามเงินเฟ้อจนถึงวันเกษียณ</p>
+        </div>
+
+        <!-- Results & Chart -->
+        <div class="flex flex-col gap-4">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="glass-card p-4 text-center">
+              <span class="text-xs text-gray-400">มูลค่าพอร์ต ณ วันเกษียณ</span>
+              <div id="sim-result-retire-val" class="text-2xl font-bold text-emerald-400 mt-1">฿0M</div>
+            </div>
+            <div class="glass-card p-4 text-center">
+              <span class="text-xs text-gray-400">ค่าใช้จ่าย/เดือน ณ วันเกษียณ (ปรับเงินเฟ้อ)</span>
+              <div id="sim-result-expense-at-retire" class="text-2xl font-bold text-amber-300 mt-1">฿0</div>
+            </div>
+          </div>
+
+          <div id="sim-result-status-card" class="sim-status-badge success">
+            🎉 เงินพอร์ตอยู่ได้ยั่งยืนจนถึงอายุ 85+ ปี!
+          </div>
+
+          <div class="glass-card p-5 flex-1">
+            <div class="mb-3">
+              <h3 class="chart-title">Retirement Freedom Projection (3 ช่วงชีวิต)</h3>
+              <p class="text-xs text-gray-400">Historical → Wealth Accumulation → Retirement Freedom (หักค่าใช้จ่ายปรับเงินเฟ้อทุกปี)</p>
+            </div>
+            <div style="height:380px; position:relative;">
+              <canvas id="retirementSimChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <script src="js/config.js"></script>
+  <script src="js/state.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/views/overview.js"></script>
+  <script src="js/views/allocation.js"></script>
+  <script src="js/views/owner_breakdown.js"></script>
+  <script src="js/views/simulator.js"></script>
+  <script src="js/app.js"></script>
+
+</body>
+</html>
