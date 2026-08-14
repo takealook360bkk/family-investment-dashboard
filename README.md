@@ -37,6 +37,12 @@ The project is built around a hybrid architecture using Google Sheets as the pri
 - **Security**: Google Identity Services (OAuth 2.0).
 
 ## Version Log
+- **Version 3.1**: UI bug fixes, default parameter updates, and API latency optimization.
+  - Scaled down demo mode mock data to realistic ~1M THB portfolio base.
+  - Fixed mobile overflow for retirement year selector.
+  - Added dynamic footer summary row for Holdings table with auto-calculating totals.
+  - Updated default FIRE target metrics and retirement simulator parameters.
+  - Implemented timestamp cache busters and `no-store` fetch options for real-time data accuracy.
 - **Version 3.0**: Initial dashboard structure and core features implementation.
 
 ## Security & Privacy

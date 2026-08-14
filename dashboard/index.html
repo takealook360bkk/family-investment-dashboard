@@ -125,18 +125,22 @@
             </h2>
             <p class="text-xs text-gray-400">คำนวณจาก FV ของพอร์ตปัจจุบัน ทบต้นตามอัตราที่กำหนด เทียบกับเป้าหมาย</p>
           </div>
-          <div class="flex items-center gap-3">
+          <!-- v3.1 Update: Change flex container to flex-wrap with gap-2 to fix overflow on mobile -->
+          <div class="flex flex-wrap items-center gap-2">
             <div class="flex items-center gap-1.5 bg-slate-900/60 px-3 py-1.5 rounded-lg border border-gray-800">
               <span class="text-xs text-gray-400">เป้าหมายเกษียณ (฿):</span>
-              <input id="milestone-target-input" type="text" class="bg-transparent text-xs text-cyan-300 font-bold w-28 outline-none border-b border-cyan-500/40 focus:border-cyan-400" value="30,000,000">
+              <!-- v3.1 Update: Default to 27,500,000 -->
+              <input id="milestone-target-input" type="text" class="bg-transparent text-xs text-cyan-300 font-bold w-28 outline-none border-b border-cyan-500/40 focus:border-cyan-400" value="27,500,000">
             </div>
             <div class="flex items-center gap-1.5 bg-slate-900/60 px-3 py-1.5 rounded-lg border border-gray-800">
               <span class="text-xs text-gray-400">ผลตอบแทนคาดหวัง (% p.a.):</span>
-              <input id="milestone-return-input" type="number" class="bg-transparent text-xs text-emerald-300 font-bold w-12 outline-none border-b border-emerald-500/40 focus:border-emerald-400" value="7.0" step="0.5">
+              <!-- v3.1 Update: Default to 5.0 -->
+              <input id="milestone-return-input" type="number" class="bg-transparent text-xs text-emerald-300 font-bold w-12 outline-none border-b border-emerald-500/40 focus:border-emerald-400" value="5.0" step="0.5">
             </div>
             <div class="flex items-center gap-1.5 bg-slate-900/60 px-3 py-1.5 rounded-lg border border-gray-800">
               <span class="text-xs text-gray-400">ปีที่เหลือก่อนเกษียณ:</span>
-              <input id="milestone-years-input" type="number" class="bg-transparent text-xs text-amber-300 font-bold w-10 outline-none border-b border-amber-500/40 focus:border-amber-400" value="17" step="1">
+              <!-- v3.1 Update: Default to 20 -->
+              <input id="milestone-years-input" type="number" class="bg-transparent text-xs text-amber-300 font-bold w-10 outline-none border-b border-amber-500/40 focus:border-amber-400" value="20" step="1">
             </div>
           </div>
         </div>
@@ -253,6 +257,22 @@
               </tr>
             </thead>
             <tbody id="asset-holdings-tbody"></tbody>
+            <!-- v3.1 Update: Add dynamic summary footer row for Holdings table -->
+            <tfoot class="bg-slate-950/80 font-bold border-t-2 border-gray-800">
+              <tr>
+                <td class="px-4 py-3 text-gray-300">Total (Filtered)</td>
+                <td class="px-4 py-3"></td>
+                <td class="px-4 py-3"></td>
+                <td class="px-4 py-3 text-right"></td>
+                <td class="px-4 py-3 text-right"></td>
+                <td class="px-4 py-3 text-right"></td>
+                <td id="tfoot-total-cost" class="px-4 py-3 text-right text-gray-200">฿0</td>
+                <td id="tfoot-market-value" class="px-4 py-3 text-right text-emerald-400">฿0</td>
+                <td id="tfoot-unrealized-pl" class="px-4 py-3 text-right">฿0</td>
+                <td id="tfoot-unrealized-pl-pct" class="px-4 py-3 text-right">0.00%</td>
+                <td id="tfoot-realized-pl" class="px-4 py-3 text-right">฿0</td>
+              </tr>
+            </tfoot>
           </table>
         </div>
       </div>
@@ -367,7 +387,8 @@
           <div class="grid grid-cols-2 gap-3">
             <div class="sim-input-group">
               <label>อายุปัจจุบัน (ปี):</label>
-              <input id="sim-current-age" type="number" value="38">
+              <!-- v3.1 Update: Default Current Age changed to 33 -->
+              <input id="sim-current-age" type="number" value="33">
             </div>
             <div class="sim-input-group">
               <label>อายุที่ตั้งใจเกษียณ:</label>
@@ -387,14 +408,16 @@
             <div class="sim-input-group">
               <label>📈 เพิ่มเงินออมต่อปี (Step-up):</label>
               <div class="input-with-suffix">
-                <input id="sim-step-up" type="number" value="5.0" step="0.5">
+                <!-- v3.1 Update: Default Step-up Rate changed to 2.5% -->
+                <input id="sim-step-up" type="number" value="2.5" step="0.5">
                 <span class="input-suffix">%</span>
               </div>
             </div>
             <div class="sim-input-group">
               <label>🎯 ROI ช่วงสะสม:</label>
               <div class="input-with-suffix">
-                <input id="sim-return-rate" type="number" value="7.0" step="0.5">
+                <!-- v3.1 Update: Default Pre-Retirement ROI changed to 5.0% -->
+                <input id="sim-return-rate" type="number" value="5.0" step="0.5">
                 <span class="input-suffix">%</span>
               </div>
             </div>
@@ -406,14 +429,16 @@
             <div class="sim-input-group">
               <label>💵 Yield หลังเกษียณ:</label>
               <div class="input-with-suffix">
-                <input id="sim-retire-yield" type="number" value="4.0" step="0.5">
+                <!-- v3.1 Update: Default Post-Retirement Yield changed to 5.0% -->
+                <input id="sim-retire-yield" type="number" value="5.0" step="0.5">
                 <span class="input-suffix">%</span>
               </div>
             </div>
             <div class="sim-input-group">
               <label>🎈 เงินเฟ้อคาดการณ์:</label>
               <div class="input-with-suffix">
-                <input id="sim-inflation" type="number" value="2.5" step="0.5">
+                <!-- v3.1 Update: Default Expected Inflation changed to 3.0% -->
+                <input id="sim-inflation" type="number" value="3.0" step="0.5">
                 <span class="input-suffix">%</span>
               </div>
             </div>

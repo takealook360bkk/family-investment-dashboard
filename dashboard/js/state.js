@@ -17,8 +17,9 @@ window.AppState = {
   snapshot: [],
 
   // Financial Freedom Milestone inputs
-  milestoneTarget: 30000000, // Default 30M THB
-  expectedReturnRate: 7.0,   // Default 7% p.a.
+  // v3.1 Update: Default Target Wealth updated to 27.5M and Return to 5%
+  milestoneTarget: 27500000, // Default 27.5M THB
+  expectedReturnRate: 5.0,   // Default 5% p.a.
 
   // Event Listeners
   _listeners: [],
@@ -58,14 +59,15 @@ window.AppState = {
 
 // Generate realistic mock data for instant offline demo/preview
 window.generateMockData = function() {
+  // v3.1 Update: Scaled-down demo mode mock data to realistic family portfolio base (~1,000,000 THB)
   const startDate = new Date(2016, 11, 31); // Dec 2016
   const endDate = new Date(2026, 6, 31);   // Jul 2026
   
   const snapshot = [];
-  let ppCapital = 100000;
-  let jjCapital = 80000;
-  let ppOndate = 102000;
-  let jjOndate = 81500;
+  let ppCapital = 400000; // v3.1: was 100,000 -> now 400,000
+  let jjCapital = 300000; // v3.1: was 80,000 -> now 300,000
+  let ppOndate = 408000;  // v3.1: adjusted proportionally to new capital base
+  let jjOndate = 306000;  // v3.1: adjusted proportionally to new capital base
   let navPerUnit = 10.0;
 
   const totalMonths = 116;
@@ -75,8 +77,9 @@ window.generateMockData = function() {
     const dateStr = curr.getFullYear() + '-' + String(curr.getMonth() + 1).padStart(2, '0') + '-' + String(curr.getDate()).padStart(2, '0');
     
     // Add monthly contributions
-    const ppInflow = Math.round(15000 + Math.sin(i / 3) * 5000 + (i * 200));
-    const jjInflow = Math.round(12000 + Math.cos(i / 4) * 4000 + (i * 180));
+    // v3.1 Update: Adjust formulas to average 3k-4k (PP) and 2k-3k (JJ) THB/month
+    const ppInflow = Math.round(3500 + Math.sin(i / 3) * 500);
+    const jjInflow = Math.round(2500 + Math.cos(i / 4) * 500);
     
     ppCapital += ppInflow;
     jjCapital += jjInflow;
@@ -130,7 +133,8 @@ window.generateMockData = function() {
     const owner = owners[i % 2];
     const assetClass = assetClasses[i % assetClasses.length];
     const name = assetNames[i % assetNames.length] + (i > 30 ? `_${i}` : '');
-    const cost = Math.round(20000 + Math.random() * 250000);
+    // v3.1 Update: Reduce cost range per asset from 20k-270k to 5k-25k to balance overall portfolio value at ~1M
+    const cost = Math.round(5000 + Math.random() * 20000);
     const returnPct = (-0.15 + Math.random() * 0.60); // -15% to +45%
     const marketValue = Math.round(cost * (1 + returnPct));
     const unrealizedPL = marketValue - cost;

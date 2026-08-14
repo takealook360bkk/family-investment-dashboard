@@ -25,12 +25,14 @@ window.ApiService = {
     this.showLoading(true);
 
     try {
-      const authParam = `&access_token=${encodeURIComponent(token)}`;
+      // v3.1 Update: Added timestamp cache buster (_t) and fetch options (no-store) to prevent stale data
+      const authParam = `&access_token=${encodeURIComponent(token)}&_t=${Date.now()}`;
+      const fetchOpts = { cache: 'no-store' };
 
       const [summaryRes, assetsRes, snapshotRes] = await Promise.all([
-        fetch(`${baseUrl}?action=summary${authParam}`).then(r => r.json()),
-        fetch(`${baseUrl}?action=assets${authParam}`).then(r => r.json()),
-        fetch(`${baseUrl}?action=snapshot${authParam}`).then(r => r.json())
+        fetch(`${baseUrl}?action=summary${authParam}`, fetchOpts).then(r => r.json()),
+        fetch(`${baseUrl}?action=assets${authParam}`, fetchOpts).then(r => r.json()),
+        fetch(`${baseUrl}?action=snapshot${authParam}`, fetchOpts).then(r => r.json())
       ]);
 
       // Log raw responses for debugging

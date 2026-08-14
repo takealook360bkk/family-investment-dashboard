@@ -23,8 +23,9 @@ window.OverviewView = {
     const yearsInput  = document.getElementById('milestone-years-input');
 
     const updateMilestone = () => {
-      const target = parseFloat((targetInput?.value || '30000000').replace(/,/g, '')) || 30000000;
-      const rate   = parseFloat(returnInput?.value || 7) || 7;
+      // v3.1 Update: Default fallback updated to 27,500,000 and rate 5.0
+      const target = parseFloat((targetInput?.value || '27500000').replace(/,/g, '')) || 27500000;
+      const rate   = parseFloat(returnInput?.value || 5) || 5;
       window.AppState.setMilestoneParams(target, rate);
     };
     targetInput?.addEventListener('change', updateMilestone);
@@ -122,9 +123,10 @@ window.OverviewView = {
 
   // Milestone: FV of current NW growing at rate for N years, vs target
   renderMilestone(currentNetWorth) {
-    const target = window.AppState.milestoneTarget || 30000000;
-    const rate   = (window.AppState.expectedReturnRate || 7) / 100;
-    const years  = parseFloat(document.getElementById('milestone-years-input')?.value || 17) || 17;
+    // v3.1 Update: Default values updated to target 27.5M, rate 5%, years 20
+    const target = window.AppState.milestoneTarget || 27500000;
+    const rate   = (window.AppState.expectedReturnRate || 5) / 100;
+    const years  = parseFloat(document.getElementById('milestone-years-input')?.value || 20) || 20;
 
     // FV of current portfolio alone (without adding more savings)
     const fv = currentNetWorth * Math.pow(1 + rate, years);

@@ -4,10 +4,11 @@ window.SimulatorView = {
   simChart: null,
   STORAGE_KEY: 'fip_sim_params',
 
+  // v3.1 Update: Adjusted default values as requested by brief
   DEFAULTS: {
-    baseWealth: 0, currentAge: 38, retireAge: 55,
-    monthlySavings: 35000, stepUp: 5.0, returnRate: 7.0,
-    retireYield: 4.0, inflation: 2.5, livingCost: 50000,
+    baseWealth: 0, currentAge: 33, retireAge: 55,
+    monthlySavings: 35000, stepUp: 2.5, returnRate: 5.0,
+    retireYield: 5.0, inflation: 3.0, livingCost: 50000,
   },
 
   init() {
@@ -58,15 +59,17 @@ window.SimulatorView = {
     setVal('sim-living-cost',     this.DEFAULTS.livingCost);
 
     const storedBase = saved?.['sim-base-wealth'];
-    const liveNW = window.AppState?.summary?.total?.market_value
-                 || (window.AppState?.snapshot?.slice(-1)[0]?.total_ondate) || 0;
+    // v3.1 Update: Apply Math.round() to liveNW
+    const liveNW = Math.round(window.AppState?.summary?.total?.market_value
+                 || (window.AppState?.snapshot?.slice(-1)[0]?.total_ondate) || 0);
     const el = document.getElementById('sim-base-wealth');
     if (el) el.value = (!useDefaults && storedBase && parseFloat(storedBase) > 0) ? storedBase : (liveNW || 0);
   },
 
   autofillBaseWealth() {
-    const liveNW = window.AppState?.summary?.total?.market_value
-                 || (window.AppState?.snapshot?.slice(-1)[0]?.total_ondate) || 0;
+    // v3.1 Update: Apply Math.round() to liveNW
+    const liveNW = Math.round(window.AppState?.summary?.total?.market_value
+                 || (window.AppState?.snapshot?.slice(-1)[0]?.total_ondate) || 0);
     if (!liveNW) return;
     const stored = JSON.parse(localStorage.getItem(this.STORAGE_KEY) || 'null');
     const el = document.getElementById('sim-base-wealth');
@@ -77,19 +80,21 @@ window.SimulatorView = {
 
   getParams() {
     const g = id => parseFloat(document.getElementById(id)?.value || 0) || 0;
-    const liveNW = window.AppState?.summary?.total?.market_value
-                 || (window.AppState?.snapshot?.slice(-1)[0]?.total_ondate) || 0;
+    // v3.1 Update: Apply Math.round() to liveNW
+    const liveNW = Math.round(window.AppState?.summary?.total?.market_value
+                 || (window.AppState?.snapshot?.slice(-1)[0]?.total_ondate) || 0);
     let baseWealth = g('sim-base-wealth');
     if (baseWealth === 0 && liveNW > 0) baseWealth = liveNW;
+    // v3.1 Update: Sync fallback values with updated defaults (Age 33, step-up 2.5, ROI 5, yield 5, inflation 3)
     return {
       baseWealth,
-      currentAge:     g('sim-current-age')     || 38,
+      currentAge:     g('sim-current-age')     || 33,
       retireAge:      g('sim-retire-age')      || 55,
       monthlySavings: g('sim-monthly-savings') || 35000,
-      stepUp:         g('sim-step-up')         || 5,
-      returnRate:     g('sim-return-rate')     || 7,
-      retireYield:    g('sim-retire-yield')    || 4,
-      inflation:      g('sim-inflation')       || 2.5,
+      stepUp:         g('sim-step-up')         || 2.5,
+      returnRate:     g('sim-return-rate')     || 5.0,
+      retireYield:    g('sim-retire-yield')    || 5.0,
+      inflation:      g('sim-inflation')       || 3.0,
       livingCost:     g('sim-living-cost')     || 50000,
     };
   },

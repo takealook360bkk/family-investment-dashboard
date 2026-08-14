@@ -292,5 +292,44 @@ window.AllocationView = {
     // Dynamic count
     const countBadge = document.getElementById('asset-count-badge');
     if (countBadge) countBadge.textContent = `${list.length} Assets`;
+
+    // v3.1 Update: Calculate and render totals for filtered view in tfoot
+    let totalCostSum = 0;
+    let marketValueSum = 0;
+    let unrealizedPlSum = 0;
+    let realizedPlSum = 0;
+
+    list.forEach(a => {
+      totalCostSum += (a.total_cost || 0);
+      marketValueSum += (a.market_value || 0);
+      unrealizedPlSum += (a.unrealized_pl || 0);
+      realizedPlSum += (a.realized_pl || 0);
+    });
+
+    const weightedAvgPlPct = totalCostSum > 0 ? (unrealizedPlSum / totalCostSum) * 100 : 0;
+    const isWeightedPos = weightedAvgPlPct >= 0;
+    const weightedPlCls = isWeightedPos ? 'text-emerald-400' : 'text-rose-400';
+    const weightedAvgPlPctStr = `${isWeightedPos ? '+' : ''}${weightedAvgPlPct.toFixed(2)}%`;
+
+    const tfCost = document.getElementById('tfoot-total-cost');
+    const tfMV = document.getElementById('tfoot-market-value');
+    const tfUnPL = document.getElementById('tfoot-unrealized-pl');
+    const tfUnPLPct = document.getElementById('tfoot-unrealized-pl-pct');
+    const tfRealPL = document.getElementById('tfoot-realized-pl');
+
+    if (tfCost) tfCost.textContent = `฿${window.formatCurrency(totalCostSum)}`;
+    if (tfMV) tfMV.textContent = `฿${window.formatCurrency(marketValueSum)}`;
+    if (tfUnPL) {
+      tfUnPL.textContent = `฿${window.formatCurrency(unrealizedPlSum)}`;
+      tfUnPL.className = `px-4 py-3 text-right font-bold ${unrealizedPlSum >= 0 ? 'text-emerald-400' : 'text-rose-400'}`;
+    }
+    if (tfUnPLPct) {
+      tfUnPLPct.textContent = weightedAvgPlPctStr;
+      tfUnPLPct.className = `px-4 py-3 text-right font-bold ${weightedPlCls}`;
+    }
+    if (tfRealPL) {
+      tfRealPL.textContent = `฿${window.formatCurrency(realizedPlSum)}`;
+      tfRealPL.className = `px-4 py-3 text-right text-amber-400 font-bold`;
+    }
   }
 };
