@@ -261,6 +261,45 @@ window.AllocationView = {
     });
 
     tbody.innerHTML = '';
+
+    // Patch v3.2: Top-Positioned Table Summary Row
+    let totalCostSum = 0;
+    let marketValueSum = 0;
+    let unrealizedPlSum = 0;
+    let realizedPlSum = 0;
+
+    list.forEach(a => {
+      totalCostSum += (a.total_cost || 0);
+      marketValueSum += (a.market_value || 0);
+      unrealizedPlSum += (a.unrealized_pl || 0);
+      realizedPlSum += (a.realized_pl || 0);
+    });
+
+    const weightedAvgPlPct = totalCostSum > 0 ? (unrealizedPlSum / totalCostSum) * 100 : 0;
+    const isWeightedPos = weightedAvgPlPct >= 0;
+    const weightedPlCls = isWeightedPos ? 'text-emerald-400' : 'text-rose-400';
+    const weightedAvgPlPctStr = `${isWeightedPos ? '+' : ''}${weightedAvgPlPct.toFixed(2)}%`;
+
+    if (list.length > 0) {
+      const summaryTr = document.createElement('tr');
+      summaryTr.id = 'holdings-summary-row';
+      summaryTr.className = 'font-bold border-b-2 border-gray-800 sticky top-[45px] z-10';
+      summaryTr.innerHTML = `
+        <td class="px-4 py-3">Total</td>
+        <td class="px-4 py-3"></td>
+        <td class="px-4 py-3"></td>
+        <td class="px-4 py-3 text-right"></td>
+        <td class="px-4 py-3 text-right"></td>
+        <td class="px-4 py-3 text-right"></td>
+        <td class="px-4 py-3 text-right">฿${window.formatCurrency(totalCostSum)}</td>
+        <td class="px-4 py-3 text-right text-emerald-400">฿${window.formatCurrency(marketValueSum)}</td>
+        <td class="px-4 py-3 text-right ${unrealizedPlSum >= 0 ? 'text-emerald-400' : 'text-rose-400'}">฿${window.formatCurrency(unrealizedPlSum)}</td>
+        <td class="px-4 py-3 text-right ${weightedPlCls}">${weightedAvgPlPctStr}</td>
+        <td class="px-4 py-3 text-right text-amber-400">฿${window.formatCurrency(realizedPlSum)}</td>
+      `;
+      tbody.appendChild(summaryTr);
+    }
+
     if (list.length === 0) {
       tbody.innerHTML = `<tr><td colspan="11" class="text-center py-6 text-gray-500">ไม่พบข้อมูลสินทรัพย์ที่ตรงกัน</td></tr>`;
     } else {
@@ -293,43 +332,5 @@ window.AllocationView = {
     const countBadge = document.getElementById('asset-count-badge');
     if (countBadge) countBadge.textContent = `${list.length} Assets`;
 
-    // v3.1 Update: Calculate and render totals for filtered view in tfoot
-    let totalCostSum = 0;
-    let marketValueSum = 0;
-    let unrealizedPlSum = 0;
-    let realizedPlSum = 0;
-
-    list.forEach(a => {
-      totalCostSum += (a.total_cost || 0);
-      marketValueSum += (a.market_value || 0);
-      unrealizedPlSum += (a.unrealized_pl || 0);
-      realizedPlSum += (a.realized_pl || 0);
-    });
-
-    const weightedAvgPlPct = totalCostSum > 0 ? (unrealizedPlSum / totalCostSum) * 100 : 0;
-    const isWeightedPos = weightedAvgPlPct >= 0;
-    const weightedPlCls = isWeightedPos ? 'text-emerald-400' : 'text-rose-400';
-    const weightedAvgPlPctStr = `${isWeightedPos ? '+' : ''}${weightedAvgPlPct.toFixed(2)}%`;
-
-    const tfCost = document.getElementById('tfoot-total-cost');
-    const tfMV = document.getElementById('tfoot-market-value');
-    const tfUnPL = document.getElementById('tfoot-unrealized-pl');
-    const tfUnPLPct = document.getElementById('tfoot-unrealized-pl-pct');
-    const tfRealPL = document.getElementById('tfoot-realized-pl');
-
-    if (tfCost) tfCost.textContent = `฿${window.formatCurrency(totalCostSum)}`;
-    if (tfMV) tfMV.textContent = `฿${window.formatCurrency(marketValueSum)}`;
-    if (tfUnPL) {
-      tfUnPL.textContent = `฿${window.formatCurrency(unrealizedPlSum)}`;
-      tfUnPL.className = `px-4 py-3 text-right font-bold ${unrealizedPlSum >= 0 ? 'text-emerald-400' : 'text-rose-400'}`;
-    }
-    if (tfUnPLPct) {
-      tfUnPLPct.textContent = weightedAvgPlPctStr;
-      tfUnPLPct.className = `px-4 py-3 text-right font-bold ${weightedPlCls}`;
-    }
-    if (tfRealPL) {
-      tfRealPL.textContent = `฿${window.formatCurrency(realizedPlSum)}`;
-      tfRealPL.className = `px-4 py-3 text-right text-amber-400 font-bold`;
-    }
   }
 };

@@ -1,4 +1,5 @@
 // Main Application Entry Point & Navigation Switcher
+// Patch v3.2.1: Clean, bug-free theme state and default light theme
 
 // Global Formatting Helper Utilities
 window.formatCurrency = function(val) {
@@ -56,6 +57,24 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
+  // 1b. Patch v3.2: Theme Toggle Logic (Patch v3.2.1: Default to Light)
+  const themeBtn = document.getElementById('btn-theme-toggle');
+  if (themeBtn) {
+    // Check for saved theme preference or default to light
+    const savedTheme = localStorage.getItem('fip_theme') || 'light';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+
+    themeBtn.addEventListener('click', () => {
+      const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+      const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+      document.documentElement.setAttribute('data-theme', newTheme);
+      localStorage.setItem('fip_theme', newTheme);
+      
+      // Notify charts to re-render with new theme colors if needed
+      window.AppState.notify('themeChanged', newTheme);
+    });
+  }
+
   // 2. Register State Change Listener
   window.AppState.subscribe((event, data) => {
     const activeTab = document.querySelector('.nav-tab-btn.active');
@@ -101,4 +120,8 @@ document.addEventListener('DOMContentLoaded', () => {
       if (window.AuthService) window.AuthService.logout();
     });
   }
+
+  // Patch v3.2.1: Initialize theme from localStorage on load (default to light)
+  const savedTheme = localStorage.getItem('fip_theme') || 'light';
+  document.documentElement.setAttribute('data-theme', savedTheme);
 });

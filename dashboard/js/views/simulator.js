@@ -192,6 +192,11 @@ window.SimulatorView = {
       this.simChart.destroy();
     }
 
+    // Patch v3.2: Dynamic Chart Colors based on Theme
+    const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+    const gridColor = isLight ? 'rgba(0,0,0,0.05)' : 'rgba(255,255,255,0.04)';
+    const textColor = isLight ? '#6B7280' : '#8E95A2';
+
     this.simChart = new Chart(ctx, {
       type: 'line',
       data: {
@@ -223,7 +228,7 @@ window.SimulatorView = {
         plugins: {
           legend: {
             labels: {
-              color: '#9ca3af', font: { family: 'Inter', size: 11 },
+              color: textColor, font: { family: 'Inter', size: 11 },
               usePointStyle: true, pointStyle: 'line', pointStyleWidth: 24
             }
           },
@@ -231,12 +236,12 @@ window.SimulatorView = {
         },
         scales: {
           x: {
-            grid: { color: 'rgba(255,255,255,0.04)' },
-            ticks: { color: '#6b7280', maxTicksLimit: 20, maxRotation: 40, font: { size: 10 } }
+            grid: { color: gridColor },
+            ticks: { color: textColor, maxTicksLimit: 20, maxRotation: 40, font: { size: 10 } }
           },
           y: {
-            grid: { color: 'rgba(255,255,255,0.06)' },
-            ticks: { color: '#6b7280', callback: v => v >= 1e6 ? `฿${(v/1e6).toFixed(0)}M` : `฿${(v/1e3).toFixed(0)}K` }
+            grid: { color: gridColor },
+            ticks: { color: textColor, callback: v => v >= 1e6 ? `฿${(v/1e6).toFixed(0)}M` : `฿${(v/1e3).toFixed(0)}K` }
           }
         }
       }

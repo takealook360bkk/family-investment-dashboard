@@ -171,6 +171,11 @@ window.OverviewView = {
 
     if (this.wealthGrowthChart) this.wealthGrowthChart.destroy();
 
+    // Patch v3.2: Dynamic Chart Colors based on Theme
+    const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+    const gridColor = isLight ? 'rgba(0,0,0,0.05)' : 'rgba(255,255,255,0.04)';
+    const textColor = isLight ? '#6B7280' : '#8E95A2';
+
     this.wealthGrowthChart = new Chart(ctx, {
       type: 'line',
       data: {
@@ -198,17 +203,17 @@ window.OverviewView = {
         plugins: {
           legend: {
             labels: {
-              color: '#9ca3af', font: { family: 'Inter' },
+              color: textColor, font: { family: 'Inter' },
               usePointStyle: true, pointStyle: 'line', pointStyleWidth: 24
             }
           },
           tooltip: { callbacks: { label: c => `${c.dataset.label}: ฿${window.formatCurrency(c.parsed.y)}` } }
         },
         scales: {
-          x: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#6b7280', maxTicksLimit: 14 } },
+          x: { grid: { color: gridColor }, ticks: { color: textColor, maxTicksLimit: 14 } },
           y: {
-            grid: { color: 'rgba(255,255,255,0.06)' },
-            ticks: { color: '#6b7280', callback: v => v >= 1e6 ? `฿${(v/1e6).toFixed(1)}M` : `฿${(v/1e3).toFixed(0)}K` }
+            grid: { color: gridColor },
+            ticks: { color: textColor, callback: v => v >= 1e6 ? `฿${(v/1e6).toFixed(1)}M` : `฿${(v/1e3).toFixed(0)}K` }
           }
         }
       }
@@ -227,6 +232,11 @@ window.OverviewView = {
     if (owner === 'JJ') inflowData = recent.map(s => s.jj_inflow || 0);
 
     if (this.monthlyInflowChart) this.monthlyInflowChart.destroy();
+
+    // Patch v3.2: Dynamic Chart Colors based on Theme
+    const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+    const gridColor = isLight ? 'rgba(0,0,0,0.05)' : 'rgba(255,255,255,0.04)';
+    const textColor = isLight ? '#6B7280' : '#8E95A2';
 
     this.monthlyInflowChart = new Chart(ctx, {
       type: 'bar',
@@ -247,10 +257,10 @@ window.OverviewView = {
           tooltip: { callbacks: { label: c => `เงินเติมเพิ่ม: ฿${window.formatCurrency(c.parsed.y)}` } }
         },
         scales: {
-          x: { grid: { display: false }, ticks: { color: '#6b7280', maxTicksLimit: 12 } },
+          x: { grid: { display: false }, ticks: { color: textColor, maxTicksLimit: 12 } },
           y: {
-            grid: { color: 'rgba(255,255,255,0.05)' },
-            ticks: { color: '#6b7280', callback: v => `฿${(v/1e3).toFixed(0)}K` }
+            grid: { color: gridColor },
+            ticks: { color: textColor, callback: v => `฿${(v/1e3).toFixed(0)}K` }
           }
         }
       }

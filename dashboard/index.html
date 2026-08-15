@@ -30,6 +30,13 @@
       <button class="nav-tab-btn" data-view="view-simulator"><span>🚀</span> <span class="hidden sm:inline">Retirement </span>Simulator</button>
     </nav>
     <div class="auth-controls">
+      <!-- Patch v3.2: Modern Pill-shaped Theme Toggle Switch -->
+      <button id="btn-theme-toggle" class="theme-toggle-btn" aria-label="Toggle theme">
+        <div class="theme-toggle-slider"></div>
+        <span class="theme-icon sun">☀️</span>
+        <span class="theme-icon moon">🌙</span>
+      </button>
+
       <button id="btn-google-login" class="btn-google">
         <svg class="w-4 h-4" viewBox="0 0 24 24">
           <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -257,22 +264,6 @@
               </tr>
             </thead>
             <tbody id="asset-holdings-tbody"></tbody>
-            <!-- v3.1 Update: Add dynamic summary footer row for Holdings table -->
-            <tfoot class="bg-slate-950/80 font-bold border-t-2 border-gray-800">
-              <tr>
-                <td class="px-4 py-3 text-gray-300">Total (Filtered)</td>
-                <td class="px-4 py-3"></td>
-                <td class="px-4 py-3"></td>
-                <td class="px-4 py-3 text-right"></td>
-                <td class="px-4 py-3 text-right"></td>
-                <td class="px-4 py-3 text-right"></td>
-                <td id="tfoot-total-cost" class="px-4 py-3 text-right text-gray-200">฿0</td>
-                <td id="tfoot-market-value" class="px-4 py-3 text-right text-emerald-400">฿0</td>
-                <td id="tfoot-unrealized-pl" class="px-4 py-3 text-right">฿0</td>
-                <td id="tfoot-unrealized-pl-pct" class="px-4 py-3 text-right">0.00%</td>
-                <td id="tfoot-realized-pl" class="px-4 py-3 text-right">฿0</td>
-              </tr>
-            </tfoot>
           </table>
         </div>
       </div>
@@ -287,7 +278,7 @@
         <div class="flex items-center gap-2">
           <span class="text-sm font-semibold text-gray-300">มุมมองพอร์ต:</span>
           <div class="flex bg-slate-900/80 p-1 rounded-xl border border-gray-800">
-            <button class="owner-filter-btn px-4 py-1.5 text-xs font-semibold rounded-lg text-gray-300 hover:text-white transition-all active" data-owner="TOTAL">👨‍👩‍👧 Total Family</button>
+            <button class="owner-filter-btn px-4 py-1.5 text-xs font-semibold rounded-lg text-gray-300 hover:text-white transition-all active" data-owner="TOTAL">Total Family</button>
             <button class="owner-filter-btn px-4 py-1.5 text-xs font-semibold rounded-lg text-cyan-400 hover:text-cyan-300 transition-all" data-owner="PP">PP Only</button>
             <button class="owner-filter-btn px-4 py-1.5 text-xs font-semibold rounded-lg text-amber-400 hover:text-amber-300 transition-all" data-owner="JJ">JJ Only</button>
           </div>
@@ -300,16 +291,16 @@
       <!-- PP & JJ Cards -->
       <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
         <!-- PP Card -->
-        <div class="glass-card p-5 border-l-4 border-l-cyan-400">
+        <div class="glass-card p-5">
           <div class="flex justify-between items-center mb-3">
             <span class="text-sm font-bold text-cyan-300">📊 PP Portfolio</span>
-            <span class="px-2.5 py-0.5 bg-cyan-950 text-cyan-300 text-xs rounded-full border border-cyan-800">Individual Port</span>
+            <span class="individual-port-badge-pp">Individual Port</span>
           </div>
           <div class="mb-2">
             <span class="text-xs text-gray-400 block mb-0.5">Net Worth</span>
             <strong class="text-3xl font-extrabold text-cyan-300">฿<span id="pp-card-networth">0</span></strong>
           </div>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-slate-900/50 p-3 rounded-xl mt-3">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 owner-card-subgrid p-3 rounded-xl mt-3">
             <div>
               <span class="block text-xs text-gray-400 mb-0.5">Capital Deposited</span>
               <strong class="text-xl font-bold text-gray-200">฿<span id="pp-card-capital">0</span></strong>
@@ -322,16 +313,16 @@
         </div>
 
         <!-- JJ Card -->
-        <div class="glass-card p-5 border-l-4 border-l-amber-400">
+        <div class="glass-card p-5">
           <div class="flex justify-between items-center mb-3">
             <span class="text-sm font-bold text-amber-300">📊 JJ Portfolio</span>
-            <span class="px-2.5 py-0.5 bg-amber-950 text-amber-300 text-xs rounded-full border border-amber-800">Individual Port</span>
+            <span class="individual-port-badge-jj">Individual Port</span>
           </div>
           <div class="mb-2">
             <span class="text-xs text-gray-400 block mb-0.5">Net Worth</span>
             <strong class="text-3xl font-extrabold text-amber-300">฿<span id="jj-card-networth">0</span></strong>
           </div>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-slate-900/50 p-3 rounded-xl mt-3">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 owner-card-subgrid p-3 rounded-xl mt-3">
             <div>
               <span class="block text-xs text-gray-400 mb-0.5">Capital Deposited</span>
               <strong class="text-xl font-bold text-gray-200">฿<span id="jj-card-capital">0</span></strong>

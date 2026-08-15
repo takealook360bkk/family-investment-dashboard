@@ -37,6 +37,19 @@ The project is built around a hybrid architecture using Google Sheets as the pri
 - **Security**: Google Identity Services (OAuth 2.0).
 
 ## Version Log
+- **Version 3.2.1**: UI Refinements, theme stabilization, and layout optimizations.
+  - Standardized Light/Dark theme variables with enhanced contrast.
+  - Replaced theme toggle with a monochrome sleek grayscale design.
+  - Optimized KPI headers with start-aligned icons for better readability.
+  - Enhanced Owner Race view with custom badges and optimized subgrid layouts.
+  - Fixed sticky header overlap and renamed summary labels in the Holdings table.
+  - Implemented persistent theme state defaulting to Light mode.
+- **Version 3.2**: Dual-theme support, UI modernization, and independent view states.
+  - Implemented Light & Dark Mode system with a global theme switcher.
+  - Relocated Holdings table summary row to the top for better visibility.
+  - Modernized Owner Breakdown toggle controls with segmented UI and micro-interactions.
+  - Isolated filter states between views to prevent global state conflicts.
+  - Standardized code documentation with Version 3.2 Patch annotations.
 - **Version 3.1**: UI bug fixes, default parameter updates, and API latency optimization.
   - Scaled down demo mode mock data to realistic ~1M THB portfolio base.
   - Fixed mobile overflow for retirement year selector.
@@ -49,4 +62,4 @@ The project is built around a hybrid architecture using Google Sheets as the pri
 This repository contains the application structure and logic. No private financial data, API keys, or personal credentials should be committed to this repository. All sensitive configuration is handled via environment-specific setup or local configuration files excluded from version control.
 
 ---
-*Last Updated: August 14, 2026*
+*Last Updated: August 15, 2026*
