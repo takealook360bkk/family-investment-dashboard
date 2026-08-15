@@ -86,8 +86,8 @@ window.OwnerBreakdownView = {
         ? `🏆 JJ นำอยู่ ฿${window.formatCurrency(diff)}`
         : `🏆 PP นำอยู่ ฿${window.formatCurrency(diff)}`;
       leaderBanner.className = leader === 'JJ'
-        ? 'px-4 py-2 bg-gradient-to-r from-amber-500/20 to-amber-500/5 border border-amber-500/30 text-amber-300 font-bold text-sm rounded-xl'
-        : 'px-4 py-2 bg-gradient-to-r from-cyan-500/20 to-cyan-500/5 border border-cyan-500/30 text-cyan-300 font-bold text-sm rounded-xl';
+        ? 'leader-jj px-4 py-2 bg-gradient-to-r from-amber-500/20 to-amber-500/5 border border-amber-500/30 text-amber-300 font-bold text-sm rounded-xl'
+        : 'leader-pp px-4 py-2 bg-gradient-to-r from-cyan-500/20 to-cyan-500/5 border border-cyan-500/30 text-cyan-300 font-bold text-sm rounded-xl';
     }
 
     this.renderRaceChart(snapshot);

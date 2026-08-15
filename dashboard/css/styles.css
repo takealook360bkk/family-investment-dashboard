@@ -146,6 +146,7 @@ body {
   font-weight: 800;
   background: var(--brand-title-color);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
@@ -166,7 +167,7 @@ body {
 
 .nav-tab-btn {
   background: transparent;
-  border: none;
+  border: 1.5px solid transparent;
   color: var(--text-muted);
   padding: 0.5rem 1rem;
   border-radius: 8px;
@@ -176,7 +177,7 @@ body {
   display: flex;
   align-items: center;
   gap: 0.4rem;
-  transition: all 0.2s ease;
+  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
 }
 
 .nav-tab-btn:hover {
@@ -184,13 +185,13 @@ body {
   background: rgba(120, 120, 120, 0.1);
 }
 
-/* Active tab contrast rule (Global dark bg with high contrast text) */
+/* Active tab & filter button contrast rule (Global dark bg with high contrast text) */
 .nav-tab-btn.active, .alloc-owner-btn.active, .owner-filter-btn.active, .roi-btn.active, .chart-range-btn.active {
-  background: #111827 !important; /* Solid dark background */
+  background: #1F2937 !important; /* Solid dark gray background */
   color: #FFFFFF !important;      /* crisp white text */
   font-weight: 700 !important;
   border: 1.5px solid var(--accent-cyan) !important;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2) !important;
 }
 
 /* User Auth Controls */
@@ -200,65 +201,97 @@ body {
   gap: 0.75rem;
 }
 
-/* Patch v3.2.1: Monochrome Sleek Grayscale Theme Toggle */
+/* Patch v3.2.2: Theme Toggle Switch Redesign & Height Synchronization */
 .theme-toggle-btn {
   position: relative;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  width: 56px;
-  height: 28px;
-  background-color: var(--bg-card-border);
-  border: 1px solid var(--bg-card-border);
+  width: 60px;
+  height: 38px;
+  box-sizing: border-box;
   border-radius: 9999px;
-  padding: 0 5px;
+  padding: 0 6px;
   cursor: pointer;
   outline: none;
   transition: background-color 0.25s ease, border-color 0.25s ease;
 }
 
-.theme-toggle-btn:hover {
-  border-color: var(--accent-cyan);
+/* Light Theme Toggle State */
+[data-theme="light"] .theme-toggle-btn {
+  background-color: #E5E7EB;
+  border: 1px solid #D1D5DB;
 }
-
-.theme-toggle-slider {
+[data-theme="light"] .theme-toggle-slider {
   position: absolute;
-  top: 2px;
-  left: 2px;
-  width: 22px;
-  height: 22px;
-  background-color: var(--text-main); /* Slate monochrome grayscale indicator */
+  top: 3px;
+  left: 4px;
+  width: 30px;
+  height: 30px;
+  background-color: #000000;
   border-radius: 50%;
   transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-}
-
-/* Toggle slides right in dark mode, left in light mode */
-[data-theme="dark"] .theme-toggle-slider {
-  transform: translateX(28px);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
 }
 [data-theme="light"] .theme-toggle-slider {
   transform: translateX(0);
 }
+[data-theme="light"] .theme-icon.sun {
+  color: #FFFFFF;
+  opacity: 1;
+}
+[data-theme="light"] .theme-icon.moon {
+  color: #4B5563;
+  opacity: 1;
+}
+
+/* Dark Theme Toggle State */
+[data-theme="dark"] .theme-toggle-btn {
+  background-color: #374151;
+  border: 1px solid #4B5563;
+}
+[data-theme="dark"] .theme-toggle-slider {
+  position: absolute;
+  top: 3px;
+  left: 4px;
+  width: 30px;
+  height: 30px;
+  background-color: #FFFFFF;
+  border-radius: 50%;
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+}
+[data-theme="dark"] .theme-toggle-slider {
+  transform: translateX(22px);
+}
+[data-theme="dark"] .theme-icon.sun {
+  color: #FFFFFF;
+  opacity: 1;
+}
+[data-theme="dark"] .theme-icon.moon {
+  color: #1F2937;
+  opacity: 1;
+}
 
 .theme-icon {
-  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   z-index: 1;
   user-select: none;
   pointer-events: none;
-  transition: opacity 0.2s ease;
+  width: 22px;
+  height: 22px;
+  transition: color 0.2s ease, opacity 0.2s ease;
 }
-
-[data-theme="dark"] .theme-icon.sun { opacity: 0.35; }
-[data-theme="dark"] .theme-icon.moon { opacity: 1; }
-[data-theme="light"] .theme-icon.sun { opacity: 1; }
-[data-theme="light"] .theme-icon.moon { opacity: 0.35; }
 
 .btn-google {
   background: #ffffff;
   color: #1f2937;
   border: 1px solid #D1D5DB;
-  padding: 0.5rem 1rem;
+  padding: 0 1rem;
+  height: 38px;
+  box-sizing: border-box;
   border-radius: 8px;
   font-size: 0.85rem;
   font-weight: 600;
@@ -278,9 +311,19 @@ body {
   align-items: center;
   gap: 0.6rem;
   background: var(--bg-card);
-  padding: 0.3rem 0.75rem;
-  border-radius: 20px;
+  padding: 0 0.75rem;
+  height: 38px;
+  box-sizing: border-box;
+  border-radius: 8px;
   border: 1px solid var(--bg-card-border);
+}
+
+#user-email-display {
+  color: var(--text-main) !important;
+}
+[data-theme="light"] #user-email-display {
+  color: #000000 !important;
+  font-weight: 600;
 }
 
 .user-avatar {
@@ -403,10 +446,43 @@ body {
   cursor: pointer;
 }
 
-/* Milestone Progress Bar */
+/* Milestone Progress Bar & Parameter Cards (Patch v3.2.2) */
 .milestone-container {
   padding: 1.25rem;
   margin-bottom: 1.5rem;
+}
+
+.milestone-header {
+  color: var(--text-main);
+}
+[data-theme="light"] .milestone-header {
+  color: #000000 !important;
+}
+
+.milestone-param-card {
+  background-color: #1F2937 !important; /* Darker gray surface */
+  border-color: #374151 !important;
+  color: #FFFFFF !important;
+}
+
+.milestone-param-label {
+  color: #E5E7EB !important;
+}
+
+.milestone-param-input {
+  color: #FFFFFF !important;
+  border-color: rgba(255, 255, 255, 0.4) !important;
+}
+
+.milestone-param-input:focus {
+  border-color: #FFFFFF !important;
+}
+
+[data-theme="light"] .milestone-subtext {
+  color: #374151 !important;
+}
+[data-theme="light"] .milestone-subtext-right {
+  color: #4B5563 !important;
 }
 
 .progress-track {
@@ -564,6 +640,21 @@ body {
   box-shadow: 0 0 8px rgba(6, 182, 212, 0.2);
 }
 
+/* Patch v3.2.2: View 4 Simulator Header & Expense Contrast */
+.sim-header {
+  color: var(--text-main);
+}
+[data-theme="light"] .sim-header {
+  color: #000000 !important;
+}
+
+#sim-result-expense-at-retire {
+  color: var(--accent-amber);
+}
+[data-theme="light"] #sim-result-expense-at-retire {
+  color: #D97706 !important; /* Deep Amber shade matching JJ / Individual Port */
+}
+
 .sim-status-badge {
   padding: 0.85rem 1.15rem;
   border-radius: 10px;
@@ -579,6 +670,49 @@ body {
   background: var(--badge-down-bg);
   border: 1px solid var(--badge-down-text);
   color: var(--badge-down-text);
+}
+
+/* Patch v3.2.2: View 3 Owner Race Light Theme Colors & Contrast */
+.portfolio-view-label {
+  color: var(--text-muted);
+}
+[data-theme="light"] .portfolio-view-label {
+  color: #000000 !important;
+}
+
+.pp-port-title, .pp-port-networth {
+  color: var(--accent-cyan);
+}
+[data-theme="light"] .pp-port-title,
+[data-theme="light"] .pp-port-networth {
+  color: #0E7490 !important; /* Deep Blue shade */
+}
+
+.jj-port-title, .jj-port-networth {
+  color: var(--accent-amber);
+}
+[data-theme="light"] .jj-port-title,
+[data-theme="light"] .jj-port-networth {
+  color: #D97706 !important; /* Deep Amber shade */
+}
+
+.capital-deposit-val {
+  color: var(--text-main);
+}
+[data-theme="light"] .capital-deposit-val {
+  color: #000000 !important;
+}
+
+[data-theme="light"] #race-leader-banner.leader-pp {
+  background: rgba(14, 116, 144, 0.12) !important;
+  border-color: rgba(14, 116, 144, 0.35) !important;
+  color: #0E7490 !important;
+}
+
+[data-theme="light"] #race-leader-banner.leader-jj {
+  background: rgba(217, 119, 6, 0.12) !important;
+  border-color: rgba(217, 119, 6, 0.35) !important;
+  color: #D97706 !important;
 }
 
 /* Patch v3.2.1: Owner Race Custom Badges & Subgrids */
@@ -607,24 +741,59 @@ body {
   font-weight: 600;
 }
 
-/* Patch v3.2: Modern Segmented Toggle Controls & Hover Micro-Interactions */
-.alloc-owner-btn, .owner-filter-btn, .roi-btn, .chart-range-btn, .nav-tab-btn {
-  transition: all 0.2s ease-in-out !important;
+/* Patch v3.2.2: Modern Segmented Toggle Controls & Smooth Static Dimensions */
+.alloc-owner-btn, .owner-filter-btn, .roi-btn, .chart-range-btn {
+  border: 1.5px solid transparent !important;
+  box-sizing: border-box;
+  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease !important;
 }
 
-.alloc-owner-btn:hover, .owner-filter-btn:hover, .roi-btn:hover, .chart-range-btn:hover {
-  background-color: var(--bg-card-hover) !important;
-  color: var(--accent-cyan) !important;
-  box-shadow: 0 0 8px rgba(6, 182, 212, 0.15);
+.alloc-owner-btn:not(.active):hover, .owner-filter-btn:not(.active):hover, .roi-btn:not(.active):hover, .chart-range-btn:not(.active):hover {
+  background-color: rgba(120, 120, 120, 0.15) !important;
+  color: var(--text-main) !important;
 }
 
-/* Patch v3.2.1: Fixed Sticky Overlap and renamed label inside table summary */
+/* Patch v3.2.2: View 2 Section Headers & Legend Visibility */
+.view-section-header {
+  color: var(--text-main);
+}
+[data-theme="light"] .view-section-header {
+  color: #000000 !important;
+}
+
+.alloc-legend-item .alloc-legend-label {
+  color: var(--text-main);
+}
+[data-theme="light"] .alloc-legend-item .alloc-legend-label {
+  color: #374151 !important; /* Dark Gray legend item labels */
+}
+[data-theme="light"] .alloc-legend-item .alloc-legend-pct {
+  color: #4B5563 !important;
+}
+
+/* Patch v3.2.2: Table Asset Data Visibility in Light Theme */
+[data-theme="light"] .holdings-data-row td.asset-name-cell,
+[data-theme="light"] .holdings-data-row td.asset-data-cell {
+  color: #000000 !important;
+}
+
+/* Patch v3.2.2: Sticky Total Row Translucency (80% opacity + backdrop blur) */
 #holdings-summary-row {
-  background-color: var(--bg-card) !important; /* solid opaque background prevents overlapping text */
-  border-bottom: 2px solid var(--summary-row-border) !important;
   position: sticky;
-  top: 40px;
-  z-index: 20;
+  top: 0;
+  z-index: 10;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+[data-theme="light"] #holdings-summary-row {
+  background-color: rgba(255, 255, 255, 0.8) !important;
+  border-bottom: 2px solid rgba(14, 116, 144, 0.3) !important;
+}
+
+[data-theme="dark"] #holdings-summary-row {
+  background-color: rgba(31, 41, 55, 0.8) !important;
+  border-bottom: 2px solid rgba(6, 182, 212, 0.4) !important;
 }
 
 #holdings-summary-row td {
@@ -632,15 +801,30 @@ body {
   font-weight: 800 !important;
 }
 
+/* Asset Class Filter Dropdown Layering */
+#class-filter-dropdown {
+  z-index: 100 !important;
+  box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.6) !important;
+}
+
 /* Chart Range Filter Buttons (1Y / 3Y / 5Y / ALL) */
 .chart-range-btn {
   background: transparent;
-  border: none;
   color: var(--text-dim);
   font-size: 0.78rem;
   font-weight: 600;
-  padding: 0.3rem 0.7rem;
+  padding: 0.25rem 0.65rem;
   border-radius: 8px;
+  cursor: pointer;
+}
+
+.roi-btn {
+  background: transparent;
+  color: var(--text-dim);
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 0.15rem 0.45rem;
+  border-radius: 4px;
   cursor: pointer;
 }
 

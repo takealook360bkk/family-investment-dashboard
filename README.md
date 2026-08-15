@@ -37,6 +37,14 @@ The project is built around a hybrid architecture using Google Sheets as the pri
 - **Security**: Google Identity Services (OAuth 2.0).
 
 ## Version Log
+- **Version 3.2.2**: UI/UX Contrast enhancements, theme toggle redesign, and interactive component fixes.
+  - Replaced theme toggle icons with clean minimalist SVGs and standardized height matching the Sign In button.
+  - Fixed Google Auth button and user badge border radius (8px) and ensured black text visibility for user email in Light theme.
+  - Fixed filter button jumping layout shift by enforcing static dimensions with seamless hover state.
+  - Resolved missing/washed-out text across Light mode views (headers, parameter cards, table cells).
+  - Enhanced Pie chart layout with 5-6px inset padding to prevent hover clipping, and dynamic slice border colors.
+  - Added 80% opacity with backdrop blur on sticky Holdings summary row for both Light and Dark themes.
+  - Refined PP (deep blue) and JJ (deep amber) color palettes in Owner Race and Simulator views.
 - **Version 3.2.1**: UI Refinements, theme stabilization, and layout optimizations.
   - Standardized Light/Dark theme variables with enhanced contrast.
   - Replaced theme toggle with a monochrome sleek grayscale design.

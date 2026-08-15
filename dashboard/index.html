@@ -30,11 +30,27 @@
       <button class="nav-tab-btn" data-view="view-simulator"><span>🚀</span> <span class="hidden sm:inline">Retirement </span>Simulator</button>
     </nav>
     <div class="auth-controls">
-      <!-- Patch v3.2: Modern Pill-shaped Theme Toggle Switch -->
+      <!-- Patch v3.2.2: Modern Minimalist Theme Toggle Switch with clean SVGs -->
       <button id="btn-theme-toggle" class="theme-toggle-btn" aria-label="Toggle theme">
         <div class="theme-toggle-slider"></div>
-        <span class="theme-icon sun">☀️</span>
-        <span class="theme-icon moon">🌙</span>
+        <span class="theme-icon sun">
+          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+          </svg>
+        </span>
+        <span class="theme-icon moon">
+          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+          </svg>
+        </span>
       </button>
 
       <button id="btn-google-login" class="btn-google">
@@ -127,27 +143,27 @@
       <div class="glass-card milestone-container">
         <div class="flex flex-wrap items-center justify-between gap-4 mb-2">
           <div>
-            <h2 class="text-base font-bold text-white flex items-center gap-2">
+            <h2 class="milestone-header text-base font-bold flex items-center gap-2">
               <span>🎯</span> Financial Freedom Milestone Progress
             </h2>
             <p class="text-xs text-gray-400">คำนวณจาก FV ของพอร์ตปัจจุบัน ทบต้นตามอัตราที่กำหนด เทียบกับเป้าหมาย</p>
           </div>
           <!-- v3.1 Update: Change flex container to flex-wrap with gap-2 to fix overflow on mobile -->
           <div class="flex flex-wrap items-center gap-2">
-            <div class="flex items-center gap-1.5 bg-slate-900/60 px-3 py-1.5 rounded-lg border border-gray-800">
-              <span class="text-xs text-gray-400">เป้าหมายเกษียณ (฿):</span>
+            <div class="milestone-param-card flex items-center gap-1.5 px-3 py-1.5 rounded-lg border">
+              <span class="milestone-param-label text-xs">เป้าหมายเกษียณ (฿):</span>
               <!-- v3.1 Update: Default to 27,500,000 -->
-              <input id="milestone-target-input" type="text" class="bg-transparent text-xs text-cyan-300 font-bold w-28 outline-none border-b border-cyan-500/40 focus:border-cyan-400" value="27,500,000">
+              <input id="milestone-target-input" type="text" class="milestone-param-input bg-transparent text-xs font-bold w-28 outline-none border-b" value="27,500,000">
             </div>
-            <div class="flex items-center gap-1.5 bg-slate-900/60 px-3 py-1.5 rounded-lg border border-gray-800">
-              <span class="text-xs text-gray-400">ผลตอบแทนคาดหวัง (% p.a.):</span>
+            <div class="milestone-param-card flex items-center gap-1.5 px-3 py-1.5 rounded-lg border">
+              <span class="milestone-param-label text-xs">ผลตอบแทนคาดหวัง (% p.a.):</span>
               <!-- v3.1 Update: Default to 5.0 -->
-              <input id="milestone-return-input" type="number" class="bg-transparent text-xs text-emerald-300 font-bold w-12 outline-none border-b border-emerald-500/40 focus:border-emerald-400" value="5.0" step="0.5">
+              <input id="milestone-return-input" type="number" class="milestone-param-input bg-transparent text-xs font-bold w-12 outline-none border-b" value="5.0" step="0.5">
             </div>
-            <div class="flex items-center gap-1.5 bg-slate-900/60 px-3 py-1.5 rounded-lg border border-gray-800">
-              <span class="text-xs text-gray-400">ปีที่เหลือก่อนเกษียณ:</span>
+            <div class="milestone-param-card flex items-center gap-1.5 px-3 py-1.5 rounded-lg border">
+              <span class="milestone-param-label text-xs">ปีที่เหลือก่อนเกษียณ:</span>
               <!-- v3.1 Update: Default to 20 -->
-              <input id="milestone-years-input" type="number" class="bg-transparent text-xs text-amber-300 font-bold w-10 outline-none border-b border-amber-500/40 focus:border-amber-400" value="20" step="1">
+              <input id="milestone-years-input" type="number" class="milestone-param-input bg-transparent text-xs font-bold w-10 outline-none border-b" value="20" step="1">
             </div>
           </div>
         </div>
@@ -155,8 +171,8 @@
           <div id="milestone-progress-bar" class="progress-fill" style="width: 0%;"></div>
         </div>
         <div class="flex justify-between items-center text-xs mt-1">
-          <span class="text-gray-300 font-medium">FV ของพอร์ตปัจจุบัน คิดเป็น <strong id="milestone-progress-pct" class="text-cyan-400 font-bold">0.0%</strong> ของเป้าหมาย</span>
-          <span class="text-gray-400">FV พอร์ตปัจจุบัน (ยังไม่ออม): <strong id="milestone-fv-val" class="text-emerald-300 font-bold">฿0</strong></span>
+          <span class="milestone-subtext text-gray-300 font-medium">FV ของพอร์ตปัจจุบัน คิดเป็น <strong id="milestone-progress-pct" class="text-cyan-400 font-bold">0.0%</strong> ของเป้าหมาย</span>
+          <span class="milestone-subtext-right text-gray-400">FV พอร์ตปัจจุบัน (ยังไม่ออม): <strong id="milestone-fv-val" class="text-emerald-300 font-bold">฿0</strong></span>
         </div>
       </div>
 
@@ -197,10 +213,10 @@
 
       <!-- Donut Allocation Chart — Full Width with Legend Below -->
       <div class="glass-card p-5 mb-5">
-        <h3 class="text-base font-bold text-white mb-1">Asset Class Allocation</h3>
+        <h3 class="view-section-header text-base font-bold mb-1">Asset Class Allocation</h3>
         <p class="text-xs text-gray-400 mb-4">สัดส่วนการจัดสรรเงินตามประเภทสินทรัพย์</p>
         <div class="flex flex-col items-center">
-          <div class="relative" style="width:260px; height:260px;">
+          <div class="relative p-2" style="width:270px; height:270px;">
             <canvas id="allocationChart"></canvas>
             <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
               <span class="text-xs text-gray-400 font-medium">Total Value</span>
@@ -208,7 +224,7 @@
             </div>
           </div>
           <!-- Legend Below -->
-          <div id="allocation-legend" class="flex flex-wrap justify-center gap-x-5 gap-y-2 mt-4 text-xs text-white"></div>
+          <div id="allocation-legend" class="flex flex-wrap justify-center gap-x-5 gap-y-2 mt-4 text-xs"></div>
         </div>
       </div>
 
@@ -216,7 +232,7 @@
       <div class="glass-card p-5">
         <div class="flex flex-wrap items-start justify-between gap-3 mb-4">
           <div>
-            <h3 class="text-base font-bold text-white flex items-center gap-2">
+            <h3 class="view-section-header text-base font-bold flex items-center gap-2">
               <span>📋</span> Asset Performance & Holdings
               <span id="asset-count-badge" class="ml-2 px-2.5 py-0.5 bg-cyan-950/60 border border-cyan-500/30 text-cyan-300 text-xs font-semibold rounded-lg">0 Assets</span>
             </h3>
@@ -232,11 +248,11 @@
               <button class="alloc-owner-btn px-3 py-1 rounded-md font-semibold text-amber-400" data-owner="JJ">JJ</button>
             </div>
             <!-- Class Filter -->
-            <div class="relative">
+            <div class="relative z-30">
               <button id="class-filter-btn" class="flex items-center gap-1.5 px-3 py-1.5 bg-slate-900/80 border border-gray-800 rounded-lg text-xs text-gray-300 hover:border-cyan-500 transition-all">
                 <span>🔽</span> Asset Class
               </button>
-              <div id="class-filter-dropdown" class="hidden absolute right-0 top-8 z-20 bg-slate-900 border border-gray-700 rounded-xl p-3 min-w-[170px] shadow-2xl">
+              <div id="class-filter-dropdown" class="hidden absolute right-0 top-10 z-50 bg-slate-900 border border-gray-700 rounded-xl p-3 min-w-[180px] shadow-2xl">
                 <div id="class-filter-options" class="flex flex-col gap-1.5"></div>
               </div>
             </div>
@@ -276,7 +292,7 @@
       <!-- Filter Row -->
       <div class="glass-card p-4 mb-5 flex flex-wrap items-center justify-between gap-4">
         <div class="flex items-center gap-2">
-          <span class="text-sm font-semibold text-gray-300">มุมมองพอร์ต:</span>
+          <span class="portfolio-view-label text-sm font-semibold">มุมมองพอร์ต:</span>
           <div class="flex bg-slate-900/80 p-1 rounded-xl border border-gray-800">
             <button class="owner-filter-btn px-4 py-1.5 text-xs font-semibold rounded-lg text-gray-300 hover:text-white transition-all active" data-owner="TOTAL">Total Family</button>
             <button class="owner-filter-btn px-4 py-1.5 text-xs font-semibold rounded-lg text-cyan-400 hover:text-cyan-300 transition-all" data-owner="PP">PP Only</button>
@@ -293,17 +309,17 @@
         <!-- PP Card -->
         <div class="glass-card p-5">
           <div class="flex justify-between items-center mb-3">
-            <span class="text-sm font-bold text-cyan-300">📊 PP Portfolio</span>
+            <span class="pp-port-title text-sm font-bold">📊 PP Portfolio</span>
             <span class="individual-port-badge-pp">Individual Port</span>
           </div>
           <div class="mb-2">
             <span class="text-xs text-gray-400 block mb-0.5">Net Worth</span>
-            <strong class="text-3xl font-extrabold text-cyan-300">฿<span id="pp-card-networth">0</span></strong>
+            <strong class="pp-port-networth text-3xl font-extrabold">฿<span id="pp-card-networth">0</span></strong>
           </div>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 owner-card-subgrid p-3 rounded-xl mt-3">
             <div>
               <span class="block text-xs text-gray-400 mb-0.5">Capital Deposited</span>
-              <strong class="text-xl font-bold text-gray-200">฿<span id="pp-card-capital">0</span></strong>
+              <strong class="capital-deposit-val text-xl font-bold">฿<span id="pp-card-capital">0</span></strong>
             </div>
             <div>
               <span class="block text-xs text-gray-400 mb-0.5">Unrealized P&L</span>
@@ -315,17 +331,17 @@
         <!-- JJ Card -->
         <div class="glass-card p-5">
           <div class="flex justify-between items-center mb-3">
-            <span class="text-sm font-bold text-amber-300">📊 JJ Portfolio</span>
+            <span class="jj-port-title text-sm font-bold">📊 JJ Portfolio</span>
             <span class="individual-port-badge-jj">Individual Port</span>
           </div>
           <div class="mb-2">
             <span class="text-xs text-gray-400 block mb-0.5">Net Worth</span>
-            <strong class="text-3xl font-extrabold text-amber-300">฿<span id="jj-card-networth">0</span></strong>
+            <strong class="jj-port-networth text-3xl font-extrabold">฿<span id="jj-card-networth">0</span></strong>
           </div>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 owner-card-subgrid p-3 rounded-xl mt-3">
             <div>
               <span class="block text-xs text-gray-400 mb-0.5">Capital Deposited</span>
-              <strong class="text-xl font-bold text-gray-200">฿<span id="jj-card-capital">0</span></strong>
+              <strong class="capital-deposit-val text-xl font-bold">฿<span id="jj-card-capital">0</span></strong>
             </div>
             <div>
               <span class="block text-xs text-gray-400 mb-0.5">Unrealized P&L</span>
@@ -363,7 +379,7 @@
         <!-- Input Controls -->
         <div class="glass-card p-5">
           <div class="flex items-center justify-between mb-4">
-            <h3 class="text-sm font-bold text-white flex items-center gap-2"><span>⚙️</span> Simulation Parameters</h3>
+            <h3 class="sim-header text-sm font-bold flex items-center gap-2"><span>⚙️</span> Simulation Parameters</h3>
             <button id="sim-reset-btn" class="text-xs text-cyan-400 hover:underline">รีเซ็ตค่า</button>
           </div>
 

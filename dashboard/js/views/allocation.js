@@ -177,22 +177,40 @@ window.AllocationView = {
 
     if (this.allocationChart) this.allocationChart.destroy();
 
+    // Patch v3.2.2: Dynamic slice border color and inset padding
+    const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+    const sliceBorderColor = isLight ? '#E5E7EB' : '#111827';
+
     this.allocationChart = new Chart(ctx, {
       type: 'doughnut',
       data: {
         labels,
-        datasets: [{ data, backgroundColor: backgroundColors, borderWidth: 2, borderColor: '#111827', hoverOffset: 8 }]
+        datasets: [{
+          data,
+          backgroundColor: backgroundColors,
+          borderWidth: 2,
+          borderColor: sliceBorderColor,
+          hoverOffset: 6
+        }]
       },
       options: {
-        responsive: true, maintainAspectRatio: false, cutout: '70%',
-        plugins: { legend: { display: false }, tooltip: {
-          callbacks: {
-            label: c => {
-              const pct = grandTotal > 0 ? ((c.parsed / grandTotal) * 100).toFixed(1) : 0;
-              return `${c.label}: ฿${window.formatCurrency(c.parsed)} (${pct}%)`;
+        responsive: true,
+        maintainAspectRatio: false,
+        cutout: '70%',
+        layout: {
+          padding: 6 // 5-6px inset offset to prevent hover clipping
+        },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: c => {
+                const pct = grandTotal > 0 ? ((c.parsed / grandTotal) * 100).toFixed(1) : 0;
+                return `${c.label}: ฿${window.formatCurrency(c.parsed)} (${pct}%)`;
+              }
             }
           }
-        }}
+        }
       }
     });
 
@@ -200,18 +218,18 @@ window.AllocationView = {
     const totalElem = document.getElementById('allocation-total-val');
     if (totalElem) totalElem.textContent = `฿${window.formatCurrency(grandTotal)}`;
 
-    // Build legend
+    // Build legend (Patch v3.2.2: Legend visibility)
     const legendContainer = document.getElementById('allocation-legend');
     if (legendContainer) {
       legendContainer.innerHTML = '';
       labels.forEach((lbl, i) => {
         const pct = grandTotal > 0 ? ((classTotals[lbl] / grandTotal) * 100).toFixed(1) : 0;
         const item = document.createElement('div');
-        item.className = 'flex items-center gap-1.5';
+        item.className = 'flex items-center gap-1.5 alloc-legend-item';
         item.innerHTML = `
           <span style="width:12px;height:12px;border-radius:3px;background:${backgroundColors[i]};display:inline-block;flex-shrink:0;"></span>
-          <span class="text-white font-semibold">${lbl}</span>
-          <span class="text-gray-400">${pct}% (฿${window.formatCurrency(classTotals[lbl])})</span>
+          <span class="alloc-legend-label font-semibold">${lbl}</span>
+          <span class="alloc-legend-pct text-gray-400">${pct}% (฿${window.formatCurrency(classTotals[lbl])})</span>
         `;
         legendContainer.appendChild(item);
       });
@@ -283,7 +301,7 @@ window.AllocationView = {
     if (list.length > 0) {
       const summaryTr = document.createElement('tr');
       summaryTr.id = 'holdings-summary-row';
-      summaryTr.className = 'font-bold border-b-2 border-gray-800 sticky top-[45px] z-10';
+      summaryTr.className = 'font-bold border-b-2 sticky top-0 z-10';
       summaryTr.innerHTML = `
         <td class="px-4 py-3">Total</td>
         <td class="px-4 py-3"></td>
@@ -310,16 +328,16 @@ window.AllocationView = {
         const plPctStr = `${isPos ? '+' : ''}${plPct.toFixed(2)}%`;
 
         const tr = document.createElement('tr');
-        tr.className = 'hover:bg-slate-800/40 transition-colors border-b border-gray-800/50';
+        tr.className = 'holdings-data-row hover:bg-slate-800/20 transition-colors border-b border-gray-800/30';
         tr.innerHTML = `
-          <td class="px-4 py-3 font-semibold text-white">${a.asset_name}</td>
+          <td class="px-4 py-3 font-semibold asset-name-cell">${a.asset_name}</td>
           <td class="px-4 py-3"><span class="badge-tag tag-${a.class || 'OTHER'}">${a.class || 'OTHER'}</span></td>
           <td class="px-4 py-3"><span class="badge-owner owner-${a.owner}">${a.owner}</span></td>
-          <td class="px-4 py-3 text-right text-gray-300">${window.formatNumber(a.units)}</td>
-          <td class="px-4 py-3 text-right text-gray-400">฿${window.formatNumber(a.avg_cost)}</td>
-          <td class="px-4 py-3 text-right text-gray-200 font-medium">฿${window.formatNumber(a.current_price)}</td>
-          <td class="px-4 py-3 text-right text-gray-300">฿${window.formatCurrency(a.total_cost)}</td>
-          <td class="px-4 py-3 text-right text-emerald-300 font-semibold">฿${window.formatCurrency(a.market_value)}</td>
+          <td class="px-4 py-3 text-right asset-data-cell">${window.formatNumber(a.units)}</td>
+          <td class="px-4 py-3 text-right asset-data-cell">฿${window.formatNumber(a.avg_cost)}</td>
+          <td class="px-4 py-3 text-right asset-data-cell font-medium">฿${window.formatNumber(a.current_price)}</td>
+          <td class="px-4 py-3 text-right asset-data-cell">฿${window.formatCurrency(a.total_cost)}</td>
+          <td class="px-4 py-3 text-right text-emerald-400 font-semibold">฿${window.formatCurrency(a.market_value)}</td>
           <td class="px-4 py-3 text-right font-medium ${plCls}">฿${window.formatCurrency(a.unrealized_pl)}</td>
           <td class="px-4 py-3 text-right font-semibold ${plCls}">${plPctStr}</td>
           <td class="px-4 py-3 text-right text-amber-400">฿${window.formatCurrency(a.realized_pl || 0)}</td>
