@@ -89,23 +89,33 @@ window.generateMockData = function() {
     ppOndate = Math.round((ppOndate + ppInflow) * (1 + monthlyReturn));
     jjOndate = Math.round((jjOndate + jjInflow) * (1 + monthlyReturn * 0.98));
     
-    const totalCost = ppCapital + jjCapital;
+    const totalCapital = ppCapital + jjCapital;
     const totalOndate = ppOndate + jjOndate;
-    const totalPL = totalOndate - totalCost;
+    const totalPL = totalOndate - totalCapital;
     
     navPerUnit = navPerUnit * (1 + monthlyReturn);
     
     snapshot.push({
       date: dateStr,
       year_month: dateStr.substring(0, 7),
-      pp_cost: ppCapital,
+      // v3.2.3 Net Capital Deposits
+      pp_net_capital_deposit: ppCapital,
+      jj_net_capital_deposit: jjCapital,
+      total_net_capital_deposit: totalCapital,
+      // Ondate amounts
       pp_ondate: ppOndate,
-      pp_pl: ppOndate - ppCapital,
-      jj_cost: jjCapital,
       jj_ondate: jjOndate,
-      jj_pl: jjOndate - jjCapital,
-      total_cost: totalCost,
       total_ondate: totalOndate,
+      // Net Gain
+      pp_net_gain: ppOndate - ppCapital,
+      jj_net_gain: jjOndate - jjCapital,
+      total_net_gain: totalOndate - totalCapital,
+      // Legacy compat
+      pp_cost: ppCapital,
+      jj_cost: jjCapital,
+      total_cost: totalCapital,
+      pp_pl: ppOndate - ppCapital,
+      jj_pl: jjOndate - jjCapital,
       total_pl: totalPL,
       nav_per_unit: Number(navPerUnit.toFixed(4)),
       pp_inflow: ppInflow,
@@ -163,25 +173,28 @@ window.generateMockData = function() {
   const latest = snapshot[snapshot.length - 1];
   const summary = {
     total: {
-      cost: latest.total_cost,
+      net_capital_deposit: latest.total_net_capital_deposit,
       market_value: latest.total_ondate,
+      net_gain: latest.total_pl + 185000,
       unrealized_pl: latest.total_pl,
       realized_pl: 185000,
-      total_gain: latest.total_pl + 185000
+      cost: latest.total_cost
     },
     pp: {
-      cost: latest.pp_cost,
+      net_capital_deposit: latest.pp_net_capital_deposit,
       market_value: latest.pp_ondate,
+      net_gain: latest.pp_pl + 110000,
       unrealized_pl: latest.pp_pl,
       realized_pl: 110000,
-      total_gain: latest.pp_pl + 110000
+      cost: latest.pp_cost
     },
     jj: {
-      cost: latest.jj_cost,
+      net_capital_deposit: latest.jj_net_capital_deposit,
       market_value: latest.jj_ondate,
+      net_gain: latest.jj_pl + 75000,
       unrealized_pl: latest.jj_pl,
       realized_pl: 75000,
-      total_gain: latest.jj_pl + 75000
+      cost: latest.jj_cost
     }
   };
 

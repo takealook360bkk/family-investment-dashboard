@@ -81,25 +81,28 @@ window.ApiService = {
         return;
       }
 
-      // Normalize summary (Master_Asset Q3:T5)
+      // Normalize summary (Master_Asset Q3:V5) - v3.2.3
       const normalizedSummary = {
         total: {
-          cost:          Number(rawSummary.total?.cost_amount   || rawSummary.total?.cost          || 0),
-          market_value:  Number(rawSummary.total?.ondate_amount || rawSummary.total?.market_value  || 0),
-          unrealized_pl: Number(rawSummary.total?.unrealized_pl || 0),
-          realized_pl:   Number(rawSummary.total?.realized_pl   || 0),
+          net_capital_deposit: Number(rawSummary.total?.net_capital_deposit || rawSummary.total?.net_capital || rawSummary.total?.cost_amount || rawSummary.total?.cost || 0),
+          market_value:        Number(rawSummary.total?.ondate_amount || rawSummary.total?.market_value || 0),
+          net_gain:            Number(rawSummary.total?.net_gain !== undefined ? rawSummary.total?.net_gain : (rawSummary.total?.unrealized_pl || 0) + (rawSummary.total?.realized_pl || 0)),
+          unrealized_pl:       Number(rawSummary.total?.unrealized_pl || 0),
+          realized_pl:         Number(rawSummary.total?.realized_pl || 0),
         },
         pp: {
-          cost:          Number(rawSummary.pp?.cost_amount   || rawSummary.pp?.cost          || 0),
-          market_value:  Number(rawSummary.pp?.ondate_amount || rawSummary.pp?.market_value  || 0),
-          unrealized_pl: Number(rawSummary.pp?.unrealized_pl || 0),
-          realized_pl:   Number(rawSummary.pp?.realized_pl   || 0),
+          net_capital_deposit: Number(rawSummary.pp?.net_capital_deposit || rawSummary.pp?.net_capital || rawSummary.pp?.cost_amount || rawSummary.pp?.cost || 0),
+          market_value:        Number(rawSummary.pp?.ondate_amount || rawSummary.pp?.market_value || 0),
+          net_gain:            Number(rawSummary.pp?.net_gain !== undefined ? rawSummary.pp?.net_gain : (rawSummary.pp?.unrealized_pl || 0) + (rawSummary.pp?.realized_pl || 0)),
+          unrealized_pl:       Number(rawSummary.pp?.unrealized_pl || 0),
+          realized_pl:         Number(rawSummary.pp?.realized_pl || 0),
         },
         jj: {
-          cost:          Number(rawSummary.jj?.cost_amount   || rawSummary.jj?.cost          || 0),
-          market_value:  Number(rawSummary.jj?.ondate_amount || rawSummary.jj?.market_value  || 0),
-          unrealized_pl: Number(rawSummary.jj?.unrealized_pl || 0),
-          realized_pl:   Number(rawSummary.jj?.realized_pl   || 0),
+          net_capital_deposit: Number(rawSummary.jj?.net_capital_deposit || rawSummary.jj?.net_capital || rawSummary.jj?.cost_amount || rawSummary.jj?.cost || 0),
+          market_value:        Number(rawSummary.jj?.ondate_amount || rawSummary.jj?.market_value || 0),
+          net_gain:            Number(rawSummary.jj?.net_gain !== undefined ? rawSummary.jj?.net_gain : (rawSummary.jj?.unrealized_pl || 0) + (rawSummary.jj?.realized_pl || 0)),
+          unrealized_pl:       Number(rawSummary.jj?.unrealized_pl || 0),
+          realized_pl:         Number(rawSummary.jj?.realized_pl || 0),
         }
       };
 
@@ -111,7 +114,7 @@ window.ApiService = {
         else if (acc.startsWith('PP')) owner = 'PP';
 
         const units      = Number(a.unit || a.units || 0);
-        const costAmt    = Number(a.cost_amount || a.total_cost || 0);
+        const costAmt    = Number(a.cost_current_asset || a.cost_amount || a.total_cost || 0);
         const ondateAmt  = Number(a.ondate_amount || a.market_value || 0);
         const priceUnit  = Number(a.price_per_unit || a.current_price || 0);
         const avgCostPer = units > 0 ? costAmt / units : 0;
@@ -136,32 +139,55 @@ window.ApiService = {
         };
       });
 
-      // Normalize snapshot (Daily Snapshort_V3)
+      // Normalize snapshot (Daily Snapshort_V3 - 26 cols) - v3.2.3
       const normalizedSnapshot = rawSnapshot.map(s => {
         const dStr = String(s.date || '');
-        const ppCost    = Number(s.pp_cost || 0);
-        const ppOndate  = Number(s.pp_ondate || 0);
-        const jjCost    = Number(s.jj_cost || 0);
-        const jjOndate  = Number(s.jj_ondate || 0);
-        const totCost   = Number(s.total_cost || ppCost + jjCost || 0);
-        const totOndate = Number(s.total_ondate || ppOndate + jjOndate || 0);
+        const ppCapital = Number(s.pp_net_capital_deposit !== undefined ? s.pp_net_capital_deposit : (s.pp_cost || 0));
+        const ppCost    = Number(s.pp_cost_current_asset !== undefined ? s.pp_cost_current_asset : (s.pp_cost || 0));
+        const ppOndate  = Number(s.pp_ondate_amount !== undefined ? s.pp_ondate_amount : (s.pp_ondate || 0));
+        const ppUnreal  = Number(s.pp_unrealized_pl !== undefined ? s.pp_unrealized_pl : (s.pp_unrealized !== undefined ? s.pp_unrealized : ppOndate - ppCost));
+        const ppRealCum = Number(s.pp_realized_pl_cumulative !== undefined ? s.pp_realized_pl_cumulative : (s.pp_realized_cum || 0));
+        const ppNetGain = Number(s.pp_net_gain !== undefined ? s.pp_net_gain : (ppUnreal + ppRealCum));
+
+        const jjCapital = Number(s.jj_net_capital_deposit !== undefined ? s.jj_net_capital_deposit : (s.jj_cost || 0));
+        const jjCost    = Number(s.jj_cost_current_asset !== undefined ? s.jj_cost_current_asset : (s.jj_cost || 0));
+        const jjOndate  = Number(s.jj_ondate_amount !== undefined ? s.jj_ondate_amount : (s.jj_ondate || 0));
+        const jjUnreal  = Number(s.jj_unrealized_pl !== undefined ? s.jj_unrealized_pl : (s.jj_unrealized !== undefined ? s.jj_unrealized : jjOndate - jjCost));
+        const jjRealCum = Number(s.jj_realized_pl_cumulative !== undefined ? s.jj_realized_pl_cumulative : (s.jj_realized_cum || 0));
+        const jjNetGain = Number(s.jj_net_gain !== undefined ? s.jj_net_gain : (jjUnreal + jjRealCum));
+
+        const totCapital = Number(s.total_net_capital_deposit !== undefined ? s.total_net_capital_deposit : (s.total_cost || ppCapital + jjCapital));
+        const totCost    = Number(s.total_cost_current_asset !== undefined ? s.total_cost_current_asset : (s.total_cost || ppCost + jjCost));
+        const totOndate  = Number(s.total_ondate_amount !== undefined ? s.total_ondate_amount : (s.total_ondate || ppOndate + jjOndate));
+        const totUnreal  = Number(s.total_unrealized_pl !== undefined ? s.total_unrealized_pl : (s.total_unrealized !== undefined ? s.total_unrealized : totOndate - totCost));
+        const totNetGain = ppNetGain + jjNetGain;
 
         return {
           date: dStr,
           year_month: dStr.length >= 7 ? dStr.substring(0, 7) : dStr,
-          pp_cost:   ppCost,
+          // v3.2.3 Net Capital Deposits (Actual External Cash)
+          pp_net_capital_deposit: ppCapital,
+          jj_net_capital_deposit: jjCapital,
+          total_net_capital_deposit: totCapital,
+          // Ondate amounts (Market value / Net worth)
           pp_ondate: ppOndate,
-          pp_pl:     Number(s.pp_unrealized !== undefined ? s.pp_unrealized : ppOndate - ppCost),
-          jj_cost:   jjCost,
           jj_ondate: jjOndate,
-          jj_pl:     Number(s.jj_unrealized !== undefined ? s.jj_unrealized : jjOndate - jjCost),
-          total_cost:   totCost,
           total_ondate: totOndate,
-          total_pl:     Number(s.total_unrealized !== undefined ? s.total_unrealized : totOndate - totCost),
+          // Net Gain (Unrealized + Cumulative Realized + Dividends)
+          pp_net_gain: ppNetGain,
+          jj_net_gain: jjNetGain,
+          total_net_gain: totNetGain,
+          // P&L & Cost
+          pp_cost: ppCost,
+          jj_cost: jjCost,
+          total_cost: totCost,
+          pp_pl: ppUnreal,
+          jj_pl: jjUnreal,
+          total_pl: totUnreal,
           nav_per_unit: Number(s.nav_per_unit || 10),
-          pp_inflow:    Number(s.pp_net_inflow  || s.pp_inflow  || 0),
-          jj_inflow:    Number(s.jj_net_inflow  || s.jj_inflow  || 0),
-          total_inflow: Number(s.total_net_inflow || s.total_inflow || 0)
+          pp_inflow:    Number(s.pp_net_inflow !== undefined ? s.pp_net_inflow : (s.pp_inflow || 0)),
+          jj_inflow:    Number(s.jj_net_inflow !== undefined ? s.jj_net_inflow : (s.jj_inflow || 0)),
+          total_inflow: Number(s.total_net_inflow !== undefined ? s.total_net_inflow : (s.total_inflow || 0))
         };
       });
 

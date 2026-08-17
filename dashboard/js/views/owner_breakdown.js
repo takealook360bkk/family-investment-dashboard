@@ -47,34 +47,34 @@ window.OwnerBreakdownView = {
 
     const latest = snapshot[snapshot.length - 1];
 
-    // PP values (prioritize live summary if available)
-    const ppNetWorth   = summary?.pp?.market_value  || latest.pp_ondate  || 0;
-    const ppCapital    = summary?.pp?.cost          || latest.pp_cost    || 0;
-    const ppUnrealized = summary?.pp?.unrealized_pl ?? latest.pp_pl      ?? 0;
-    const ppPLPct      = ppCapital > 0 ? (ppUnrealized / ppCapital * 100) : 0;
+    // PP values (prioritize live summary if available) - v3.2.3
+    const ppNetWorth   = summary?.pp?.market_value        || latest.pp_ondate                  || 0;
+    const ppCapital    = summary?.pp?.net_capital_deposit ?? latest.pp_net_capital_deposit     ?? latest.pp_cost ?? 0;
+    const ppNetGain    = summary?.pp?.net_gain            ?? latest.pp_net_gain                ?? ((summary?.pp?.unrealized_pl || 0) + (summary?.pp?.realized_pl || 0));
+    const ppNetGainPct = ppCapital > 0 ? (ppNetGain / ppCapital * 100) : 0;
 
-    // JJ values
-    const jjNetWorth   = summary?.jj?.market_value  || latest.jj_ondate  || 0;
-    const jjCapital    = summary?.jj?.cost          || latest.jj_cost    || 0;
-    const jjUnrealized = summary?.jj?.unrealized_pl ?? latest.jj_pl      ?? 0;
-    const jjPLPct      = jjCapital > 0 ? (jjUnrealized / jjCapital * 100) : 0;
+    // JJ values - v3.2.3
+    const jjNetWorth   = summary?.jj?.market_value        || latest.jj_ondate                  || 0;
+    const jjCapital    = summary?.jj?.net_capital_deposit ?? latest.jj_net_capital_deposit     ?? latest.jj_cost ?? 0;
+    const jjNetGain    = summary?.jj?.net_gain            ?? latest.jj_net_gain                ?? ((summary?.jj?.unrealized_pl || 0) + (summary?.jj?.realized_pl || 0));
+    const jjNetGainPct = jjCapital > 0 ? (jjNetGain / jjCapital * 100) : 0;
 
     // Update PP card
     this._setText('pp-card-networth', window.formatCurrency(ppNetWorth));
     this._setText('pp-card-capital',  window.formatCurrency(ppCapital));
-    const ppPlEl = document.getElementById('pp-card-pl');
-    if (ppPlEl) {
-      ppPlEl.textContent = `${ppUnrealized >= 0 ? '+' : ''}฿${window.formatCurrency(ppUnrealized)} (${ppPLPct.toFixed(1)}%)`;
-      ppPlEl.style.color = ppUnrealized >= 0 ? '#10b981' : '#f43f5e';
+    const ppNetGainEl = document.getElementById('pp-card-netgain');
+    if (ppNetGainEl) {
+      ppNetGainEl.textContent = `${ppNetGain >= 0 ? '+' : ''}฿${window.formatCurrency(ppNetGain)} (${ppNetGainPct.toFixed(1)}%)`;
+      ppNetGainEl.style.color = ppNetGain >= 0 ? '#10b981' : '#f43f5e';
     }
 
     // Update JJ card
     this._setText('jj-card-networth', window.formatCurrency(jjNetWorth));
     this._setText('jj-card-capital',  window.formatCurrency(jjCapital));
-    const jjPlEl = document.getElementById('jj-card-pl');
-    if (jjPlEl) {
-      jjPlEl.textContent = `${jjUnrealized >= 0 ? '+' : ''}฿${window.formatCurrency(jjUnrealized)} (${jjPLPct.toFixed(1)}%)`;
-      jjPlEl.style.color = jjUnrealized >= 0 ? '#10b981' : '#f43f5e';
+    const jjNetGainEl = document.getElementById('jj-card-netgain');
+    if (jjNetGainEl) {
+      jjNetGainEl.textContent = `${jjNetGain >= 0 ? '+' : ''}฿${window.formatCurrency(jjNetGain)} (${jjNetGainPct.toFixed(1)}%)`;
+      jjNetGainEl.style.color = jjNetGain >= 0 ? '#10b981' : '#f43f5e';
     }
 
     // Leader banner
@@ -114,8 +114,8 @@ window.OwnerBreakdownView = {
         fill: false, tension: 0.35, borderWidth: 2.5, pointRadius: 0, pointHoverRadius: 5
       });
       datasets.push({
-        label: 'PP Capital (เงินต้น PP)',
-        data: filtered.map(s => s.pp_cost || 0),
+        label: 'PP Net Capital (เงินต้นสุทธิ PP)',
+        data: filtered.map(s => s.pp_net_capital_deposit !== undefined ? s.pp_net_capital_deposit : (s.pp_cost || 0)),
         borderColor: '#22d3ee', borderDash: [5, 4],
         backgroundColor: 'transparent',
         fill: false, tension: 0.2, borderWidth: 1.5, pointRadius: 0
@@ -130,8 +130,8 @@ window.OwnerBreakdownView = {
         fill: false, tension: 0.35, borderWidth: 2.5, pointRadius: 0, pointHoverRadius: 5
       });
       datasets.push({
-        label: 'JJ Capital (เงินต้น JJ)',
-        data: filtered.map(s => s.jj_cost || 0),
+        label: 'JJ Net Capital (เงินต้นสุทธิ JJ)',
+        data: filtered.map(s => s.jj_net_capital_deposit !== undefined ? s.jj_net_capital_deposit : (s.jj_cost || 0)),
         borderColor: '#f59e0b', borderDash: [5, 4],
         backgroundColor: 'transparent',
         fill: false, tension: 0.2, borderWidth: 1.5, pointRadius: 0

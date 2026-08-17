@@ -50,25 +50,20 @@ window.OverviewView = {
     const latest = snapshot[snapshot.length - 1];
     const prev   = snapshot.length > 1 ? snapshot[snapshot.length - 2] : latest;
 
-    // Use live summary (from Master_Asset Q3:T5) as primary source
-    let netWorth  = summary?.total?.market_value  || latest.total_ondate;
-    let capital   = summary?.total?.cost          || latest.total_cost;
-    let unrealized= summary?.total?.unrealized_pl ?? latest.total_pl;
-    let realized  = summary?.total?.realized_pl   ?? 0;
+    // Use live summary (from Master_Asset Q3:V5) as primary source - v3.2.3
+    let netWorth  = summary?.total?.market_value        || latest.total_ondate;
+    let capital   = summary?.total?.net_capital_deposit ?? latest.total_net_capital_deposit ?? latest.total_cost;
+    let wealthGain= summary?.total?.net_gain            ?? latest.total_net_gain            ?? ((summary?.total?.unrealized_pl || 0) + (summary?.total?.realized_pl || 0));
 
     if (selectedOwner === 'PP') {
-      netWorth   = summary?.pp?.market_value  || latest.pp_ondate;
-      capital    = summary?.pp?.cost          || latest.pp_cost;
-      unrealized = summary?.pp?.unrealized_pl ?? latest.pp_pl;
-      realized   = summary?.pp?.realized_pl   ?? 0;
+      netWorth   = summary?.pp?.market_value        || latest.pp_ondate;
+      capital    = summary?.pp?.net_capital_deposit ?? latest.pp_net_capital_deposit ?? latest.pp_cost;
+      wealthGain = summary?.pp?.net_gain            ?? latest.pp_net_gain            ?? ((summary?.pp?.unrealized_pl || 0) + (summary?.pp?.realized_pl || 0));
     } else if (selectedOwner === 'JJ') {
-      netWorth   = summary?.jj?.market_value  || latest.jj_ondate;
-      capital    = summary?.jj?.cost          || latest.jj_cost;
-      unrealized = summary?.jj?.unrealized_pl ?? latest.jj_pl;
-      realized   = summary?.jj?.realized_pl   ?? 0;
+      netWorth   = summary?.jj?.market_value        || latest.jj_ondate;
+      capital    = summary?.jj?.net_capital_deposit ?? latest.jj_net_capital_deposit ?? latest.jj_cost;
+      wealthGain = summary?.jj?.net_gain            ?? latest.jj_net_gain            ?? ((summary?.jj?.unrealized_pl || 0) + (summary?.jj?.realized_pl || 0));
     }
-
-    const wealthGain = unrealized + realized;
 
     // Update KPIs
     document.getElementById('kpi-net-worth').textContent    = window.formatCurrency(netWorth);
@@ -158,15 +153,16 @@ window.OverviewView = {
     const filtered = this.filterByRange(snapshot, this.wealthRange);
     const labels = filtered.map(s => s.year_month || s.date);
 
+    // v3.2.3: Total_Ondate_Amount (solid) vs Total_Net_Capital_Deposit (dashed)
     let netWorthData = filtered.map(s => s.total_ondate);
-    let capitalData  = filtered.map(s => s.total_cost);
+    let capitalData  = filtered.map(s => s.total_net_capital_deposit !== undefined ? s.total_net_capital_deposit : s.total_cost);
 
     if (owner === 'PP') {
       netWorthData = filtered.map(s => s.pp_ondate);
-      capitalData  = filtered.map(s => s.pp_cost);
+      capitalData  = filtered.map(s => s.pp_net_capital_deposit !== undefined ? s.pp_net_capital_deposit : s.pp_cost);
     } else if (owner === 'JJ') {
       netWorthData = filtered.map(s => s.jj_ondate);
-      capitalData  = filtered.map(s => s.jj_cost);
+      capitalData  = filtered.map(s => s.jj_net_capital_deposit !== undefined ? s.jj_net_capital_deposit : s.jj_cost);
     }
 
     if (this.wealthGrowthChart) this.wealthGrowthChart.destroy();
@@ -189,7 +185,7 @@ window.OverviewView = {
             fill: true, tension: 0.35, borderWidth: 2.5, pointRadius: 0, pointHoverRadius: 6
           },
           {
-            label: 'Capital Deposited (เงินต้นสะสม)',
+            label: 'Net Capital Deposited (เงินต้นสุทธิสะสม)',
             data: capitalData,
             borderColor: '#4ade80',
             backgroundColor: 'transparent',

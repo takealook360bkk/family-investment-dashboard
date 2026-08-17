@@ -37,6 +37,18 @@ The project is built around a hybrid architecture using Google Sheets as the pri
 - **Security**: Google Identity Services (OAuth 2.0).
 
 ## Version Log
+- **Version 3.2.3**: Accounting Logic Fix & True Principal Cost Tracking (`Net_Capital_Deposit` & `Net_Gain`).
+  - Separated external net cash injected (`Net_Capital_Deposit`) from compounded gains (`Cost_Current_Asset`) to resolve reinvestment calculation distortion.
+  - **View 1 (Overview)**:
+    - Updated *Capital Deposited* KPI to use `Net_Capital_Deposit` (reflecting true principal).
+    - Updated *Wealth Growth History* chart dashed line to track `Total_Net_Capital_Deposit` (solid line remains `Total_Ondate_Amount`).
+  - **View 3 (Owner Race)**:
+    - Replaced *Unrealized P&L* card metric with *Net Gain* (`PP_Net_Gain` and `JJ_Net_Gain` = Unrealized + Realized + Dividends).
+    - Updated *Capital Deposited* card metric to `PP_Net_Capital_Deposit` and `JJ_Net_Capital_Deposit`.
+    - Updated *PP vs JJ Growth Race* chart dashed lines to track `PP_Net_Capital_Deposit` and `JJ_Net_Capital_Deposit` respectively (solid lines remain `Ondate_Amount`).
+  - **API & Data Engine**:
+    - Expanded API normalization layer for 26-column schema (`Daily Snapshort_V3`) and `Master_Asset` summary matrix (Q3:V5).
+    - Synced demo mock data generators and documentation files across `/docs`.
 - **Version 3.2.2**: UI/UX Contrast enhancements, theme toggle redesign, and interactive component fixes.
   - Replaced theme toggle icons with clean minimalist SVGs and standardized height matching the Sign In button.
   - Fixed Google Auth button and user badge border radius (8px) and ensured black text visibility for user email in Light theme.
@@ -70,4 +82,4 @@ The project is built around a hybrid architecture using Google Sheets as the pri
 This repository contains the application structure and logic. No private financial data, API keys, or personal credentials should be committed to this repository. All sensitive configuration is handled via environment-specific setup or local configuration files excluded from version control.
 
 ---
-*Last Updated: August 15, 2026*
+*Last Updated: August 18, 2026*
