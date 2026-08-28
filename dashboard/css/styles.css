@@ -753,6 +753,22 @@ body {
   color: var(--text-main) !important;
 }
 
+/* Patch v3.3.1: Light Theme Range & Filter Button Contrast Fix */
+[data-theme="light"] .chart-range-btn:not(.active),
+[data-theme="light"] .roi-btn:not(.active),
+[data-theme="light"] .owner-filter-btn:not(.active),
+[data-theme="light"] .alloc-owner-btn:not(.active) {
+  color: #D1D5DB !important; /* Off-white / light gray for high legibility on dark pill container */
+}
+
+[data-theme="light"] .chart-range-btn:not(.active):hover,
+[data-theme="light"] .roi-btn:not(.active):hover,
+[data-theme="light"] .owner-filter-btn:not(.active):hover,
+[data-theme="light"] .alloc-owner-btn:not(.active):hover {
+  background-color: rgba(255, 255, 255, 0.15) !important;
+  color: #FFFFFF !important; /* Pure white on hover */
+}
+
 /* Patch v3.2.2: View 2 Section Headers & Legend Visibility */
 .view-section-header {
   color: var(--text-main);

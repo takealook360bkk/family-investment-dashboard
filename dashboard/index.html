@@ -195,11 +195,17 @@
         </div>
       </div>
 
-      <!-- Monthly Inflow Chart -->
+      <!-- Savings Inflow Chart (Monthly / Yearly) -->
       <div class="glass-card p-5 mb-5">
-        <div class="mb-3">
-          <h3 class="chart-title">Monthly Savings Inflow (เงินออมเติมใหม่รายเดือน)</h3>
-          <p class="text-xs text-gray-400">วินัยการเติมเงินออมเพิ่มในแต่ละเดือน (ย้อนหลัง 24 เดือน)</p>
+        <div class="flex flex-wrap items-center justify-between mb-3 gap-3">
+          <div>
+            <h3 id="savings-inflow-title" class="chart-title">Monthly Savings Inflow (เงินออมเติมใหม่รายเดือน)</h3>
+            <p id="savings-inflow-sub" class="text-xs text-gray-400">วินัยการเติมเงินออมเพิ่มในแต่ละเดือน (ย้อนหลังตามช่วงเวลาที่เลือก)</p>
+          </div>
+          <div class="flex gap-1.5 bg-slate-900/60 p-1 rounded-xl border border-gray-800">
+            <button class="chart-range-btn active" data-inflow-mode="monthly">Monthly</button>
+            <button class="chart-range-btn" data-inflow-mode="yearly">Yearly</button>
+          </div>
         </div>
         <div style="height:220px; position:relative;">
           <canvas id="monthlyInflowChart"></canvas>

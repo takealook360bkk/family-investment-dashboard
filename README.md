@@ -37,6 +37,13 @@ The project is built around a hybrid architecture using Google Sheets as the pri
 - **Security**: Google Identity Services (OAuth 2.0).
 
 ## Version Log
+- **Version 3.3.1**: Savings Inflow Time Range Synchronization, Yearly/Monthly Granularity Toggle, Dynamic Color Scaling, and Light Theme Filter Button Contrast Fix.
+  - **View 1 (Overview)**:
+    - **Synchronized Time Range**: Savings Inflow bar chart is now dynamically synchronized and horizontally aligned with the Wealth Growth History line chart above (`ALL` starting from Dec 2016 inception, `5Y`, `3Y`, `1Y`).
+    - **Yearly / Monthly Granularity Toggle**: Added an interactive segmented switch (`Monthly` vs `Yearly`) allowing users to switch between monthly inflow tracking and cumulative annual savings sums per calendar year.
+    - **Dynamic Value Color Scale**: Implemented dynamic bar coloring where higher positive savings scale up into vibrant deep emerald (`#10b981`), while negative net inflows (capital withdrawals) scale into rose/red (`#f43f5e`) for rapid visual assessment.
+  - **Design System & Contrast Enhancement**:
+    - **Light Theme Filter Button Legibility Fix**: Enhanced inactive Time Range and segmented filter buttons (`chart-range-btn`, `roi-btn`, `owner-filter-btn`, `alloc-owner-btn`) in Light Theme with high-contrast off-white text (`#D1D5DB`) and pure white hover state (`#FFFFFF` with `rgba(255, 255, 255, 0.15)` backdrop), resolving low contrast on dark slate pill containers without altering Dark Theme.
 - **Version 3.3.0**: Asset Class Historical Stacked Area Chart, View 2 Restructuring, and Table Sticky Header Overlap Bug Fix.
   - **View 2 (Allocation & Holdings)**:
     - **View 2.1**: *Asset Class Allocation* (Donut chart showing current snapshot portfolio distribution).

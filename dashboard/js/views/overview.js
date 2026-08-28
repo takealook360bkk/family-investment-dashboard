@@ -4,6 +4,7 @@ window.OverviewView = {
   wealthGrowthChart: null,
   monthlyInflowChart: null,
   wealthRange: 'ALL',
+  inflowMode: 'monthly', // 'monthly' | 'yearly'
 
   init() {
     this.bindEvents();
@@ -32,13 +33,24 @@ window.OverviewView = {
     returnInput?.addEventListener('change', updateMilestone);
     yearsInput?.addEventListener('change', () => this.render());
 
-    // Wealth chart range buttons
+    // Wealth chart range buttons (syncs both Wealth Growth and Savings Inflow charts)
     document.querySelectorAll('[data-chart="wealth"]').forEach(btn => {
       btn.addEventListener('click', e => {
         document.querySelectorAll('[data-chart="wealth"]').forEach(b => b.classList.remove('active'));
         e.target.classList.add('active');
         this.wealthRange = e.target.getAttribute('data-range');
         this.renderWealthGrowthChart(window.AppState.snapshot, window.AppState.selectedOwner);
+        this.renderMonthlyInflowChart(window.AppState.snapshot, window.AppState.selectedOwner);
+      });
+    });
+
+    // Inflow Mode buttons (Monthly vs Yearly)
+    document.querySelectorAll('[data-inflow-mode]').forEach(btn => {
+      btn.addEventListener('click', e => {
+        document.querySelectorAll('[data-inflow-mode]').forEach(b => b.classList.remove('active'));
+        e.target.classList.add('active');
+        this.inflowMode = e.target.getAttribute('data-inflow-mode');
+        this.renderMonthlyInflowChart(window.AppState.snapshot, window.AppState.selectedOwner);
       });
     });
   },
@@ -220,12 +232,45 @@ window.OverviewView = {
     const ctx = document.getElementById('monthlyInflowChart');
     if (!ctx) return;
 
-    const recent = snapshot.slice(-24);
-    const labels = recent.map(s => s.year_month || s.date);
+    // Synchronize time range with Wealth Growth History
+    const filtered = this.filterByRange(snapshot, this.wealthRange);
 
-    let inflowData = recent.map(s => s.total_inflow || 0);
-    if (owner === 'PP') inflowData = recent.map(s => s.pp_inflow || 0);
-    if (owner === 'JJ') inflowData = recent.map(s => s.jj_inflow || 0);
+    let labels = [];
+    let inflowData = [];
+
+    // Update Header and Subtitle text according to mode
+    const titleElem = document.getElementById('savings-inflow-title');
+    const subElem = document.getElementById('savings-inflow-sub');
+
+    if (this.inflowMode === 'yearly') {
+      if (titleElem) titleElem.textContent = 'Yearly Savings Inflow (เงินออมเติมใหม่รายปี)';
+      if (subElem) subElem.textContent = 'สรุปยอดเงินออมเติมเพิ่มสะสมรายปี (ตามช่วงเวลาที่เลือก)';
+
+      // Aggregate by Year
+      const yearlyMap = {};
+      filtered.forEach(s => {
+        const rawDate = String(s.year_month || s.date || '');
+        const year = rawDate.length >= 4 ? rawDate.substring(0, 4) : 'Unknown';
+        let val = Number(s.total_inflow || 0);
+        if (owner === 'PP') val = Number(s.pp_inflow || 0);
+        if (owner === 'JJ') val = Number(s.jj_inflow || 0);
+
+        yearlyMap[year] = (yearlyMap[year] || 0) + val;
+      });
+
+      labels = Object.keys(yearlyMap);
+      inflowData = Object.values(yearlyMap);
+    } else {
+      if (titleElem) titleElem.textContent = 'Monthly Savings Inflow (เงินออมเติมใหม่รายเดือน)';
+      if (subElem) subElem.textContent = 'วินัยการเติมเงินออมเพิ่มในแต่ละเดือน (ย้อนหลังตามช่วงเวลาที่เลือก)';
+
+      labels = filtered.map(s => s.year_month || s.date);
+      inflowData = filtered.map(s => {
+        if (owner === 'PP') return Number(s.pp_inflow || 0);
+        if (owner === 'JJ') return Number(s.jj_inflow || 0);
+        return Number(s.total_inflow || 0);
+      });
+    }
 
     if (this.monthlyInflowChart) this.monthlyInflowChart.destroy();
 
@@ -234,15 +279,43 @@ window.OverviewView = {
     const gridColor = isLight ? 'rgba(0,0,0,0.05)' : 'rgba(255,255,255,0.04)';
     const textColor = isLight ? '#6B7280' : '#8E95A2';
 
+    // Compute dynamic color scale based on magnitude
+    // Higher positive -> deeper/vibrant green
+    // Negative (withdrawal) -> red scale
+    const posValues = inflowData.filter(v => v > 0);
+    const negValues = inflowData.filter(v => v < 0);
+    const maxPos = posValues.length > 0 ? Math.max(...posValues) : 1;
+    const maxNeg = negValues.length > 0 ? Math.max(...negValues.map(v => Math.abs(v))) : 1;
+
+    const backgroundColors = inflowData.map(v => {
+      if (v > 0) {
+        const ratio = Math.min(1, Math.max(0.2, v / maxPos));
+        const alpha = (0.35 + 0.55 * ratio).toFixed(2);
+        return `rgba(16, 185, 129, ${alpha})`;
+      } else if (v < 0) {
+        const ratio = Math.min(1, Math.max(0.2, Math.abs(v) / maxNeg));
+        const alpha = (0.45 + 0.50 * ratio).toFixed(2);
+        return `rgba(244, 63, 94, ${alpha})`;
+      }
+      return 'rgba(156, 163, 175, 0.4)';
+    });
+
+    const hoverBackgroundColors = inflowData.map(v => {
+      if (v >= 0) return '#10b981';
+      return '#f43f5e';
+    });
+
+    const isYearly = this.inflowMode === 'yearly';
+
     this.monthlyInflowChart = new Chart(ctx, {
       type: 'bar',
       data: {
         labels,
         datasets: [{
-          label: 'เงินต้นเติมใหม่รายเดือน (฿)',
+          label: isYearly ? 'เงินต้นเติมใหม่รายปี (฿)' : 'เงินต้นเติมใหม่รายเดือน (฿)',
           data: inflowData,
-          backgroundColor: 'rgba(74,222,128,0.65)',
-          hoverBackgroundColor: '#4ade80',
+          backgroundColor: backgroundColors,
+          hoverBackgroundColor: hoverBackgroundColors,
           borderRadius: 6
         }]
       },
@@ -250,13 +323,31 @@ window.OverviewView = {
         responsive: true, maintainAspectRatio: false,
         plugins: {
           legend: { display: false },
-          tooltip: { callbacks: { label: c => `เงินเติมเพิ่ม: ฿${window.formatCurrency(c.parsed.y)}` } }
+          tooltip: {
+            callbacks: {
+              label: c => `${isYearly ? 'เงินออมรายปี' : 'เงินออมรายเดือน'}: ฿${window.formatCurrency(c.parsed.y)}`
+            }
+          }
         },
         scales: {
-          x: { grid: { display: false }, ticks: { color: textColor, maxTicksLimit: 12 } },
+          x: {
+            grid: { display: false },
+            ticks: {
+              color: textColor,
+              maxTicksLimit: isYearly ? 14 : 14
+            }
+          },
           y: {
             grid: { color: gridColor },
-            ticks: { color: textColor, callback: v => `฿${(v/1e3).toFixed(0)}K` }
+            ticks: {
+              color: textColor,
+              callback: v => {
+                const abs = Math.abs(v);
+                const prefix = v < 0 ? '-฿' : '฿';
+                if (abs >= 1e6) return `${prefix}${(abs/1e6).toFixed(1)}M`;
+                return `${prefix}${(abs/1e3).toFixed(0)}K`;
+              }
+            }
           }
         }
       }
