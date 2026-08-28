@@ -37,6 +37,15 @@ The project is built around a hybrid architecture using Google Sheets as the pri
 - **Security**: Google Identity Services (OAuth 2.0).
 
 ## Version Log
+- **Version 3.3.0**: Asset Class Historical Stacked Area Chart, View 2 Restructuring, and Table Sticky Header Overlap Bug Fix.
+  - **View 2 (Allocation & Holdings)**:
+    - **View 2.1**: *Asset Class Allocation* (Donut chart showing current snapshot portfolio distribution).
+    - **View 2.2**: *Asset Class Allocation History (วิวัฒนาการสัดส่วนสินทรัพย์ตามกาลเวลา)* - Introduced a high-contrast Stacked Area Chart visualizing historical growth and asset class evolution from inception to present across 9 asset classes (`THSTOCK`, `USAFUND`, `GOLD`, `GOLDFUND`, `ASIAFUND`, `CHIFUND`, `SEMIFUND`, `BOND`, `FCD`) with interactive time range buttons (`1Y`, `3Y`, `5Y`, `ALL`).
+    - **View 2.3**: *Asset Performance & Holdings* - Reordered to the 3rd section and resolved the sticky table header overlap bug by integrating the `Total` summary row directly into `<thead>`. Header titles and Total sum now freeze seamlessly at the top in order (`Header -> Total Sum -> Asset Rows`) during vertical table scrolling.
+    - **Unified Design System & Palette**: Synchronized color palette across Donut chart slices, Stacked Area layers, badges, and table indicators.
+  - **API & Data Engine**:
+    - Expanded `handleSnapshot` in `api_code.js` and `api.js` normalization layer to ingest columns `AA:AI` (indices 26-34) from `Daily Snapshort_V3`.
+    - Updated offline demo mock data generator in `state.js` to simulate realistic historical asset class breakdowns across all 116 snapshot months.
 - **Version 3.2.3**: Accounting Logic Fix & True Principal Cost Tracking (`Net_Capital_Deposit` & `Net_Gain`).
   - Separated external net cash injected (`Net_Capital_Deposit`) from compounded gains (`Cost_Current_Asset`) to resolve reinvestment calculation distortion.
   - **View 1 (Overview)**:

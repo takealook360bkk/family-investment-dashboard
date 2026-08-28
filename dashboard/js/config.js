@@ -1,7 +1,7 @@
 // Family Investment Portfolio Dashboard - Configuration
 window.APP_CONFIG = {
   // Google Apps Script Web App Deployment URL
-  API_BASE_URL: 'https://script.google.com/macros/s/AKfycbzLDpTH-ANXYUcK-BumHmZU3ClVjbkNm6jP-GMlUieyZucZkEczXqenW8qVlpfVCY5Hcg/exec',
+  API_BASE_URL: 'https://script.google.com/macros/s/AKfycbytDT_dcFl-HgPqbPVk_Utogh0HisdKEj9ViCKCeQy0PowUSPvJDUrbRWTBBOEdP9OHNA/exec',
   
   // Google Identity Services Client ID
   GOOGLE_CLIENT_ID: '959636783979-gokjb8qgt5g270087jag34vdlnvdlb41.apps.googleusercontent.com',

@@ -93,8 +93,18 @@ window.generateMockData = function() {
     const totalOndate = ppOndate + jjOndate;
     const totalPL = totalOndate - totalCapital;
     
-    navPerUnit = navPerUnit * (1 + monthlyReturn);
-    
+    // Realistic asset class distribution over time (sums to totalOndate)
+    // 9 classes: THSTOCK (28%), USAFUND (19%), GOLD (21%), GOLDFUND (9%), ASIAFUND (8%), FCD (5%), CHIFUND (4%), BOND (3%), SEMIFUND (3%)
+    const thstockAmt  = Math.round(totalOndate * (0.28 + Math.sin(i / 8) * 0.03));
+    const usafundAmt  = Math.round(totalOndate * (0.19 + Math.cos(i / 10) * 0.02));
+    const goldAmt     = Math.round(totalOndate * (0.21 + Math.sin(i / 6) * 0.02));
+    const goldfundAmt = Math.round(totalOndate * 0.09);
+    const asiafundAmt = Math.round(totalOndate * 0.08);
+    const fcdAmt      = Math.round(totalOndate * 0.05);
+    const chifundAmt  = Math.round(totalOndate * 0.04);
+    const bondAmt     = Math.round(totalOndate * 0.03);
+    const semifundAmt = Math.max(0, totalOndate - (thstockAmt + usafundAmt + goldAmt + goldfundAmt + asiafundAmt + fcdAmt + chifundAmt + bondAmt));
+
     snapshot.push({
       date: dateStr,
       year_month: dateStr.substring(0, 7),
@@ -120,7 +130,19 @@ window.generateMockData = function() {
       nav_per_unit: Number(navPerUnit.toFixed(4)),
       pp_inflow: ppInflow,
       jj_inflow: jjInflow,
-      total_inflow: ppInflow + jjInflow
+      total_inflow: ppInflow + jjInflow,
+      // v3.3.0 Asset Class Breakdown
+      asset_classes: {
+        THSTOCK:  thstockAmt,
+        USAFUND:  usafundAmt,
+        GOLD:     goldAmt,
+        GOLDFUND: goldfundAmt,
+        ASIAFUND: asiafundAmt,
+        FCD:      fcdAmt,
+        CHIFUND:  chifundAmt,
+        BOND:     bondAmt,
+        SEMIFUND: semifundAmt
+      }
     });
     
     curr.setMonth(curr.getMonth() + 1);

@@ -211,10 +211,10 @@
     <!-- ===== VIEW 2: ALLOCATION & HOLDINGS ===== -->
     <section id="view-allocation" class="view-container hidden">
 
-      <!-- Donut Allocation Chart — Full Width with Legend Below -->
+      <!-- View 2.1: Donut Allocation Chart — Full Width with Legend Below -->
       <div class="glass-card p-5 mb-5">
-        <h3 class="view-section-header text-base font-bold mb-1">Asset Class Allocation</h3>
-        <p class="text-xs text-gray-400 mb-4">สัดส่วนการจัดสรรเงินตามประเภทสินทรัพย์</p>
+        <h3 class="view-section-header text-base font-bold mb-1">Asset Class Allocation (สัดส่วนปัจจุบัน)</h3>
+        <p class="text-xs text-gray-400 mb-4">สัดส่วนการจัดสรรเงินตามประเภทสินทรัพย์ ณ วันประเมินล่าสุด</p>
         <div class="flex flex-col items-center">
           <div class="relative p-2" style="width:270px; height:270px;">
             <canvas id="allocationChart"></canvas>
@@ -228,7 +228,28 @@
         </div>
       </div>
 
-      <!-- Holdings Table — Full Width -->
+      <!-- View 2.2: Stacked Area Chart — Asset Class Allocation History -->
+      <div class="glass-card p-5 mb-5">
+        <div class="flex flex-wrap items-center justify-between mb-3 gap-3">
+          <div>
+            <h3 class="view-section-header text-base font-bold flex items-center gap-2">
+              <span>📈</span> Asset Class Allocation History (วิวัฒนาการสัดส่วนสินทรัพย์ตามกาลเวลา)
+            </h3>
+            <p class="text-xs text-gray-400">กราฟพื้นที่ซ้อนกัน (Stacked Area Chart) แสดงการเติบโตและการปรับพอร์ตของแต่ละประเภทสินทรัพย์ตั้งแต่อดีตจนถึงปัจจุบัน</p>
+          </div>
+          <div class="flex gap-1.5 bg-slate-900/60 p-1 rounded-xl border border-gray-800">
+            <button class="chart-range-btn active" data-range="ALL" data-chart="asset-history">ALL</button>
+            <button class="chart-range-btn" data-range="5Y" data-chart="asset-history">5Y</button>
+            <button class="chart-range-btn" data-range="3Y" data-chart="asset-history">3Y</button>
+            <button class="chart-range-btn" data-range="1Y" data-chart="asset-history">1Y</button>
+          </div>
+        </div>
+        <div style="height:380px; position:relative;">
+          <canvas id="assetHistoryChart"></canvas>
+        </div>
+      </div>
+
+      <!-- View 2.3: Holdings Table — Full Width -->
       <div class="glass-card p-5">
         <div class="flex flex-wrap items-start justify-between gap-3 mb-4">
           <div>
@@ -261,11 +282,11 @@
           </div>
         </div>
 
-        <!-- Table -->
+        <!-- Table with Unified Sticky thead -->
         <div class="holdings-table-wrap">
           <table class="w-full text-left text-xs">
-            <thead class="bg-slate-900/90 text-gray-400 font-semibold sticky top-0 backdrop-blur-md">
-              <tr>
+            <thead id="asset-holdings-thead" class="sticky top-0 z-20 backdrop-blur-md">
+              <tr class="holdings-header-row bg-slate-900/95 text-gray-400 font-semibold border-b border-gray-800">
                 <th class="px-4 py-3 sortable-th" data-sort="asset_name">Asset Name <span class="sort-icon">⇅</span></th>
                 <th class="px-4 py-3 sortable-th" data-sort="class">Class <span class="sort-icon">⇅</span></th>
                 <th class="px-4 py-3 sortable-th" data-sort="owner">Owner <span class="sort-icon">⇅</span></th>
@@ -277,6 +298,19 @@
                 <th class="px-4 py-3 text-right sortable-th" data-sort="unrealized_pl">Unrealized P&L <span class="sort-icon">⇅</span></th>
                 <th class="px-4 py-3 text-right sortable-th" data-sort="unrealized_pl_pct">Unrealized % <span class="sort-icon">⇅</span></th>
                 <th class="px-4 py-3 text-right sortable-th" data-sort="realized_pl">Realized P&L <span class="sort-icon">⇅</span></th>
+              </tr>
+              <tr id="holdings-summary-row" class="font-bold border-b-2">
+                <td class="px-4 py-3">Total</td>
+                <td class="px-4 py-3"></td>
+                <td class="px-4 py-3"></td>
+                <td class="px-4 py-3 text-right"></td>
+                <td class="px-4 py-3 text-right"></td>
+                <td class="px-4 py-3 text-right"></td>
+                <td id="sum-col-cost" class="px-4 py-3 text-right">฿0</td>
+                <td id="sum-col-mv" class="px-4 py-3 text-right text-emerald-400">฿0</td>
+                <td id="sum-col-unpl" class="px-4 py-3 text-right text-emerald-400">฿0</td>
+                <td id="sum-col-unpl-pct" class="px-4 py-3 text-right text-emerald-400">+0.00%</td>
+                <td id="sum-col-realpl" class="px-4 py-3 text-right text-amber-400">฿0</td>
               </tr>
             </thead>
             <tbody id="asset-holdings-tbody"></tbody>

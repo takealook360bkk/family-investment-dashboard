@@ -1,5 +1,17 @@
 // Data API Service for Family Investment Portfolio
 
+function parseVal(val) {
+  if (val === null || val === undefined || val === '') return 0;
+  if (typeof val === 'number') return isNaN(val) ? 0 : val;
+  const str = String(val).replace(/,/g, '').replace(/฿/g, '').trim();
+  if (str.startsWith('(') && str.endsWith(')')) {
+    const n = Number('-' + str.slice(1, -1));
+    return isNaN(n) ? 0 : n;
+  }
+  const n = Number(str);
+  return isNaN(n) ? 0 : n;
+}
+
 window.ApiService = {
   async fetchAllData() {
     const baseUrl = window.APP_CONFIG.API_BASE_URL;
@@ -73,6 +85,15 @@ window.ApiService = {
       const rawSummary = summaryRes.data || summaryRes;
       const rawAssets = Array.isArray(assetsRes.data) ? assetsRes.data : (Array.isArray(assetsRes) ? assetsRes : []);
       const rawSnapshot = Array.isArray(snapshotRes.data) ? snapshotRes.data : (Array.isArray(snapshotRes) ? snapshotRes : []);
+
+      // DEBUG: Log raw snapshot to see what field names the Apps Script sends
+      if (rawSnapshot.length > 0) {
+        const rawLast = rawSnapshot[rawSnapshot.length - 1];
+        console.log('[API RAW] Snapshot last row keys:', Object.keys(rawLast).join(', '));
+        console.log('[API RAW] Last row date field:', rawLast.date);
+        console.log('[API RAW] asiafund_amount:', rawLast.asiafund_amount, '| thstock_amount:', rawLast.thstock_amount);
+        console.log('[API RAW] Full last row:', JSON.stringify(rawLast));
+      }
 
       if (rawSnapshot.length === 0 || rawAssets.length === 0) {
         console.warn('[API] Empty data returned. Falling back to demo.');
@@ -187,13 +208,35 @@ window.ApiService = {
           nav_per_unit: Number(s.nav_per_unit || 10),
           pp_inflow:    Number(s.pp_net_inflow !== undefined ? s.pp_net_inflow : (s.pp_inflow || 0)),
           jj_inflow:    Number(s.jj_net_inflow !== undefined ? s.jj_net_inflow : (s.jj_inflow || 0)),
-          total_inflow: Number(s.total_net_inflow !== undefined ? s.total_net_inflow : (s.total_inflow || 0))
+          total_inflow: Number(s.total_net_inflow !== undefined ? s.total_net_inflow : (s.total_inflow || 0)),
+          // v3.3.0 Asset Class Breakdown
+          // NOTE: Use ?? (nullish coalescing), NOT || (OR), because 0 is a valid amount
+          // and || treats 0 as falsy, causing correct 0-values to be ignored.
+          asset_classes: {
+            ASIAFUND: parseVal(s.asiafund_amount ?? s.asset_classes?.ASIAFUND ?? 0),
+            BOND:     parseVal(s.bond_amount     ?? s.asset_classes?.BOND     ?? 0),
+            CHIFUND:  parseVal(s.chifund_amount  ?? s.asset_classes?.CHIFUND  ?? 0),
+            FCD:      parseVal(s.fcd_amount      ?? s.asset_classes?.FCD      ?? 0),
+            GOLD:     parseVal(s.gold_amount     ?? s.asset_classes?.GOLD     ?? 0),
+            GOLDFUND: parseVal(s.goldfund_amount ?? s.asset_classes?.GOLDFUND ?? 0),
+            SEMIFUND: parseVal(s.semifund_amount ?? s.asset_classes?.SEMIFUND ?? 0),
+            THSTOCK:  parseVal(s.thstock_amount  ?? s.asset_classes?.THSTOCK  ?? 0),
+            USAFUND:  parseVal(s.usafund_amount  ?? s.asset_classes?.USAFUND  ?? 0)
+          }
         };
       });
 
       console.log('[API] Normalized summary total NW:', normalizedSummary.total.market_value);
       console.log('[API] Snapshot rows loaded:', normalizedSnapshot.length);
       console.log('[API] Assets loaded:', normalizedAssets.length);
+      // Debug: Log first and last snapshot asset_classes to verify data
+      if (normalizedSnapshot.length > 0) {
+        const last = normalizedSnapshot[normalizedSnapshot.length - 1];
+        console.log('[API] Last snapshot date:', last.date, 'asset_classes:', last.asset_classes);
+        // Also log raw to cross-check field names
+        const rawLast = rawSnapshot[rawSnapshot.length - 1];
+        console.log('[API] Raw last snapshot keys:', Object.keys(rawLast || {}));
+      }
 
       window.AppState.setData({
         summary:  normalizedSummary,
