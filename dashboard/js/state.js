@@ -15,6 +15,7 @@ window.AppState = {
   summary: null,
   assets: [],
   snapshot: [],
+  thaiStocks: { summary: null, items: [] },
 
   // Financial Freedom Milestone inputs
   // v3.1 Update: Default Target Wealth updated to 27.5M and Return to 5%
@@ -48,12 +49,13 @@ window.AppState = {
     this.notify('milestoneChanged', { target, rate });
   },
 
-  setData({ summary, assets, snapshot, isDemo = false }) {
+  setData({ summary, assets, snapshot, thaiStocks = { summary: null, items: [] }, isDemo = false }) {
     this.summary = summary;
     this.assets = assets;
     this.snapshot = snapshot;
+    this.thaiStocks = thaiStocks;
     this.isDemoMode = isDemo;
-    this.notify('dataLoaded', { summary, assets, snapshot, isDemo });
+    this.notify('dataLoaded', { summary, assets, snapshot, thaiStocks, isDemo });
   }
 };
 
@@ -220,5 +222,73 @@ window.generateMockData = function() {
     }
   };
 
-  return { summary, assets, snapshot };
+  // Mock Thai Stock Hub Data (Matching THStock_Master_V3)
+  const thaiStocks = {
+    summary: {
+      total: {
+        total_cost: 909634.88,
+        real_capital_cost_basis: 703598.42,
+        market_value: 922195.00,
+        unrealized_pl: 12560.12,
+        yearly_dividend: 48344.50,
+        historical_net_gain: 106040.46,
+        yoc_pct: 6.87,
+        market_yield_pct: 5.24,
+        net_gain_pct: 15.07
+      },
+      pp: {
+        total_cost: 671005.71,
+        real_capital_cost_basis: 481751.88,
+        market_value: 661875.00,
+        unrealized_pl: -9130.71,
+        yearly_dividend: 32781.00,
+        historical_net_gain: 89884.34,
+        yoc_pct: 6.81,
+        market_yield_pct: 4.95,
+        net_gain_pct: 18.66
+      },
+      jj: {
+        total_cost: 238629.18,
+        real_capital_cost_basis: 221846.54,
+        market_value: 260320.00,
+        unrealized_pl: 21690.82,
+        yearly_dividend: 15563.50,
+        historical_net_gain: 16156.12,
+        yoc_pct: 7.02,
+        market_yield_pct: 5.98,
+        net_gain_pct: 7.28
+      }
+    },
+    items: [
+      // PP Stocks
+      { account: 'PP', symbol: 'BDMS', quantity: 2200, avg_cost_price: 19.75, total_cost: 43452.09, current_price: 19.50, market_value: 42900.00, unrealized_pl: -552.09, unrealized_pl_pct: -1.27, expected_dps: 0.71, yearly_expected_dividend: 1562.00, yield_on_cost: 3.59, current_price_yield: 3.64, cumulative_dividend_history: 1374.20, realized_pl_history: 0, historical_net_gain: 822.11, net_gain_pct: 1.89, note_consensus: 'Buy', company_perform: 'Temp Slowdown' },
+      { account: 'PP', symbol: 'COM7', quantity: 100, avg_cost_price: 30.66, total_cost: 3066.18, current_price: 28.50, market_value: 2850.00, unrealized_pl: -216.18, unrealized_pl_pct: -7.05, expected_dps: 1.10, yearly_expected_dividend: 110.00, yield_on_cost: 3.59, current_price_yield: 3.86, cumulative_dividend_history: 0, realized_pl_history: 0, historical_net_gain: -216.18, net_gain_pct: -7.05, note_consensus: 'Buy', company_perform: 'High Growth' },
+      { account: 'PP', symbol: 'CPALL', quantity: 500, avg_cost_price: 47.68, total_cost: 23839.90, current_price: 46.25, market_value: 23125.00, unrealized_pl: -714.90, unrealized_pl_pct: -3.00, expected_dps: 1.70, yearly_expected_dividend: 850.00, yield_on_cost: 3.57, current_price_yield: 3.68, cumulative_dividend_history: 2705.00, realized_pl_history: -8376.35, historical_net_gain: -6386.25, net_gain_pct: -26.79, note_consensus: 'Buy', company_perform: 'Moderate Growth' },
+      { account: 'PP', symbol: 'FTREIT', quantity: 4600, avg_cost_price: 10.58, total_cost: 48682.13, current_price: 12.40, market_value: 57040.00, unrealized_pl: 8357.87, unrealized_pl_pct: 17.17, expected_dps: 0.76, yearly_expected_dividend: 3496.00, yield_on_cost: 7.18, current_price_yield: 6.13, cumulative_dividend_history: 6345.58, realized_pl_history: 0, historical_net_gain: 14703.44, net_gain_pct: 30.20, note_consensus: 'Hold', company_perform: 'Moderate Growth' },
+      { account: 'PP', symbol: 'HTECH', quantity: 2300, avg_cost_price: 15.98, total_cost: 36765.55, current_price: 15.70, market_value: 36110.00, unrealized_pl: -655.55, unrealized_pl_pct: -1.78, expected_dps: 1.00, yearly_expected_dividend: 2300.00, yield_on_cost: 6.26, current_price_yield: 6.37, cumulative_dividend_history: 3659.60, realized_pl_history: 517.20, historical_net_gain: 3521.25, net_gain_pct: 9.58, note_consensus: 'Hold', company_perform: 'Neutral' },
+      { account: 'PP', symbol: 'ICHI', quantity: 4000, avg_cost_price: 13.27, total_cost: 53089.03, current_price: 14.10, market_value: 56400.00, unrealized_pl: 3310.97, unrealized_pl_pct: 6.24, expected_dps: 1.00, yearly_expected_dividend: 4000.00, yield_on_cost: 7.53, current_price_yield: 7.09, cumulative_dividend_history: 8446.50, realized_pl_history: 105.66, historical_net_gain: 11863.13, net_gain_pct: 22.35, note_consensus: 'Buy', company_perform: 'Temp Slowdown' },
+      { account: 'PP', symbol: 'ILM', quantity: 1900, avg_cost_price: 19.58, total_cost: 37209.64, current_price: 18.30, market_value: 34770.00, unrealized_pl: -2439.64, unrealized_pl_pct: -6.56, expected_dps: 0.90, yearly_expected_dividend: 1710.00, yield_on_cost: 4.60, current_price_yield: 4.92, cumulative_dividend_history: 2479.50, realized_pl_history: 0, historical_net_gain: 39.86, net_gain_pct: 0.11, note_consensus: 'Hold', company_perform: 'Neutral' },
+      { account: 'PP', symbol: 'KCG', quantity: 5000, avg_cost_price: 8.49, total_cost: 42466.21, current_price: 10.20, market_value: 51000.00, unrealized_pl: 8533.79, unrealized_pl_pct: 20.10, expected_dps: 0.56, yearly_expected_dividend: 2800.00, yield_on_cost: 6.59, current_price_yield: 5.49, cumulative_dividend_history: 2830.50, realized_pl_history: 0, historical_net_gain: 11364.29, net_gain_pct: 26.76, note_consensus: 'Buy', company_perform: 'High Growth' },
+      { account: 'PP', symbol: 'KL', quantity: 5000, avg_cost_price: 5.80, total_cost: 29015.20, current_price: 5.35, market_value: 26750.00, unrealized_pl: -2265.20, unrealized_pl_pct: -7.81, expected_dps: 0.32, yearly_expected_dividend: 1600.00, yield_on_cost: 5.51, current_price_yield: 5.98, cumulative_dividend_history: 4938.84, realized_pl_history: 0, historical_net_gain: 2673.64, net_gain_pct: 9.21, note_consensus: 'Hold', company_perform: 'Neutral' },
+      { account: 'PP', symbol: 'MC', quantity: 7000, avg_cost_price: 11.66, total_cost: 81606.87, current_price: 11.90, market_value: 83300.00, unrealized_pl: 1693.13, unrealized_pl_pct: 2.07, expected_dps: 0.80, yearly_expected_dividend: 5600.00, yield_on_cost: 6.86, current_price_yield: 6.72, cumulative_dividend_history: 11759.40, realized_pl_history: 0, historical_net_gain: 13452.53, net_gain_pct: 16.48, note_consensus: 'Hold', company_perform: 'Neutral' },
+      { account: 'PP', symbol: 'MOSHI', quantity: 100, avg_cost_price: 42.07, total_cost: 4207.05, current_price: 38.25, market_value: 3825.00, unrealized_pl: -382.05, unrealized_pl_pct: -9.08, expected_dps: 1.25, yearly_expected_dividend: 125.00, yield_on_cost: 2.97, current_price_yield: 3.27, cumulative_dividend_history: 57.60, realized_pl_history: 0, historical_net_gain: -324.45, net_gain_pct: -7.71, note_consensus: 'Buy', company_perform: 'High Growth' },
+      { account: 'PP', symbol: 'PM', quantity: 2800, avg_cost_price: 12.13, total_cost: 33958.94, current_price: 11.00, market_value: 30800.00, unrealized_pl: -3158.94, unrealized_pl_pct: -9.30, expected_dps: 0.595, yearly_expected_dividend: 1666.00, yield_on_cost: 4.91, current_price_yield: 5.41, cumulative_dividend_history: 1260.00, realized_pl_history: 0, historical_net_gain: -1898.94, net_gain_pct: -5.59, note_consensus: 'Hold', company_perform: 'Neutral' },
+      { account: 'PP', symbol: 'SABINA', quantity: 2200, avg_cost_price: 29.07, total_cost: 63942.16, current_price: 15.60, market_value: 34320.00, unrealized_pl: -29622.16, unrealized_pl_pct: -46.33, expected_dps: 1.00, yearly_expected_dividend: 2200.00, yield_on_cost: 3.44, current_price_yield: 6.41, cumulative_dividend_history: 6919.50, realized_pl_history: 0, historical_net_gain: -22702.66, net_gain_pct: -35.51, note_consensus: 'Hold', company_perform: 'Temp Slowdown' },
+      { account: 'PP', symbol: 'SCB', quantity: 100, avg_cost_price: 136.73, total_cost: 13672.94, current_price: 151.00, market_value: 15100.00, unrealized_pl: 1427.06, unrealized_pl_pct: 10.44, expected_dps: 9.00, yearly_expected_dividend: 900.00, yield_on_cost: 6.58, current_price_yield: 5.96, cumulative_dividend_history: 1015.20, realized_pl_history: 1650.28, historical_net_gain: 4092.54, net_gain_pct: 29.93, note_consensus: 'Hold', company_perform: 'Neutral' },
+      { account: 'PP', symbol: 'SIS', quantity: 100, avg_cost_price: 26.54, total_cost: 2654.46, current_price: 23.70, market_value: 2370.00, unrealized_pl: -284.46, unrealized_pl_pct: -10.72, expected_dps: 1.20, yearly_expected_dividend: 120.00, yield_on_cost: 4.52, current_price_yield: 5.06, cumulative_dividend_history: 0, realized_pl_history: 0, historical_net_gain: -284.46, net_gain_pct: -10.72, note_consensus: 'Hold', company_perform: 'Moderate Growth' },
+      { account: 'PP', symbol: 'TISCO', quantity: 300, avg_cost_price: 95.58, total_cost: 28673.11, current_price: 127.00, market_value: 38100.00, unrealized_pl: 9426.89, unrealized_pl_pct: 32.88, expected_dps: 7.50, yearly_expected_dividend: 2250.00, yield_on_cost: 7.85, current_price_yield: 5.91, cumulative_dividend_history: 11180.00, realized_pl_history: 7005.70, historical_net_gain: 27612.59, net_gain_pct: 96.30, note_consensus: 'Hold', company_perform: 'Neutral' },
+      { account: 'PP', symbol: 'TOA', quantity: 2800, avg_cost_price: 11.35, total_cost: 31773.37, current_price: 7.10, market_value: 19880.00, unrealized_pl: -11893.37, unrealized_pl_pct: -37.43, expected_dps: 0.46, yearly_expected_dividend: 1288.00, yield_on_cost: 4.05, current_price_yield: 6.48, cumulative_dividend_history: 5607.60, realized_pl_history: -6591.46, historical_net_gain: -12877.23, net_gain_pct: -40.53, note_consensus: 'Hold', company_perform: 'Temp Slowdown' },
+      // JJ Stocks
+      { account: 'JJ', symbol: 'BDMS', quantity: 1400, avg_cost_price: 19.26, total_cost: 26965.22, current_price: 19.50, market_value: 27300.00, unrealized_pl: 334.78, unrealized_pl_pct: 1.24, expected_dps: 0.71, yearly_expected_dividend: 994.00, yield_on_cost: 3.69, current_price_yield: 3.64, cumulative_dividend_history: 827.00, realized_pl_history: 0, historical_net_gain: 1161.78, net_gain_pct: 4.31, note_consensus: 'Buy', company_perform: 'Temp Slowdown' },
+      { account: 'JJ', symbol: 'ICHI', quantity: 3400, avg_cost_price: 12.53, total_cost: 42596.44, current_price: 14.10, market_value: 47940.00, unrealized_pl: 5343.56, unrealized_pl_pct: 12.54, expected_dps: 1.00, yearly_expected_dividend: 3400.00, yield_on_cost: 7.98, current_price_yield: 7.09, cumulative_dividend_history: 2565.00, realized_pl_history: 0, historical_net_gain: 7908.56, net_gain_pct: 18.57, note_consensus: 'Buy', company_perform: 'Temp Slowdown' },
+      { account: 'JJ', symbol: 'KCG', quantity: 2400, avg_cost_price: 8.60, total_cost: 20644.46, current_price: 10.20, market_value: 24480.00, unrealized_pl: 3835.54, unrealized_pl_pct: 18.58, expected_dps: 0.56, yearly_expected_dividend: 1344.00, yield_on_cost: 6.51, current_price_yield: 5.49, cumulative_dividend_history: 1293.40, realized_pl_history: 0, historical_net_gain: 5128.94, net_gain_pct: 24.84, note_consensus: 'Buy', company_perform: 'High Growth' },
+      { account: 'JJ', symbol: 'MC', quantity: 2200, avg_cost_price: 10.34, total_cost: 22750.18, current_price: 11.90, market_value: 26180.00, unrealized_pl: 3429.82, unrealized_pl_pct: 15.08, expected_dps: 0.80, yearly_expected_dividend: 1760.00, yield_on_cost: 7.74, current_price_yield: 6.72, cumulative_dividend_history: 1029.60, realized_pl_history: 0, historical_net_gain: 4459.42, net_gain_pct: 19.60, note_consensus: 'Hold', company_perform: 'Neutral' },
+      { account: 'JJ', symbol: 'PM', quantity: 900, avg_cost_price: 11.35, total_cost: 10217.14, current_price: 11.00, market_value: 9900.00, unrealized_pl: -317.14, unrealized_pl_pct: -3.10, expected_dps: 0.595, yearly_expected_dividend: 535.50, yield_on_cost: 5.24, current_price_yield: 5.41, cumulative_dividend_history: 1125.00, realized_pl_history: 0, historical_net_gain: 807.86, net_gain_pct: 7.91, note_consensus: 'Hold', company_perform: 'Neutral' },
+      { account: 'JJ', symbol: 'SABINA', quantity: 1700, avg_cost_price: 16.02, total_cost: 27228.83, current_price: 15.60, market_value: 26520.00, unrealized_pl: -708.83, unrealized_pl_pct: -2.60, expected_dps: 1.00, yearly_expected_dividend: 1700.00, yield_on_cost: 6.24, current_price_yield: 6.41, cumulative_dividend_history: 2017.00, realized_pl_history: 0, historical_net_gain: 1308.17, net_gain_pct: 4.80, note_consensus: 'Hold', company_perform: 'Temp Slowdown' },
+      { account: 'JJ', symbol: 'SCB', quantity: 400, avg_cost_price: 138.36, total_cost: 55342.91, current_price: 151.00, market_value: 60400.00, unrealized_pl: 5057.09, unrealized_pl_pct: 9.14, expected_dps: 9.00, yearly_expected_dividend: 3600.00, yield_on_cost: 6.50, current_price_yield: 5.96, cumulative_dividend_history: 4060.80, realized_pl_history: 1800.62, historical_net_gain: 10918.51, net_gain_pct: 19.73, note_consensus: 'Hold', company_perform: 'Neutral' },
+      { account: 'JJ', symbol: 'TISCO', quantity: 300, avg_cost_price: 107.93, total_cost: 32379.29, current_price: 127.00, market_value: 38100.00, unrealized_pl: 5720.71, unrealized_pl_pct: 17.67, expected_dps: 7.50, yearly_expected_dividend: 2250.00, yield_on_cost: 6.95, current_price_yield: 5.91, cumulative_dividend_history: 1575.00, realized_pl_history: 0, historical_net_gain: 7295.71, net_gain_pct: 22.53, note_consensus: 'Hold', company_perform: 'Neutral' }
+    ]
+  };
+
+  return { summary, assets, snapshot, thaiStocks };
 };

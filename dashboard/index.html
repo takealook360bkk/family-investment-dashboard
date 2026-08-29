@@ -20,7 +20,10 @@
       <div class="brand-icon">📈</div>
       <div>
         <h1 class="brand-title">Family Investment Portfolio</h1>
-        <p class="text-xs text-gray-400 font-normal">PP & JJ Wealth Growth Engine</p>
+        <p class="text-xs text-gray-400 font-normal flex items-center gap-1.5">
+          <span>PP &amp; JJ Wealth Growth Engine</span>
+          <span class="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-cyan-950/80 text-cyan-400 border border-cyan-800/60">v3.4.0</span>
+        </p>
       </div>
     </div>
     <nav class="nav-tabs">
@@ -28,6 +31,7 @@
       <button class="nav-tab-btn" data-view="view-allocation"><span>📊</span> Allocation <span class="hidden sm:inline">&amp; Holdings</span></button>
       <button class="nav-tab-btn" data-view="view-owner"><span>⚔️</span> Owner Race <span class="hidden sm:inline">(PP vs JJ)</span></button>
       <button class="nav-tab-btn" data-view="view-simulator"><span>🚀</span> <span class="hidden sm:inline">Retirement </span>Simulator</button>
+      <button class="nav-tab-btn" data-view="view-thai-hub"><span>🇹🇭</span> Thai Stock Hub</button>
     </nav>
     <div class="auth-controls">
       <!-- Patch v3.2.2: Modern Minimalist Theme Toggle Switch with clean SVGs -->
@@ -532,6 +536,291 @@
       </div>
 
     </section>
+    
+    <!-- ===== VIEW 5: THAI STOCK HUB & DIVIDEND / DRIP SIMULATOR ===== -->
+    <section id="view-thai-hub" class="view-container hidden">
+
+      <!-- ZONE 1: HERO KPI CARDS -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-6">
+        <!-- Card 1.1: Valuation & Profitability Matrix -->
+        <div class="glass-card p-5 border-l-4 border-cyan-500">
+          <div class="flex items-center justify-between mb-3">
+            <h2 class="text-base font-bold text-gray-100 flex items-center gap-2">
+              <span>💎</span> Thai Stock Valuation &amp; Profitability
+            </h2>
+            <span class="text-xs font-semibold px-2.5 py-1 rounded bg-cyan-950/60 text-cyan-400 border border-cyan-800/60">Portfolio Total</span>
+          </div>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
+            <div class="p-3 bg-slate-900/50 rounded-lg border border-slate-800/80">
+              <span class="text-[11px] text-gray-400 block mb-1">Market Value</span>
+              <div id="th-hero-market-val" class="text-lg font-bold text-cyan-400">฿0</div>
+              <span class="text-[10px] text-gray-500">มูลค่าตลาดรวม</span>
+            </div>
+            <div class="p-3 bg-slate-900/50 rounded-lg border border-slate-800/80">
+              <span class="text-[11px] text-gray-400 block mb-1">Real Capital Basis</span>
+              <div id="th-hero-real-capital" class="text-lg font-bold text-emerald-400">฿0</div>
+              <span class="text-[10px] text-gray-500">เงินต้นสุทธิหักกำไรสะสม</span>
+            </div>
+            <div class="p-3 bg-slate-900/50 rounded-lg border border-slate-800/80">
+              <span class="text-[11px] text-gray-400 block mb-1">Total Net Gain</span>
+              <div id="th-hero-net-gain" class="text-lg font-bold text-emerald-400">฿0</div>
+              <span class="text-[10px] text-gray-500">กำไรสุทธิสะสมทั้งหมด</span>
+            </div>
+            <div class="p-3 bg-slate-900/50 rounded-lg border border-slate-800/80">
+              <span class="text-[11px] text-gray-400 block mb-1">Total Net Gain %</span>
+              <div id="th-hero-net-gain-pct" class="text-lg font-bold text-emerald-400">+0.00%</div>
+              <span class="text-[10px] text-gray-500">เทียบ Real Capital</span>
+            </div>
+          </div>
+          <div class="flex justify-between items-center mt-3 pt-2 border-t border-slate-800/60 text-xs text-gray-400">
+            <span>Book Cost: <strong id="th-hero-book-cost" class="text-gray-300">฿0</strong></span>
+            <span>Unrealized P&amp;L: <strong id="th-hero-unrealized-pl" class="text-gray-300">฿0</strong></span>
+          </div>
+        </div>
+
+        <!-- Card 1.2: Annual Dividend & Yield Engine -->
+        <div class="glass-card p-5 border-l-4 border-amber-500">
+          <div class="flex items-center justify-between mb-3">
+            <h2 class="text-base font-bold text-gray-100 flex items-center gap-2">
+              <span>💰</span> Annual Dividend &amp; Yield Engine
+            </h2>
+            <span class="text-xs font-semibold px-2.5 py-1 rounded bg-amber-950/60 text-amber-400 border border-amber-800/60">Passive Cash Flow</span>
+          </div>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
+            <div class="p-3 bg-slate-900/50 rounded-lg border border-slate-800/80">
+              <span class="text-[11px] text-gray-400 block mb-1">Expected Dividend</span>
+              <div id="th-hero-dividend-yr" class="text-lg font-bold text-amber-400">฿0</div>
+              <span class="text-[10px] text-gray-500">คาดการณ์ต่อปี</span>
+            </div>
+            <div class="p-3 bg-slate-900/50 rounded-lg border border-slate-800/80">
+              <span class="text-[11px] text-gray-400 block mb-1">Avg. Monthly Flow</span>
+              <div id="th-hero-dividend-mo" class="text-lg font-bold text-amber-300">฿0</div>
+              <span class="text-[10px] text-gray-500">เฉลี่ยต่อเดือน</span>
+            </div>
+            <div class="p-3 bg-slate-900/50 rounded-lg border border-slate-800/80">
+              <span class="text-[11px] text-gray-400 block mb-1">Yield on Cost (YoC)</span>
+              <div id="th-hero-yoc-pct" class="text-lg font-bold text-cyan-400">0.00%</div>
+              <span class="text-[10px] text-gray-500">เทียบ Real Capital</span>
+            </div>
+            <div class="p-3 bg-slate-900/50 rounded-lg border border-slate-800/80">
+              <span class="text-[11px] text-gray-400 block mb-1">Market Yield</span>
+              <div id="th-hero-mkt-yield-pct" class="text-lg font-bold text-purple-400">0.00%</div>
+              <span class="text-[10px] text-gray-500">เทียบ Market Value</span>
+            </div>
+          </div>
+          <div class="mt-3 pt-2 border-t border-slate-800/60 text-right">
+            <span class="text-[11px] text-emerald-400 font-medium">✨ Real Capital Cost Basis ทำให้ YoC สะท้อนความมั่งคั่งที่แท้จริง</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ZONE 2 & 3: OWNER HUBS & ALLOCATION DONUT CHARTS -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-6">
+        <!-- PP Section (Card 2.1 & Donut 3.1) -->
+        <div class="glass-card p-5">
+          <div class="flex items-center justify-between mb-3">
+            <h3 class="text-base font-bold text-cyan-300 flex items-center gap-2">
+              <span>👤</span> PP Thai Stock Portfolio
+            </h3>
+            <span class="text-xs px-2 py-0.5 rounded bg-cyan-900/40 text-cyan-300 border border-cyan-700/40">Owner PP</span>
+          </div>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center mb-4">
+            <div class="p-2.5 bg-slate-900/50 rounded border border-slate-800">
+              <span class="text-[10px] text-gray-400 block">Market Value</span>
+              <div id="th-pp-market-val" class="text-sm font-bold text-cyan-400">฿0</div>
+            </div>
+            <div class="p-2.5 bg-slate-900/50 rounded border border-slate-800">
+              <span class="text-[10px] text-gray-400 block">Real Capital</span>
+              <div id="th-pp-real-capital" class="text-sm font-bold text-emerald-400">฿0</div>
+            </div>
+            <div class="p-2.5 bg-slate-900/50 rounded border border-slate-800">
+              <span class="text-[10px] text-gray-400 block">Net Gain</span>
+              <div id="th-pp-net-gain" class="text-sm font-bold text-emerald-400">฿0</div>
+            </div>
+            <div class="p-2.5 bg-slate-900/50 rounded border border-slate-800">
+              <span class="text-[10px] text-gray-400 block">Exp. Div/Yr (YoC)</span>
+              <div id="th-pp-dividend-yoc" class="text-sm font-bold text-amber-400">฿0</div>
+            </div>
+          </div>
+          <div class="flex flex-col items-center justify-center p-2 bg-slate-900/30 rounded-lg">
+            <h4 class="text-xs font-semibold text-gray-400 mb-2">PP Dividend Contribution by Stock</h4>
+            <div style="height:220px; width:100%; max-width:320px; position:relative;">
+              <canvas id="ppStockDonutChart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- JJ Section (Card 2.2 & Donut 3.2) -->
+        <div class="glass-card p-5">
+          <div class="flex items-center justify-between mb-3">
+            <h3 class="text-base font-bold text-rose-300 flex items-center gap-2">
+              <span>👤</span> JJ Thai Stock Portfolio
+            </h3>
+            <span class="text-xs px-2 py-0.5 rounded bg-rose-900/40 text-rose-300 border border-rose-700/40">Owner JJ</span>
+          </div>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center mb-4">
+            <div class="p-2.5 bg-slate-900/50 rounded border border-slate-800">
+              <span class="text-[10px] text-gray-400 block">Market Value</span>
+              <div id="th-jj-market-val" class="text-sm font-bold text-rose-400">฿0</div>
+            </div>
+            <div class="p-2.5 bg-slate-900/50 rounded border border-slate-800">
+              <span class="text-[10px] text-gray-400 block">Real Capital</span>
+              <div id="th-jj-real-capital" class="text-sm font-bold text-emerald-400">฿0</div>
+            </div>
+            <div class="p-2.5 bg-slate-900/50 rounded border border-slate-800">
+              <span class="text-[10px] text-gray-400 block">Net Gain</span>
+              <div id="th-jj-net-gain" class="text-sm font-bold text-emerald-400">฿0</div>
+            </div>
+            <div class="p-2.5 bg-slate-900/50 rounded border border-slate-800">
+              <span class="text-[10px] text-gray-400 block">Exp. Div/Yr (YoC)</span>
+              <div id="th-jj-dividend-yoc" class="text-sm font-bold text-amber-400">฿0</div>
+            </div>
+          </div>
+          <div class="flex flex-col items-center justify-center p-2 bg-slate-900/30 rounded-lg">
+            <h4 class="text-xs font-semibold text-gray-400 mb-2">JJ Dividend Contribution by Stock</h4>
+            <div style="height:220px; width:100%; max-width:320px; position:relative;">
+              <canvas id="jjStockDonutChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ZONE 4: INTERACTIVE HOLDINGS TABLES (13 COLUMNS WITH 2-WAY LIVE SYNC) -->
+      <div class="glass-card p-5 mb-6">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+          <div>
+            <h3 class="text-lg font-bold text-gray-100 flex items-center gap-2">
+              <span>📋</span> Thai Stock Strategic Holdings (2-Way Live Sync)
+            </h3>
+            <p class="text-xs text-gray-400 mt-0.5">
+              แก้ไข Expected DPS, Consensus Rating และ Performance เพื่อดูผลจำลองและซิงค์กลับ Google Sheet ทันที
+            </p>
+          </div>
+          <div class="flex items-center gap-3">
+            <div id="th-sync-status-indicator" class="sync-indicator">
+              <span class="sync-dot"></span>
+              <span class="sync-text">🟢 Live Synced</span>
+            </div>
+            <div class="flex items-center bg-slate-900/80 rounded-lg p-1 border border-slate-800">
+              <button id="btn-th-table-all" class="th-tab-filter active" data-owner="ALL">All (25)</button>
+              <button id="btn-th-table-pp" class="th-tab-filter" data-owner="PP">PP (17)</button>
+              <button id="btn-th-table-jj" class="th-tab-filter" data-owner="JJ">JJ (8)</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table id="th-stocks-table" class="data-table w-full text-left">
+            <thead>
+              <tr>
+                <th>Stock</th>
+                <th>Owner</th>
+                <th class="text-right">Qty</th>
+                <th class="text-right">Avg Cost</th>
+                <th class="text-right">Price</th>
+                <th class="text-right">Market Value</th>
+                <th class="text-right">Unrealized P&amp;L</th>
+                <th class="text-center bg-amber-950/30 text-amber-300">Exp. DPS ✏️</th>
+                <th class="text-right text-amber-300">Exp. Div/Yr</th>
+                <th class="text-right text-cyan-300">YoC %</th>
+                <th class="text-right text-purple-300">Mkt Yield %</th>
+                <th class="text-center bg-slate-900/60">Consensus ✏️</th>
+                <th class="text-center bg-slate-900/60">Company Performance ✏️</th>
+              </tr>
+            </thead>
+            <tbody id="th-stocks-table-body">
+              <!-- Dynamically rendered -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ZONE 5: THAI DIVIDEND DRIP & WEALTH RETIREMENT SIMULATOR -->
+      <div class="glass-card p-5">
+        <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-4 pb-3 border-b border-slate-800/80">
+          <div>
+            <h3 class="text-lg font-bold text-cyan-300 flex items-center gap-2">
+              <span>🚀</span> Thai Stock Dividend Snowball &amp; DRIP Retirement Simulator
+            </h3>
+            <p class="text-xs text-gray-400">
+              จำลองการเติบโตแบบทบต้นของพอร์ตหุ้นไทยและการนำเงินปันผลกลับมาลงทุนใหม่ (Dividend Reinvestment Plan - DRIP)
+            </p>
+          </div>
+          <div class="flex items-center gap-3">
+            <span class="text-xs text-gray-400">Simulation Mode:</span>
+            <label class="flex items-center gap-2 cursor-pointer bg-slate-900/80 px-3 py-1.5 rounded-lg border border-slate-800 text-xs font-semibold text-emerald-400">
+              <input type="checkbox" id="drip-toggle" checked class="form-checkbox h-4 w-4 text-emerald-500 rounded focus:ring-0">
+              <span>Enable DRIP (Reinvest Dividends)</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <!-- Simulation Parameter Controls (Left: 4 cols) -->
+          <div class="lg:col-span-4 bg-slate-900/50 p-4 rounded-xl border border-slate-800/80 flex flex-col gap-4">
+            <h4 class="text-sm font-bold text-gray-200">⚙️ Simulation Parameters</h4>
+            
+            <div>
+              <div class="flex justify-between text-xs text-gray-300 mb-1">
+                <span>Monthly DCA (หุ้นไทย):</span>
+                <span id="drip-dca-val-display" class="font-bold text-cyan-400">฿15,000 / mo</span>
+              </div>
+              <input type="range" id="drip-dca-input" min="0" max="100000" step="1000" value="15000" class="w-full">
+            </div>
+
+            <div>
+              <div class="flex justify-between text-xs text-gray-300 mb-1">
+                <span>Target Retirement Age:</span>
+                <span id="drip-retire-age-display" class="font-bold text-cyan-400">55 ปี (อีก 15 ปี)</span>
+              </div>
+              <input type="range" id="drip-retire-age-input" min="45" max="70" step="1" value="55" class="w-full">
+            </div>
+
+            <div>
+              <div class="flex justify-between text-xs text-gray-300 mb-1">
+                <span>Expected Dividend Growth Rate (%/yr):</span>
+                <span id="drip-div-growth-display" class="font-bold text-cyan-400">5.0% / yr</span>
+              </div>
+              <input type="range" id="drip-div-growth-input" min="0" max="15" step="0.5" value="5.0" class="w-full">
+            </div>
+
+            <div>
+              <div class="flex justify-between text-xs text-gray-300 mb-1">
+                <span>Expected Capital Growth Rate (%/yr):</span>
+                <span id="drip-cap-growth-display" class="font-bold text-cyan-400">4.0% / yr</span>
+              </div>
+              <input type="range" id="drip-cap-growth-input" min="0" max="15" step="0.5" value="4.0" class="w-full">
+            </div>
+
+            <!-- Calculated Milestone Results in Sim Box -->
+            <div class="mt-2 p-3 bg-slate-950/80 rounded-lg border border-cyan-900/40 text-center">
+              <span class="text-[11px] text-gray-400 block">Est. Passive Income at Retirement</span>
+              <div id="drip-result-monthly-div" class="text-xl font-bold text-amber-400 mt-0.5">฿0 / เดือน</div>
+              <span id="drip-result-annual-div" class="text-[11px] text-gray-400 block mt-0.5">฿0 / ปี</span>
+            </div>
+          </div>
+
+          <!-- Simulation Projection Chart (Right: 8 cols) -->
+          <div class="lg:col-span-8 flex flex-col">
+            <div class="grid grid-cols-2 gap-3 mb-3 text-center">
+              <div class="p-3 bg-slate-900/50 rounded-lg border border-slate-800">
+                <span class="text-xs text-gray-400">Projected Portfolio Value at Age 55</span>
+                <div id="drip-result-portfolio-val" class="text-xl font-bold text-emerald-400 mt-1">฿0M</div>
+              </div>
+              <div class="p-3 bg-slate-900/50 rounded-lg border border-slate-800">
+                <span class="text-xs text-gray-400">Yield on Real Capital at Retirement</span>
+                <div id="drip-result-future-yoc" class="text-xl font-bold text-cyan-400 mt-1">0.00%</div>
+              </div>
+            </div>
+
+            <div class="flex-1 bg-slate-900/30 p-3 rounded-lg border border-slate-800/80" style="min-height:340px; position:relative;">
+              <canvas id="dripTrajectoryChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </section>
 
   </main>
 
@@ -543,6 +832,7 @@
   <script src="js/views/allocation.js"></script>
   <script src="js/views/owner_breakdown.js"></script>
   <script src="js/views/simulator.js"></script>
+  <script src="js/views/thai_hub.js"></script>
   <script src="js/app.js"></script>
 
 </body>

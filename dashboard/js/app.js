@@ -47,6 +47,8 @@ document.addEventListener('DOMContentLoaded', () => {
       window.OwnerBreakdownView.render();
     } else if (viewId === 'view-simulator' && window.SimulatorView) {
       window.SimulatorView.render();
+    } else if (viewId === 'view-thai-hub' && window.ThaiHubView) {
+      window.ThaiHubView.render();
     }
   }
 
@@ -94,6 +96,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (window.AllocationView) window.AllocationView.init();
   if (window.OwnerBreakdownView) window.OwnerBreakdownView.init();
   if (window.SimulatorView) window.SimulatorView.init();
+  if (window.ThaiHubView) window.ThaiHubView.init();
 
   // 4. Initialize Auth & API Services
   if (window.AuthService) window.AuthService.init();

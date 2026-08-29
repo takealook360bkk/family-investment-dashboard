@@ -41,16 +41,18 @@ window.ApiService = {
       const authParam = `&access_token=${encodeURIComponent(token)}&_t=${Date.now()}`;
       const fetchOpts = { cache: 'no-store' };
 
-      const [summaryRes, assetsRes, snapshotRes] = await Promise.all([
-        fetch(`${baseUrl}?action=summary${authParam}`, fetchOpts).then(r => r.json()),
-        fetch(`${baseUrl}?action=assets${authParam}`, fetchOpts).then(r => r.json()),
-        fetch(`${baseUrl}?action=snapshot${authParam}`, fetchOpts).then(r => r.json())
+      const [summaryRes, assetsRes, snapshotRes, thaiStocksRes] = await Promise.all([
+        fetch(`${baseUrl}?action=summary${authParam}`, fetchOpts).then(r => r.json()).catch(e => ({ error: e.message })),
+        fetch(`${baseUrl}?action=assets${authParam}`, fetchOpts).then(r => r.json()).catch(e => ({ error: e.message })),
+        fetch(`${baseUrl}?action=snapshot${authParam}`, fetchOpts).then(r => r.json()).catch(e => ({ error: e.message })),
+        fetch(`${baseUrl}?action=thai_stocks${authParam}`, fetchOpts).then(r => r.json()).catch(e => ({ error: e.message }))
       ]);
 
       // Log raw responses for debugging
       console.log('[API] summary raw:', summaryRes);
       console.log('[API] assets count:', Array.isArray(assetsRes.data) ? assetsRes.data.length : 'N/A');
       console.log('[API] snapshot count:', Array.isArray(snapshotRes.data) ? snapshotRes.data.length : 'N/A');
+      console.log('[API] thai_stocks items count:', thaiStocksRes?.data?.items ? thaiStocksRes.data.items.length : 'N/A');
 
       // Check for authorization / token errors
       const anyError = summaryRes.error || assetsRes.error || snapshotRes.error;
@@ -238,11 +240,22 @@ window.ApiService = {
         console.log('[API] Raw last snapshot keys:', Object.keys(rawLast || {}));
       }
 
+      // Normalize Thai Stocks Hub data
+      let normalizedThaiStocks = { summary: null, items: [] };
+      if (thaiStocksRes && thaiStocksRes.success && thaiStocksRes.data) {
+        normalizedThaiStocks = thaiStocksRes.data;
+      } else {
+        // Fallback to mock thaiStocks if not yet populated or error
+        const mock = window.generateMockData();
+        normalizedThaiStocks = mock.thaiStocks;
+      }
+
       window.AppState.setData({
-        summary:  normalizedSummary,
-        assets:   normalizedAssets,
-        snapshot: normalizedSnapshot,
-        isDemo:   false
+        summary:    normalizedSummary,
+        assets:     normalizedAssets,
+        snapshot:   normalizedSnapshot,
+        thaiStocks: normalizedThaiStocks,
+        isDemo:     false
       });
 
     } catch (err) {
@@ -252,6 +265,52 @@ window.ApiService = {
     } finally {
       this.showLoading(false);
     }
+  },
+
+  /**
+   * 2-Way Live Sync: ส่งข้อมูลอัปเดตหุ้นไทยไปยัง Google Sheet (Expected DPS, Consensus, Performance)
+   */
+  async updateThaiStock(account, symbol, updates) {
+    if (window.AppState.isDemoMode) {
+      console.log('[API Mock] updateThaiStock received:', { account, symbol, updates });
+      // Update local state in mock mode
+      if (window.AppState.thaiStocks && window.AppState.thaiStocks.items) {
+        const item = window.AppState.thaiStocks.items.find(i => i.account === account && i.symbol === symbol);
+        if (item) {
+          Object.assign(item, updates);
+          // Recalculate dependent metrics if expected_dps changed
+          if (updates.expected_dps !== undefined) {
+            item.yearly_expected_dividend = item.quantity * item.expected_dps;
+            item.yield_on_cost = item.avg_cost_price > 0 ? (item.expected_dps / item.avg_cost_price * 100) : 0;
+            item.current_price_yield = item.current_price > 0 ? (item.expected_dps / item.current_price * 100) : 0;
+          }
+        }
+      }
+      return { success: true, updated: { account, symbol, ...updates } };
+    }
+
+    const baseUrl = window.APP_CONFIG.API_BASE_URL;
+    const token = window.AppState.token;
+
+    if (!baseUrl || !token) {
+      throw new Error('API not configured or user not logged in.');
+    }
+
+    const payload = {
+      action: 'update_thai_stock',
+      access_token: token,
+      account: account,
+      symbol: symbol,
+      ...updates
+    };
+
+    const response = await fetch(baseUrl, {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    });
+
+    const result = await response.json();
+    return result;
   },
 
   showLoading(isLoading) {

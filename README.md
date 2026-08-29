@@ -37,6 +37,16 @@ The project is built around a hybrid architecture using Google Sheets as the pri
 - **Security**: Google Identity Services (OAuth 2.0).
 
 ## Version Log
+- **Version 3.4.0**: View 5 Thai Stock Hub & Dividend / DRIP Wealth Simulator with 2-Way Live Sync & Real Capital Cost Basis.
+  - **View 5 (Thai Stock Hub & Dividend Simulator)**:
+    - **Zone 1 (Hero KPIs)**: Valuation & Profitability Matrix (Market Value, Real Capital Cost Basis, Total Net Gain & %, Book Cost, Unrealized P&L) and Annual Dividend & Yield Engine (Expected Dividend / Mo / Yr, YoC % based on Real Capital, Market Yield %).
+    - **Zone 2 & 3 (Owner Hubs & Dividend Contribution Donut Charts)**: Dedicated PP and JJ sub-hubs with individual Real Capital Cost Basis, Net Gains, and Chart.js Doughnut visualizations (`Chart 3.1` & `Chart 3.2`) breaking down dividend contribution by ticker.
+    - **Zone 4 (Strategic Holdings Table with 2-Way Live Sync)**: 13-column interactive table supporting owner filtering (`All`, `PP`, `JJ`), live Expected DPS inline input with 500ms debounce + optimistic UI recalculations, Consensus rating dropdown pills (🟢 Buy / 🟡 Hold / 🔴 Sell), Company Performance dropdowns (5 tiers), and real-time Google Sheet sync indicator (🔄 Syncing / 🟢 Saved / 🔴 Error).
+    - **Zone 5 (DRIP Wealth Retirement Simulator)**: Interactive snowball growth engine with parameter sliders (Monthly DCA, Retirement Age, Dividend Growth %, Capital Growth %) and dynamic multi-axis trajectory chart (`Chart 5.1`) comparing Projected Portfolio, Cumulative Capital, and Annual Dividend.
+  - **Backend & Data Pipeline (`api_code.js` & `THStock_Master_V3`)**:
+    - Introduced `THStock_Master_V3` side-by-side sheet layout with `Col X` (`Real Capital Cost Basis` = Total Cost - Historical Net Gain).
+    - Added `?action=thai_stocks` route in `doGet` and `action=update_thai_stock` handler in `doPost` for secure row-level updates based on `account` + `symbol`.
+    - Added Thai stock normalization layer and `ApiService.updateThaiStock()` in frontend.
 - **Version 3.3.1**: Savings Inflow Time Range Synchronization, Yearly/Monthly Granularity Toggle, Dynamic Color Scaling, and Light Theme Filter Button Contrast Fix.
   - **View 1 (Overview)**:
     - **Synchronized Time Range**: Savings Inflow bar chart is now dynamically synchronized and horizontally aligned with the Wealth Growth History line chart above (`ALL` starting from Dec 2016 inception, `5Y`, `3Y`, `1Y`).
