@@ -37,7 +37,37 @@ The project is built around a hybrid architecture using Google Sheets as the pri
 - **Security**: Google Identity Services (OAuth 2.0).
 
 ## Version Log
-- **Version 3.4.0**: View 5 Thai Stock Hub & Dividend / DRIP Wealth Simulator with 2-Way Live Sync & Real Capital Cost Basis.
+- **Version 3.4.1** *(August 30, 2026)*: View 5 Thai Stock Hub — Visual Overhaul, Monotone Pie Charts, Dual-Table Sort, and Light Theme Restoration.
+  - **Demo Data Privacy**: Replaced all Thai stock demo data in `state.js` with anonymized, randomized SET tickers (`MC`, `FTREIT`, `ICHI`, `KCG`, `BDMS`, `TISCO`, `KJL`, `HTC`, `SABINA`, etc.) and reduced total portfolio valuation to ~฿488K to prevent information leakage.
+  - **Card Header Cleanup**: Removed all emoji icons from all Card headers in View 5 for a cleaner, professional typographic look.
+  - **Card 1.1 (Thai Stock Amount) Restructure**: Streamlined to left/right split layout — Market Value (฿) large left block (emerald) + 3 compact right sub-boxes: Real Capital, Cost Amount, Total Net Gain. Removed the Portfolio Total badge and outer blue border.
+  - **Card 1.2 (Annual Dividend Yield) Restructure**: Streamlined to left/right split — Expected Dividend (฿) large left block (emerald) + 2 compact right sub-boxes: YoC % (emerald) and Market Yield (neutral). Removed description text and orange outer border.
+  - **Card 2.1 & 2.2 (PP & JJ Owner Hub) Restructure**: Market Value occupies left 50%; right 50% shows Cost Amount and Exp. Div/Yr. Pie chart sized equally for both sides.
+  - **Monotone Pie Chart Color Palettes**: Replaced multi-hue rainbow pie slices with cohesive monotone palettes — PP uses Shades of Blue/Cyan (`#0284C7` → `#1E3A8A`); JJ uses Shades of Amber/Bronze/Warm Gold (`#D97706` → `#713F12`).
+  - **Pie Chart Tooltip Layer Fix**: Changed in-slice ticker label drawing from `afterDraw` to `afterDatasetsDraw` hook, ensuring Chart.js renders hover tooltips above canvas text at all times.
+  - **Dual Holdings Tables (PP & JJ)**: Split single combined table into two independent tables — PP Thai Stock Holdings and JJ Thai Stock Holdings — each with their own sticky Summary Row (Row Sum) showing Qty, Market Value, Unrealized P&L, Exp. Div/Yr, YoC %, and Mkt Yield %.
+  - **Table Typography Fix**: Replaced all `font-mono` / `ui-monospace` table cell fonts with `Inter` (same as View 2 Holdings at 12px/16px).
+  - **Table Default Sort (A–Z)**: Both PP and JJ tables default to sorting by Stock Symbol alphabetically (A → Z) on first render.
+  - **Interactive Table Header Sorting**: All 12 table columns support click-to-sort with directional indicators (`▲ / ▼ / ⇅`). Text columns toggle A→Z / Z→A; numeric columns toggle largest-first / smallest-first.
+  - **Table Text Color System**:
+    - Dark Theme: Stock symbols, prices, Market Value → White (`#F8FAFC`); Qty, Avg Cost → White (`#F8FAFC`).
+    - Light Theme: Stock symbols, prices, Market Value → Black (`#0F172A`); Qty, Avg Cost → Dark gray (`#334155`).
+    - Table header `<th>` forced to white (`#F8FAFC`, `font-weight: 700`) in both themes for legibility.
+  - **Dividend Simulator (Zone 5) Overhaul**:
+    - Converted all parameter controls from range sliders to typed `<input>` fields for precision.
+    - Removed Capital Appreciation parameter; simulator now models growth exclusively from Dividend Reinvestment (DRIP) + Step-up DCA compounding, reflecting real-world dividend portfolio behavior.
+    - Added Step-up DCA (% per year) parameter.
+    - Changed chart Legend style from color boxes to line indicators (`pointStyle: 'line'`).
+    - Added "Reset to Current Portfolio" button.
+  - **Light Theme Comprehensive Restoration**:
+    - `.th-kpi-subbox` CSS class replaces hardcoded `bg-slate-900/50` on all sub-boxes in Cards 1.1, 1.2, 2.1, 2.2 — Light Theme: `#F8FAFC` background, `#E2E8F0` border; Dark Theme: glass dark.
+    - `.th-chart-box` class for Pie Chart containers — Light Theme: off-white; Dark Theme: dark translucent.
+    - PP accent in Light Theme: Deep Blue `#0369A1`; JJ accent: Deep Amber `#B45309`; Dividend/Gain color: Deep Emerald `#047857`.
+    - "รีเซ็ตค่าพอร์ตปัจจุบัน" button in Light Theme: Deep Blue `#0369A1`.
+    - DRIP Reinvest label locked to Emerald `#10B981` in both themes via `.th-drip-label` class.
+  - **Scoped Edit Verification**: `git diff` confirmed all changes are strictly within `<section id="view-thai-hub">`, `dashboard/js/views/thai_hub.js`, `dashboard/js/state.js`, and `dashboard/css/styles.css`. Views 1, 2, 3, and 4 remain 100% unmodified.
+
+- **Version 3.4.0** *(August 18, 2026)*: View 5 Thai Stock Hub & Dividend / DRIP Wealth Simulator with 2-Way Live Sync & Real Capital Cost Basis.
   - **View 5 (Thai Stock Hub & Dividend Simulator)**:
     - **Zone 1 (Hero KPIs)**: Valuation & Profitability Matrix (Market Value, Real Capital Cost Basis, Total Net Gain & %, Book Cost, Unrealized P&L) and Annual Dividend & Yield Engine (Expected Dividend / Mo / Yr, YoC % based on Real Capital, Market Yield %).
     - **Zone 2 & 3 (Owner Hubs & Dividend Contribution Donut Charts)**: Dedicated PP and JJ sub-hubs with individual Real Capital Cost Basis, Net Gains, and Chart.js Doughnut visualizations (`Chart 3.1` & `Chart 3.2`) breaking down dividend contribution by ticker.
@@ -108,4 +138,4 @@ The project is built around a hybrid architecture using Google Sheets as the pri
 This repository contains the application structure and logic. No private financial data, API keys, or personal credentials should be committed to this repository. All sensitive configuration is handled via environment-specific setup or local configuration files excluded from version control.
 
 ---
-*Last Updated: August 18, 2026*
+*Last Updated: August 30, 2026 (v3.4.1)*
