@@ -1051,6 +1051,42 @@ body {
 }
 
 /* Table Text Colors for View 5 (Inter 12px) */
+.holdings-header-row th {
+  color: #F8FAFC !important;
+  font-weight: 700 !important;
+  font-family: var(--font-family);
+  font-size: 0.75rem;
+}
+
+.th-sortable-th {
+  cursor: pointer;
+  user-select: none;
+  transition: color 0.15s ease;
+}
+.th-sortable-th:hover {
+  color: #38BDF8 !important;
+}
+.th-sortable-th.active-sort {
+  color: #38BDF8 !important;
+}
+.th-sort-icon {
+  font-size: 0.7rem;
+  margin-left: 2px;
+  opacity: 0.75;
+}
+
+[data-theme="light"] #th-sim-reset-btn {
+  color: #0369A1 !important;
+  font-weight: 600 !important;
+}
+
+.th-drip-label {
+  color: #10B981 !important;
+}
+[data-theme="light"] .th-drip-label {
+  color: #10B981 !important;
+}
+
 .th-stock-symbol,
 .th-stock-price,
 .th-stock-mv {

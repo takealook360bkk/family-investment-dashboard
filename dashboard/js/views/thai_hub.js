@@ -1,5 +1,5 @@
 // View 5: Thai Stock Hub & Dividend / DRIP Wealth Simulator
-// Patch v3.4.1: Upgraded dual-table layout, privacy-safe demo dataset, and enhanced retirement simulator
+// Patch v3.4.1: Upgraded dual-table layout, A-Z default sorting & interactive header sort, and refined light theme
 
 window.ThaiHubView = {
   charts: {
@@ -8,6 +8,8 @@ window.ThaiHubView = {
     dripChart: null
   },
   
+  sortColumn: 'symbol',
+  sortDirection: 'asc', // Default A -> Z alphabetical order
   debounceTimers: {},
   localItemOverrides: {}, // Key: `${account}_${symbol}` -> { expected_dps, note_consensus, company_perform }
 
@@ -16,7 +18,28 @@ window.ThaiHubView = {
   },
 
   bindEvents() {
-    // DRIP Simulator Controls
+    // 1. Table Header Interactive Sorting
+    document.querySelectorAll('.th-sortable-th').forEach(th => {
+      th.addEventListener('click', (e) => {
+        const col = th.getAttribute('data-sort');
+        if (!col) return;
+
+        if (this.sortColumn === col) {
+          this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+        } else {
+          this.sortColumn = col;
+          // Default string columns to asc, numeric columns to desc
+          this.sortDirection = (col === 'symbol' || col === 'note_consensus' || col === 'company_perform') ? 'asc' : 'desc';
+        }
+
+        const data = this.getAggregatedData();
+        if (data) {
+          this.renderZone4Tables(data);
+        }
+      });
+    });
+
+    // 2. DRIP Simulator Controls
     const initValInput = document.getElementById('th-sim-init-val');
     const ageInput = document.getElementById('th-sim-current-age');
     const retireAgeInput = document.getElementById('th-sim-retire-age');
@@ -53,11 +76,16 @@ window.ThaiHubView = {
       });
     }
 
-    // Listen for theme change to update chart colors
+    // 3. Listen for theme change to update chart colors
     window.AppState.subscribe((event) => {
       if (event === 'themeChanged') {
         this.renderCharts();
         this.renderDRIPSimulation();
+        const data = this.getAggregatedData();
+        if (data) {
+          this.renderZone1HeroKPIs(data);
+          this.renderZone4Tables(data);
+        }
       }
     });
   },
@@ -217,15 +245,47 @@ window.ThaiHubView = {
     if (jjDivEl) jjDivEl.innerText = `฿${window.formatCurrency(jj.yearly_dividend)}`;
   },
 
-  // ZONE 4: DUAL TABLES (PP & JJ) WITH COMPLETE ROW SUMMARIES (INTER 12PX TYPOGRAPHY)
+  // ZONE 4: DUAL TABLES (PP & JJ) WITH INTERACTIVE SORTING & COMPLETE ROW SUMS
   renderZone4Tables(data) {
+    if (!data) data = this.getAggregatedData();
+    if (!data) return;
+
     const ppTbody = document.getElementById('th-pp-table-body');
     const jjTbody = document.getElementById('th-jj-table-body');
     const isLight = document.documentElement.getAttribute('data-theme') === 'light';
 
+    // Update Sort Icons on active thead elements
+    document.querySelectorAll('.th-sortable-th').forEach(th => {
+      const col = th.getAttribute('data-sort');
+      const icon = th.querySelector('.th-sort-icon');
+      if (col === this.sortColumn) {
+        th.classList.add('active-sort');
+        if (icon) icon.innerText = this.sortDirection === 'asc' ? '▲' : '▼';
+      } else {
+        th.classList.remove('active-sort');
+        if (icon) icon.innerText = '⇅';
+      }
+    });
+
+    const sortItems = (items) => {
+      return [...items].sort((a, b) => {
+        let valA = a[this.sortColumn];
+        let valB = b[this.sortColumn];
+
+        if (typeof valA === 'string') {
+          const cmp = (valA || '').localeCompare(valB || '');
+          return this.sortDirection === 'asc' ? cmp : -cmp;
+        }
+
+        valA = Number(valA) || 0;
+        valB = Number(valB) || 0;
+        return this.sortDirection === 'asc' ? valA - valB : valB - valA;
+      });
+    };
+
     // 1. Render PP Table
     if (ppTbody) {
-      const sortedPP = [...data.ppItems].sort((a, b) => (b.market_value || 0) - (a.market_value || 0));
+      const sortedPP = sortItems(data.ppItems);
       let ppHtml = '';
       let ppQtySum = 0;
       let ppMvSum = 0;
@@ -277,7 +337,7 @@ window.ThaiHubView = {
 
     // 2. Render JJ Table
     if (jjTbody) {
-      const sortedJJ = [...data.jjItems].sort((a, b) => (b.market_value || 0) - (a.market_value || 0));
+      const sortedJJ = sortItems(data.jjItems);
       let jjHtml = '';
       let jjQtySum = 0;
       let jjMvSum = 0;
