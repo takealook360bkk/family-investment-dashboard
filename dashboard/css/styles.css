@@ -935,7 +935,7 @@ body {
 }
 [data-theme="light"] .th-pp-card-title,
 [data-theme="light"] .th-pp-networth {
-  color: #0E7490 !important;
+  color: #0369A1 !important;
 }
 
 .th-jj-card-title, .th-jj-networth {
@@ -943,7 +943,60 @@ body {
 }
 [data-theme="light"] .th-jj-card-title,
 [data-theme="light"] .th-jj-networth {
-  color: #D97706 !important;
+  color: #B45309 !important;
+}
+
+/* Light / Dark Sub-boxes for Cards 1.1, 1.2, 2.1, 2.2 */
+.th-kpi-subbox {
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid rgba(51, 65, 85, 0.6);
+  color: #F8FAFC;
+  transition: all 0.2s ease;
+}
+[data-theme="light"] .th-kpi-subbox {
+  background: #F8FAFC !important;
+  border: 1px solid #E2E8F0 !important;
+  color: #0F172A !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.th-chart-box {
+  background: rgba(15, 23, 42, 0.4);
+  border: 1px solid rgba(51, 65, 85, 0.5);
+}
+[data-theme="light"] .th-chart-box {
+  background: #F8FAFC !important;
+  border: 1px solid #E2E8F0 !important;
+}
+
+/* Light theme high-contrast overrides for View 5 */
+[data-theme="light"] #view-thai-hub h2,
+[data-theme="light"] #view-thai-hub h3,
+[data-theme="light"] #view-thai-hub h4,
+[data-theme="light"] #view-thai-hub .text-gray-100 {
+  color: #0F172A !important;
+}
+[data-theme="light"] #view-thai-hub .text-gray-400 {
+  color: #64748B !important;
+}
+[data-theme="light"] #view-thai-hub .text-gray-300 {
+  color: #334155 !important;
+}
+
+[data-theme="light"] #th-hero-market-val,
+[data-theme="light"] #th-hero-dividend-yr,
+[data-theme="light"] #th-hero-yoc-pct,
+[data-theme="light"] #view-thai-hub .th-emerald-text,
+[data-theme="light"] #view-thai-hub .text-emerald-400 {
+  color: #047857 !important;
+}
+
+[data-theme="light"] #th-hero-real-capital,
+[data-theme="light"] #th-hero-cost-amt,
+[data-theme="light"] #th-hero-mkt-yield-pct,
+[data-theme="light"] #th-pp-cost-amt,
+[data-theme="light"] #th-jj-cost-amt {
+  color: #0F172A !important;
 }
 
 .th-pie-chart-container {
@@ -964,13 +1017,17 @@ body {
 
 [data-theme="light"] #th-pp-summary-row,
 [data-theme="light"] #th-jj-summary-row {
-  background-color: #F0FDFA !important;
-  border-bottom: 2px solid #0E7490 !important;
+  background-color: #F8FAFC !important;
+  border-bottom: 2px solid #0369A1 !important;
+}
+
+[data-theme="light"] #th-jj-summary-row {
+  border-bottom: 2px solid #B45309 !important;
 }
 
 [data-theme="light"] #th-pp-summary-row td,
 [data-theme="light"] #th-jj-summary-row td {
-  color: #0E7490 !important;
+  color: #0F172A !important;
   font-weight: 800 !important;
   font-family: var(--font-family);
   font-size: 0.75rem;
@@ -981,13 +1038,37 @@ body {
   background-color: #0F2027 !important;
   border-bottom: 2px solid #06B6D4 !important;
 }
+[data-theme="dark"] #th-jj-summary-row {
+  border-bottom: 2px solid #F59E0B !important;
+}
 
 [data-theme="dark"] #th-pp-summary-row td,
 [data-theme="dark"] #th-jj-summary-row td {
-  color: #06B6D4 !important;
+  color: #F8FAFC !important;
   font-weight: 800 !important;
   font-family: var(--font-family);
   font-size: 0.75rem;
+}
+
+/* Table Text Colors for View 5 (Inter 12px) */
+.th-stock-symbol,
+.th-stock-price,
+.th-stock-mv {
+  color: #F8FAFC;
+  font-family: var(--font-family);
+}
+[data-theme="light"] .th-stock-symbol,
+[data-theme="light"] .th-stock-price,
+[data-theme="light"] .th-stock-mv {
+  color: #0F172A !important;
+}
+
+.th-stock-sec {
+  color: #F8FAFC; /* White in dark theme */
+  font-family: var(--font-family);
+}
+[data-theme="light"] .th-stock-sec {
+  color: #334155 !important; /* Dark gray in light theme */
 }
 
 .sync-indicator {

@@ -551,22 +551,22 @@
           </div>
           <div class="grid grid-cols-1 sm:grid-cols-12 gap-3 items-stretch">
             <!-- Left 50%: Large Market Value Box -->
-            <div class="sm:col-span-6 p-4 bg-slate-900/50 rounded-xl border border-slate-800/80 flex flex-col justify-center text-center">
+            <div class="sm:col-span-6 p-4 th-kpi-subbox rounded-xl flex flex-col justify-center text-center">
               <span class="text-xs text-gray-400 block mb-1">Market Value</span>
               <div id="th-hero-market-val" class="text-3xl font-extrabold text-emerald-400">฿0</div>
               <span class="text-[11px] text-gray-500 mt-1">มูลค่าตลาดรวม</span>
             </div>
             <!-- Right 50%: 3 Sub-KPI Boxes -->
             <div class="sm:col-span-6 grid grid-cols-1 gap-2">
-              <div class="p-2.5 bg-slate-900/50 rounded-lg border border-slate-800/80 flex justify-between items-center px-3">
+              <div class="p-2.5 th-kpi-subbox rounded-lg flex justify-between items-center px-3">
                 <span class="text-xs text-gray-400">Real Capital:</span>
                 <strong id="th-hero-real-capital" class="text-sm font-bold text-gray-100">฿0</strong>
               </div>
-              <div class="p-2.5 bg-slate-900/50 rounded-lg border border-slate-800/80 flex justify-between items-center px-3">
+              <div class="p-2.5 th-kpi-subbox rounded-lg flex justify-between items-center px-3">
                 <span class="text-xs text-gray-400">Cost Amount:</span>
                 <strong id="th-hero-cost-amt" class="text-sm font-bold text-gray-100">฿0</strong>
               </div>
-              <div class="p-2.5 bg-slate-900/50 rounded-lg border border-slate-800/80 flex justify-between items-center px-3">
+              <div class="p-2.5 th-kpi-subbox rounded-lg flex justify-between items-center px-3">
                 <span class="text-xs text-gray-400">Total Net Gain:</span>
                 <strong id="th-hero-net-gain" class="text-sm font-bold text-emerald-400">฿0</strong>
               </div>
@@ -583,18 +583,18 @@
           </div>
           <div class="grid grid-cols-1 sm:grid-cols-12 gap-3 items-stretch">
             <!-- Left 50%: Large Expected Dividend Box -->
-            <div class="sm:col-span-6 p-4 bg-slate-900/50 rounded-xl border border-slate-800/80 flex flex-col justify-center text-center">
+            <div class="sm:col-span-6 p-4 th-kpi-subbox rounded-xl flex flex-col justify-center text-center">
               <span class="text-xs text-gray-400 block mb-1">Expected Dividend</span>
               <div id="th-hero-dividend-yr" class="text-3xl font-extrabold text-emerald-400">฿0</div>
               <span class="text-[11px] text-gray-500 mt-1">คาดการณ์ปันผลรวมต่อปี</span>
             </div>
             <!-- Right 50%: 2 Sub-KPI Boxes (YoC & Market Yield) -->
             <div class="sm:col-span-6 grid grid-cols-1 gap-2.5 justify-center">
-              <div class="p-3 bg-slate-900/50 rounded-lg border border-slate-800/80 flex justify-between items-center px-3.5">
+              <div class="p-3 th-kpi-subbox rounded-lg flex justify-between items-center px-3.5">
                 <span class="text-xs text-gray-400">Yield on Cost (YoC):</span>
                 <strong id="th-hero-yoc-pct" class="text-base font-bold text-emerald-400">0.00%</strong>
               </div>
-              <div class="p-3 bg-slate-900/50 rounded-lg border border-slate-800/80 flex justify-between items-center px-3.5">
+              <div class="p-3 th-kpi-subbox rounded-lg flex justify-between items-center px-3.5">
                 <span class="text-xs text-gray-400">Market Yield:</span>
                 <strong id="th-hero-mkt-yield-pct" class="text-base font-bold text-gray-100">0.00%</strong>
               </div>
@@ -616,17 +616,17 @@
             </div>
             <div class="grid grid-cols-1 sm:grid-cols-12 gap-3 mb-4">
               <!-- Left 50%: Market Value -->
-              <div class="sm:col-span-6 p-3 bg-slate-900/50 rounded-lg border border-slate-800 text-center flex flex-col justify-center">
+              <div class="sm:col-span-6 p-3 th-kpi-subbox rounded-lg text-center flex flex-col justify-center">
                 <span class="text-xs text-gray-400 block mb-0.5">Market Value</span>
                 <div id="th-pp-market-val" class="th-pp-networth text-2xl font-extrabold">฿0</div>
               </div>
               <!-- Right 50%: Cost Amount & Exp.Div/Yr -->
               <div class="sm:col-span-6 grid grid-cols-1 gap-2">
-                <div class="p-2 bg-slate-900/50 rounded border border-slate-800 flex justify-between items-center px-2.5">
+                <div class="p-2 th-kpi-subbox rounded flex justify-between items-center px-2.5">
                   <span class="text-[11px] text-gray-400">Cost Amount:</span>
                   <strong id="th-pp-cost-amt" class="text-xs font-bold text-gray-100">฿0</strong>
                 </div>
-                <div class="p-2 bg-slate-900/50 rounded border border-slate-800 flex justify-between items-center px-2.5">
+                <div class="p-2 th-kpi-subbox rounded flex justify-between items-center px-2.5">
                   <span class="text-[11px] text-gray-400">Exp. Div/Yr:</span>
                   <strong id="th-pp-dividend-val" class="text-xs font-bold text-emerald-400">฿0</strong>
                 </div>
@@ -634,7 +634,7 @@
             </div>
           </div>
           <!-- Pie Chart Container (Equal Synchronized Height) -->
-          <div class="p-2 bg-slate-900/30 rounded-lg flex flex-col items-center justify-center">
+          <div class="p-2 th-chart-box rounded-lg flex flex-col items-center justify-center">
             <span class="text-xs text-gray-400 font-medium mb-1">Market Value Allocation</span>
             <div class="th-pie-chart-container" style="height:220px; width:100%; max-width:280px; position:relative;">
               <canvas id="ppStockDonutChart"></canvas>
@@ -653,17 +653,17 @@
             </div>
             <div class="grid grid-cols-1 sm:grid-cols-12 gap-3 mb-4">
               <!-- Left 50%: Market Value -->
-              <div class="sm:col-span-6 p-3 bg-slate-900/50 rounded-lg border border-slate-800 text-center flex flex-col justify-center">
+              <div class="sm:col-span-6 p-3 th-kpi-subbox rounded-lg text-center flex flex-col justify-center">
                 <span class="text-xs text-gray-400 block mb-0.5">Market Value</span>
                 <div id="th-jj-market-val" class="th-jj-networth text-2xl font-extrabold">฿0</div>
               </div>
               <!-- Right 50%: Cost Amount & Exp.Div/Yr -->
               <div class="sm:col-span-6 grid grid-cols-1 gap-2">
-                <div class="p-2 bg-slate-900/50 rounded border border-slate-800 flex justify-between items-center px-2.5">
+                <div class="p-2 th-kpi-subbox rounded flex justify-between items-center px-2.5">
                   <span class="text-[11px] text-gray-400">Cost Amount:</span>
                   <strong id="th-jj-cost-amt" class="text-xs font-bold text-gray-100">฿0</strong>
                 </div>
-                <div class="p-2 bg-slate-900/50 rounded border border-slate-800 flex justify-between items-center px-2.5">
+                <div class="p-2 th-kpi-subbox rounded flex justify-between items-center px-2.5">
                   <span class="text-[11px] text-gray-400">Exp. Div/Yr:</span>
                   <strong id="th-jj-dividend-val" class="text-xs font-bold text-emerald-400">฿0</strong>
                 </div>
@@ -671,7 +671,7 @@
             </div>
           </div>
           <!-- Pie Chart Container (Equal Synchronized Height) -->
-          <div class="p-2 bg-slate-900/30 rounded-lg flex flex-col items-center justify-center">
+          <div class="p-2 th-chart-box rounded-lg flex flex-col items-center justify-center">
             <span class="text-xs text-gray-400 font-medium mb-1">Market Value Allocation</span>
             <div class="th-pie-chart-container" style="height:220px; width:100%; max-width:280px; position:relative;">
               <canvas id="jjStockDonutChart"></canvas>
@@ -863,14 +863,6 @@
                 </div>
               </div>
             </div>
-
-            <div class="sim-input-group">
-              <label>Capital Appreciation (% ต่อปี):</label>
-              <div class="input-with-suffix">
-                <input id="th-sim-growth" type="number" value="4.0" step="0.5">
-                <span class="input-suffix">%</span>
-              </div>
-            </div>
           </div>
 
           <!-- Results & Chart (Right) -->
@@ -895,7 +887,7 @@
               <div class="mb-3 flex justify-between items-center">
                 <div>
                   <h4 class="chart-title text-sm font-bold">Dividend Snowball &amp; Wealth Trajectory</h4>
-                  <p class="text-xs text-gray-400">การเติบโตของมูลค่าพอร์ตและปันผลสุทธิสะสมตามอายุ</p>
+                  <p class="text-xs text-gray-400">การเติบโตของมูลค่าพอร์ตและปันผลสุทธิสะสมตามอายุ (Reinvest + DCA ล้วนๆ)</p>
                 </div>
                 <span id="drip-result-future-yoc" class="text-xs font-semibold text-cyan-400 bg-cyan-950/60 border border-cyan-800/60 px-2.5 py-1 rounded-lg">YoC: 0.0%</span>
               </div>

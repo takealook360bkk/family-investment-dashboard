@@ -23,7 +23,6 @@ window.ThaiHubView = {
     const dcaInput = document.getElementById('th-sim-dca');
     const stepUpInput = document.getElementById('th-sim-stepup');
     const yieldInput = document.getElementById('th-sim-yield');
-    const growthInput = document.getElementById('th-sim-growth');
     const dripToggle = document.getElementById('drip-toggle');
     const resetBtn = document.getElementById('th-sim-reset-btn');
 
@@ -31,7 +30,7 @@ window.ThaiHubView = {
       this.renderDRIPSimulation();
     };
 
-    [initValInput, ageInput, retireAgeInput, dcaInput, stepUpInput, yieldInput, growthInput, dripToggle].forEach(el => {
+    [initValInput, ageInput, retireAgeInput, dcaInput, stepUpInput, yieldInput, dripToggle].forEach(el => {
       if (el) {
         el.addEventListener('input', handleSimChange);
         el.addEventListener('change', handleSimChange);
@@ -49,7 +48,6 @@ window.ThaiHubView = {
         if (dcaInput) dcaInput.value = 15000;
         if (stepUpInput) stepUpInput.value = 3.0;
         if (yieldInput && data) yieldInput.value = data.summary.total.market_yield_pct.toFixed(1);
-        if (growthInput) growthInput.value = 4.0;
         if (dripToggle) dripToggle.checked = true;
         this.renderDRIPSimulation();
       });
@@ -162,6 +160,7 @@ window.ThaiHubView = {
   // ZONE 1: HERO KPIS
   renderZone1HeroKPIs(data) {
     const total = data.summary.total;
+    const isLight = document.documentElement.getAttribute('data-theme') === 'light';
 
     // Card 1.1 Thai Stock Amount
     const mktValEl = document.getElementById('th-hero-market-val');
@@ -176,7 +175,9 @@ window.ThaiHubView = {
     const netGainEl = document.getElementById('th-hero-net-gain');
     if (netGainEl) {
       netGainEl.innerText = `${total.historical_net_gain >= 0 ? '+' : ''}฿${window.formatCurrency(total.historical_net_gain)}`;
-      netGainEl.className = `text-sm font-bold ${total.historical_net_gain >= 0 ? 'text-emerald-400' : 'text-rose-400'}`;
+      const posColor = isLight ? 'text-emerald-700' : 'text-emerald-400';
+      const negColor = isLight ? 'text-rose-700' : 'text-rose-400';
+      netGainEl.className = `text-sm font-bold ${total.historical_net_gain >= 0 ? posColor : negColor}`;
     }
 
     // Card 1.2 Annual Dividend Yield
@@ -216,10 +217,11 @@ window.ThaiHubView = {
     if (jjDivEl) jjDivEl.innerText = `฿${window.formatCurrency(jj.yearly_dividend)}`;
   },
 
-  // ZONE 4: DUAL TABLES (PP & JJ) WITH COMPLETE ROW SUMMARIES
+  // ZONE 4: DUAL TABLES (PP & JJ) WITH COMPLETE ROW SUMMARIES (INTER 12PX TYPOGRAPHY)
   renderZone4Tables(data) {
     const ppTbody = document.getElementById('th-pp-table-body');
     const jjTbody = document.getElementById('th-jj-table-body');
+    const isLight = document.documentElement.getAttribute('data-theme') === 'light';
 
     // 1. Render PP Table
     if (ppTbody) {
@@ -256,7 +258,9 @@ window.ThaiHubView = {
       const ppSumUnpl = document.getElementById('th-pp-sum-unpl');
       if (ppSumUnpl) {
         ppSumUnpl.innerText = `${ppUnplSum >= 0 ? '+' : ''}฿${window.formatCurrency(ppUnplSum)}`;
-        ppSumUnpl.className = `px-3 py-2.5 text-right font-bold ${ppUnplSum >= 0 ? 'text-emerald-400' : 'text-rose-400'}`;
+        const posColor = isLight ? 'text-emerald-700' : 'text-emerald-400';
+        const negColor = isLight ? 'text-rose-700' : 'text-rose-400';
+        ppSumUnpl.className = `px-3 py-2.5 text-right font-bold ${ppUnplSum >= 0 ? posColor : negColor}`;
       }
 
       const ppSumDiv = document.getElementById('th-pp-sum-div');
@@ -306,7 +310,9 @@ window.ThaiHubView = {
       const jjSumUnpl = document.getElementById('th-jj-sum-unpl');
       if (jjSumUnpl) {
         jjSumUnpl.innerText = `${jjUnplSum >= 0 ? '+' : ''}฿${window.formatCurrency(jjUnplSum)}`;
-        jjSumUnpl.className = `px-3 py-2.5 text-right font-bold ${jjUnplSum >= 0 ? 'text-emerald-400' : 'text-rose-400'}`;
+        const posColor = isLight ? 'text-emerald-700' : 'text-emerald-400';
+        const negColor = isLight ? 'text-rose-700' : 'text-rose-400';
+        jjSumUnpl.className = `px-3 py-2.5 text-right font-bold ${jjUnplSum >= 0 ? posColor : negColor}`;
       }
 
       const jjSumDiv = document.getElementById('th-jj-sum-div');
@@ -325,8 +331,11 @@ window.ThaiHubView = {
   },
 
   _generateTableRowHtml(item) {
+    const isLight = document.documentElement.getAttribute('data-theme') === 'light';
     const isUnplPos = (item.unrealized_pl || 0) >= 0;
-    const unplClass = isUnplPos ? 'text-emerald-400 font-semibold' : 'text-rose-400 font-semibold';
+    const posColor = isLight ? 'text-emerald-700 font-semibold' : 'text-emerald-400 font-semibold';
+    const negColor = isLight ? 'text-rose-700 font-semibold' : 'text-rose-400 font-semibold';
+    const unplClass = isUnplPos ? posColor : negColor;
 
     const consensus = (item.note_consensus || 'Hold').trim();
     let consensusClass = 'hold';
@@ -343,13 +352,13 @@ window.ThaiHubView = {
     return `
       <tr class="hover:bg-slate-800/30 transition-colors border-b border-gray-800/60 text-xs">
         <td class="px-3 py-2.5 font-bold">
-          <span class="text-cyan-400 font-mono">${item.symbol}</span>
+          <span class="th-stock-symbol font-semibold">${item.symbol}</span>
         </td>
-        <td class="px-3 py-2.5 text-right font-mono text-gray-300">${window.formatCurrency(item.quantity)}</td>
-        <td class="px-3 py-2.5 text-right font-mono text-gray-300">${window.formatNumber(item.avg_cost_price)}</td>
-        <td class="px-3 py-2.5 text-right font-mono text-gray-100 font-semibold">${window.formatNumber(item.current_price)}</td>
-        <td class="px-3 py-2.5 text-right font-mono text-gray-100 font-bold">฿${window.formatCurrency(item.market_value)}</td>
-        <td class="px-3 py-2.5 text-right font-mono ${unplClass}">
+        <td class="px-3 py-2.5 text-right th-stock-sec">${window.formatCurrency(item.quantity)}</td>
+        <td class="px-3 py-2.5 text-right th-stock-sec">${window.formatNumber(item.avg_cost_price)}</td>
+        <td class="px-3 py-2.5 text-right th-stock-price font-semibold">${window.formatNumber(item.current_price)}</td>
+        <td class="px-3 py-2.5 text-right th-stock-mv font-bold">฿${window.formatCurrency(item.market_value)}</td>
+        <td class="px-3 py-2.5 text-right ${unplClass}">
           ${isUnplPos ? '+' : ''}฿${window.formatCurrency(item.unrealized_pl)}
           <span class="text-[10px] block opacity-80">${isUnplPos ? '+' : ''}${window.formatNumber(item.unrealized_pl_pct)}%</span>
         </td>
@@ -360,9 +369,9 @@ window.ThaiHubView = {
             data-symbol="${item.symbol}" 
             value="${Number(item.expected_dps).toFixed(2)}">
         </td>
-        <td class="px-3 py-2.5 text-right font-mono text-emerald-400 font-bold">฿${window.formatCurrency(item.yearly_expected_dividend)}</td>
-        <td class="px-3 py-2.5 text-right font-mono text-gray-300 font-semibold">${window.formatNumber(item.yield_on_cost)}%</td>
-        <td class="px-3 py-2.5 text-right font-mono text-gray-300 font-semibold">${window.formatNumber(item.current_price_yield)}%</td>
+        <td class="px-3 py-2.5 text-right text-emerald-400 font-bold">฿${window.formatCurrency(item.yearly_expected_dividend)}</td>
+        <td class="px-3 py-2.5 text-right th-stock-sec font-semibold">${window.formatNumber(item.yield_on_cost)}%</td>
+        <td class="px-3 py-2.5 text-right th-stock-sec font-semibold">${window.formatNumber(item.current_price_yield)}%</td>
         <td class="px-3 py-2.5 text-center">
           <select class="th-select-consensus ${consensusClass}" data-account="${item.account}" data-symbol="${item.symbol}">
             <option value="Buy" ${consensus === 'Buy' ? 'selected' : ''}>🟢 Buy</option>
@@ -491,7 +500,7 @@ window.ThaiHubView = {
     }
   },
 
-  // ZONE 3: EQUAL-SIZED PIE CHARTS (BY MARKET VALUE, NO LEGEND, IN-SLICE LABELS)
+  // ZONE 3: EQUAL-SIZED MONOTONE PIE CHARTS (BY MARKET VALUE, NO LEGEND, IN-SLICE LABELS, TOP-LAYER TOOLTIPS)
   renderCharts(data) {
     if (!data) data = this.getAggregatedData();
     if (!data) return;
@@ -499,10 +508,10 @@ window.ThaiHubView = {
     const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
     const borderColor = isDark ? '#16191E' : '#FFFFFF';
 
-    // Custom In-Slice Labels Plugin
+    // In-Slice Labels Plugin attached to afterDatasetsDraw so tooltips render on TOP of the canvas text!
     const inSliceLabelsPlugin = {
       id: 'inSliceLabels',
-      afterDraw(chart) {
+      afterDatasetsDraw(chart) {
         const { ctx, data: chartData } = chart;
         const meta = chart.getDatasetMeta(0);
         if (!meta || !meta.data) return;
@@ -522,7 +531,7 @@ window.ThaiHubView = {
           if (pct >= 4.5) {
             const { x, y } = element.tooltipPosition();
             ctx.fillStyle = '#FFFFFF';
-            ctx.shadowColor = 'rgba(0, 0, 0, 0.85)';
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.9)';
             ctx.shadowBlur = 4;
             ctx.fillText(chartData.labels[index], x, y);
           }
@@ -531,11 +540,20 @@ window.ThaiHubView = {
       }
     };
 
-    const colors = [
-      '#06B6D4', '#10B981', '#F59E0B', '#6366F1', '#EC4899',
-      '#8B5CF6', '#14B8A6', '#F97316', '#3B82F6', '#84CC16',
-      '#64748B', '#A855F7', '#E11D48', '#0EA5E9', '#D97706',
-      '#4ADE80', '#F43F5E'
+    // Monotone Blue/Cyan Shades for PP
+    const ppMonotoneColors = [
+      '#0284C7', '#0EA5E9', '#38BDF8', '#06B6D4', '#22D3EE',
+      '#67E8F9', '#0369A1', '#075985', '#155E75', '#164E63',
+      '#60A5FA', '#3B82F6', '#2563EB', '#1D4ED8', '#1E40AF',
+      '#1E3A8A', '#93C5FD'
+    ];
+
+    // Monotone Amber/Bronze/Warm Gold Shades for JJ
+    const jjMonotoneColors = [
+      '#D97706', '#B45309', '#92400E', '#78350F', '#F59E0B',
+      '#FBBF24', '#FCD34D', '#EA580C', '#C2410C', '#9A3412',
+      '#7C2D12', '#CA8A04', '#A16207', '#854D0E', '#713F12',
+      '#EAB308', '#FEF08A'
     ];
 
     // 1. PP Pie Chart (Weighted by Market Value)
@@ -554,7 +572,7 @@ window.ThaiHubView = {
           labels: labels,
           datasets: [{
             data: values,
-            backgroundColor: colors.slice(0, labels.length),
+            backgroundColor: ppMonotoneColors.slice(0, labels.length),
             borderWidth: 1.5,
             borderColor: borderColor
           }]
@@ -595,7 +613,7 @@ window.ThaiHubView = {
           labels: labels,
           datasets: [{
             data: values,
-            backgroundColor: colors.slice(0, labels.length),
+            backgroundColor: jjMonotoneColors.slice(0, labels.length),
             borderWidth: 1.5,
             borderColor: borderColor
           }]
@@ -621,7 +639,7 @@ window.ThaiHubView = {
     }
   },
 
-  // ZONE 5: DIVIDEND DRIP & WEALTH RETIREMENT SIMULATOR
+  // ZONE 5: DIVIDEND DRIP & WEALTH RETIREMENT SIMULATOR (REINVEST + DCA ONLY)
   renderDRIPSimulation(data) {
     if (!data) data = this.getAggregatedData();
     if (!data) return;
@@ -633,7 +651,6 @@ window.ThaiHubView = {
     const monthlyDCA = Number(document.getElementById('th-sim-dca')?.value || 15000);
     const stepUpRate = Number(document.getElementById('th-sim-stepup')?.value || 3.0) / 100;
     const divYieldRate = Number(document.getElementById('th-sim-yield')?.value || 4.6) / 100;
-    const capGrowthRate = Number(document.getElementById('th-sim-growth')?.value || 4.0) / 100;
     const isDRIP = document.getElementById('drip-toggle')?.checked ?? true;
 
     const years = Math.max(1, targetAge - currentAge);
@@ -661,13 +678,13 @@ window.ThaiHubView = {
         const annualDCA = (monthlyDCA * 12) * Math.pow(1 + stepUpRate, yr - 1);
         runningCapitalCost += annualDCA;
 
+        // Stock prices don't appreciate by assumption (Growth = 0%); growth is purely from DRIP + DCA
         const yearDiv = runningPortfolioValue * divYieldRate;
-        const capitalGain = runningPortfolioValue * capGrowthRate;
 
         if (isDRIP) {
-          runningPortfolioValue = runningPortfolioValue + capitalGain + yearDiv + annualDCA;
+          runningPortfolioValue = runningPortfolioValue + yearDiv + annualDCA;
         } else {
-          runningPortfolioValue = runningPortfolioValue + capitalGain + annualDCA;
+          runningPortfolioValue = runningPortfolioValue + annualDCA;
         }
 
         portfolioProjection.push(Math.round(runningPortfolioValue));
@@ -695,7 +712,7 @@ window.ThaiHubView = {
     const resYocEl = document.getElementById('drip-result-future-yoc');
     if (resYocEl) resYocEl.innerText = `YoC: ${window.formatNumber(futureYoC)}%`;
 
-    // Render Trajectory Chart
+    // Render Trajectory Chart with Line-style Legends
     const ctx = document.getElementById('dripTrajectoryChart')?.getContext('2d');
     if (!ctx) return;
 
@@ -748,8 +765,11 @@ window.ThaiHubView = {
         plugins: {
           legend: {
             labels: {
-              color: isDark ? '#F9FAFB' : '#111827',
-              font: { family: 'Inter', size: 11 }
+              color: isDark ? '#F9FAFB' : '#0F172A',
+              font: { family: 'Inter', size: 11 },
+              usePointStyle: true,
+              pointStyle: 'line',
+              pointStyleWidth: 24
             }
           },
           tooltip: {
@@ -784,7 +804,7 @@ window.ThaiHubView = {
             position: 'right',
             grid: { drawOnChartArea: false },
             ticks: {
-              color: '#F59E0B',
+              color: isDark ? '#F59E0B' : '#B45309',
               font: { family: 'Inter', size: 10 },
               callback: (val) => `฿${window.formatCurrency(val)}`
             }
