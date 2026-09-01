@@ -22,7 +22,7 @@
         <h1 class="brand-title">Family Investment Portfolio</h1>
         <p class="text-xs text-gray-400 font-normal flex items-center gap-1.5">
           <span>PP &amp; JJ Wealth Growth Engine</span>
-          <span class="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-cyan-950/80 text-cyan-400 border border-cyan-800/60">v3.4.1</span>
+          <span class="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-cyan-950/80 text-cyan-400 border border-cyan-800/60">v3.4.2</span>
         </p>
       </div>
     </div>
@@ -715,6 +715,7 @@
                   <th class="px-3 py-2.5 text-right th-sortable-th" data-sort="current_price">Price <span class="th-sort-icon">⇅</span></th>
                   <th class="px-3 py-2.5 text-right th-sortable-th" data-sort="market_value">Market Value <span class="th-sort-icon">⇅</span></th>
                   <th class="px-3 py-2.5 text-right th-sortable-th" data-sort="unrealized_pl">Unrealized P&amp;L <span class="th-sort-icon">⇅</span></th>
+                  <th class="px-3 py-2.5 text-right th-sortable-th" data-sort="historical_net_gain">Net Gain <span class="th-sort-icon">⇅</span></th>
                   <th class="px-3 py-2.5 text-center bg-amber-950/30 text-amber-300 th-sortable-th" data-sort="expected_dps">Exp. DPS ✏️ <span class="th-sort-icon">⇅</span></th>
                   <th class="px-3 py-2.5 text-right text-emerald-400 th-sortable-th" data-sort="yearly_expected_dividend">Exp. Div/Yr <span class="th-sort-icon">⇅</span></th>
                   <th class="px-3 py-2.5 text-right th-sortable-th" data-sort="yield_on_cost">YoC % <span class="th-sort-icon">⇅</span></th>
@@ -729,6 +730,7 @@
                   <td class="px-3 py-2.5 text-right">-</td>
                   <td id="th-pp-sum-mv" class="px-3 py-2.5 text-right text-emerald-400">฿0</td>
                   <td id="th-pp-sum-unpl" class="px-3 py-2.5 text-right">฿0</td>
+                  <td id="th-pp-sum-netgain" class="px-3 py-2.5 text-right">฿0</td>
                   <td class="px-3 py-2.5 text-center">-</td>
                   <td id="th-pp-sum-div" class="px-3 py-2.5 text-right text-emerald-400">฿0</td>
                   <td id="th-pp-sum-yoc" class="px-3 py-2.5 text-right">0.00%</td>
@@ -762,6 +764,7 @@
                   <th class="px-3 py-2.5 text-right th-sortable-th" data-sort="current_price">Price <span class="th-sort-icon">⇅</span></th>
                   <th class="px-3 py-2.5 text-right th-sortable-th" data-sort="market_value">Market Value <span class="th-sort-icon">⇅</span></th>
                   <th class="px-3 py-2.5 text-right th-sortable-th" data-sort="unrealized_pl">Unrealized P&amp;L <span class="th-sort-icon">⇅</span></th>
+                  <th class="px-3 py-2.5 text-right th-sortable-th" data-sort="historical_net_gain">Net Gain <span class="th-sort-icon">⇅</span></th>
                   <th class="px-3 py-2.5 text-center bg-amber-950/30 text-amber-300 th-sortable-th" data-sort="expected_dps">Exp. DPS ✏️ <span class="th-sort-icon">⇅</span></th>
                   <th class="px-3 py-2.5 text-right text-emerald-400 th-sortable-th" data-sort="yearly_expected_dividend">Exp. Div/Yr <span class="th-sort-icon">⇅</span></th>
                   <th class="px-3 py-2.5 text-right th-sortable-th" data-sort="yield_on_cost">YoC % <span class="th-sort-icon">⇅</span></th>
@@ -776,6 +779,7 @@
                   <td class="px-3 py-2.5 text-right">-</td>
                   <td id="th-jj-sum-mv" class="px-3 py-2.5 text-right text-emerald-400">฿0</td>
                   <td id="th-jj-sum-unpl" class="px-3 py-2.5 text-right">฿0</td>
+                  <td id="th-jj-sum-netgain" class="px-3 py-2.5 text-right">฿0</td>
                   <td class="px-3 py-2.5 text-center">-</td>
                   <td id="th-jj-sum-div" class="px-3 py-2.5 text-right text-emerald-400">฿0</td>
                   <td id="th-jj-sum-yoc" class="px-3 py-2.5 text-right">0.00%</td>

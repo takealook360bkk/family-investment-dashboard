@@ -37,6 +37,12 @@ The project is built around a hybrid architecture using Google Sheets as the pri
 - **Security**: Google Identity Services (OAuth 2.0).
 
 ## Version Log
+- **Version 3.4.2** *(September 1, 2026)*: View 5 Thai Stock Hub — Unrealized P&L % Precision Bug Fix & Historical Net Gain Column Integration.
+  - **Unrealized P&L % Bug Fix**: Resolved decimal ratio scaling bug in View 5 table where percentages were rendered without scale conversion (displaying 100x smaller, e.g. +0.01% instead of +1.24%). All `% Unrealized P&L` values are now accurately computed directly against total cost or scaled from API data.
+  - **Historical Net Gain & Net Gain % Column**: Added dedicated "Net Gain" column placed immediately to the right of Unrealized P&L in both PP and JJ Thai Stock Holdings tables (stacked 2-row layout with amount in ฿ and percentage in %, color-coded by positive/negative profit).
+  - **Table Summary Aggregation**: Added Historical Net Gain totals in sticky summary header rows (`Total PP` and `Total JJ`).
+  - **Interactive Sorting**: Added column sorting support for `historical_net_gain` across both dual tables.
+
 - **Version 3.4.1** *(August 30, 2026)*: View 5 Thai Stock Hub — Visual Overhaul, Monotone Pie Charts, Dual-Table Sort, and Light Theme Restoration.
   - **Demo Data Privacy**: Replaced all Thai stock demo data in `state.js` with anonymized, randomized SET tickers (`MC`, `FTREIT`, `ICHI`, `KCG`, `BDMS`, `TISCO`, `KJL`, `HTC`, `SABINA`, etc.) and reduced total portfolio valuation to ~฿488K to prevent information leakage.
   - **Card Header Cleanup**: Removed all emoji icons from all Card headers in View 5 for a cleaner, professional typographic look.

@@ -119,8 +119,30 @@ window.ThaiHubView = {
       const yield_on_cost = item.avg_cost_price > 0 ? (expected_dps / item.avg_cost_price * 100) : 0;
       const current_price_yield = item.current_price > 0 ? (expected_dps / item.current_price * 100) : 0;
 
+      // Fix v3.4.2: Ensure unrealized_pl_pct and net_gain_pct are accurately calculated as percentages (0-100 scale)
+      const total_cost = Number(item.total_cost || 0);
+      const unrealized_pl = item.unrealized_pl !== undefined ? Number(item.unrealized_pl) : (Number(item.market_value || 0) - total_cost);
+      let unrealized_pl_pct = 0;
+      if (total_cost > 0) {
+        unrealized_pl_pct = (unrealized_pl / total_cost) * 100;
+      } else if (item.unrealized_pl_pct !== undefined) {
+        unrealized_pl_pct = Math.abs(item.unrealized_pl_pct) <= 1 && item.unrealized_pl_pct !== 0 ? item.unrealized_pl_pct * 100 : Number(item.unrealized_pl_pct || 0);
+      }
+
+      const historical_net_gain = Number(item.historical_net_gain !== undefined ? item.historical_net_gain : unrealized_pl);
+      let net_gain_pct = 0;
+      if (total_cost > 0) {
+        net_gain_pct = (historical_net_gain / total_cost) * 100;
+      } else if (item.net_gain_pct !== undefined) {
+        net_gain_pct = Math.abs(item.net_gain_pct) <= 1 && item.net_gain_pct !== 0 ? item.net_gain_pct * 100 : Number(item.net_gain_pct || 0);
+      }
+
       return {
         ...item,
+        unrealized_pl,
+        unrealized_pl_pct,
+        historical_net_gain,
+        net_gain_pct,
         expected_dps,
         yearly_expected_dividend,
         yield_on_cost,
@@ -290,6 +312,7 @@ window.ThaiHubView = {
       let ppQtySum = 0;
       let ppMvSum = 0;
       let ppUnplSum = 0;
+      let ppNetGainSum = 0;
       let ppDivSum = 0;
       let ppCostSum = 0;
 
@@ -297,6 +320,7 @@ window.ThaiHubView = {
         ppQtySum += (item.quantity || 0);
         ppMvSum += (item.market_value || 0);
         ppUnplSum += (item.unrealized_pl || 0);
+        ppNetGainSum += (item.historical_net_gain || 0);
         ppDivSum += (item.yearly_expected_dividend || 0);
         ppCostSum += (item.total_cost || 0);
 
@@ -323,6 +347,14 @@ window.ThaiHubView = {
         ppSumUnpl.className = `px-3 py-2.5 text-right font-bold ${ppUnplSum >= 0 ? posColor : negColor}`;
       }
 
+      const ppSumNetGain = document.getElementById('th-pp-sum-netgain');
+      if (ppSumNetGain) {
+        ppSumNetGain.innerText = `${ppNetGainSum >= 0 ? '+' : ''}฿${window.formatCurrency(ppNetGainSum)}`;
+        const posColor = isLight ? 'text-emerald-700' : 'text-emerald-400';
+        const negColor = isLight ? 'text-rose-700' : 'text-rose-400';
+        ppSumNetGain.className = `px-3 py-2.5 text-right font-bold ${ppNetGainSum >= 0 ? posColor : negColor}`;
+      }
+
       const ppSumDiv = document.getElementById('th-pp-sum-div');
       if (ppSumDiv) ppSumDiv.innerText = `฿${window.formatCurrency(ppDivSum)}`;
 
@@ -342,6 +374,7 @@ window.ThaiHubView = {
       let jjQtySum = 0;
       let jjMvSum = 0;
       let jjUnplSum = 0;
+      let jjNetGainSum = 0;
       let jjDivSum = 0;
       let jjCostSum = 0;
 
@@ -349,6 +382,7 @@ window.ThaiHubView = {
         jjQtySum += (item.quantity || 0);
         jjMvSum += (item.market_value || 0);
         jjUnplSum += (item.unrealized_pl || 0);
+        jjNetGainSum += (item.historical_net_gain || 0);
         jjDivSum += (item.yearly_expected_dividend || 0);
         jjCostSum += (item.total_cost || 0);
 
@@ -375,6 +409,14 @@ window.ThaiHubView = {
         jjSumUnpl.className = `px-3 py-2.5 text-right font-bold ${jjUnplSum >= 0 ? posColor : negColor}`;
       }
 
+      const jjSumNetGain = document.getElementById('th-jj-sum-netgain');
+      if (jjSumNetGain) {
+        jjSumNetGain.innerText = `${jjNetGainSum >= 0 ? '+' : ''}฿${window.formatCurrency(jjNetGainSum)}`;
+        const posColor = isLight ? 'text-emerald-700' : 'text-emerald-400';
+        const negColor = isLight ? 'text-rose-700' : 'text-rose-400';
+        jjSumNetGain.className = `px-3 py-2.5 text-right font-bold ${jjNetGainSum >= 0 ? posColor : negColor}`;
+      }
+
       const jjSumDiv = document.getElementById('th-jj-sum-div');
       if (jjSumDiv) jjSumDiv.innerText = `฿${window.formatCurrency(jjDivSum)}`;
 
@@ -393,9 +435,11 @@ window.ThaiHubView = {
   _generateTableRowHtml(item) {
     const isLight = document.documentElement.getAttribute('data-theme') === 'light';
     const isUnplPos = (item.unrealized_pl || 0) >= 0;
+    const isNetGainPos = (item.historical_net_gain || 0) >= 0;
     const posColor = isLight ? 'text-emerald-700 font-semibold' : 'text-emerald-400 font-semibold';
     const negColor = isLight ? 'text-rose-700 font-semibold' : 'text-rose-400 font-semibold';
     const unplClass = isUnplPos ? posColor : negColor;
+    const netGainClass = isNetGainPos ? posColor : negColor;
 
     const consensus = (item.note_consensus || 'Hold').trim();
     let consensusClass = 'hold';
@@ -421,6 +465,10 @@ window.ThaiHubView = {
         <td class="px-3 py-2.5 text-right ${unplClass}">
           ${isUnplPos ? '+' : ''}฿${window.formatCurrency(item.unrealized_pl)}
           <span class="text-[10px] block opacity-80">${isUnplPos ? '+' : ''}${window.formatNumber(item.unrealized_pl_pct)}%</span>
+        </td>
+        <td class="px-3 py-2.5 text-right ${netGainClass}">
+          ${isNetGainPos ? '+' : ''}฿${window.formatCurrency(item.historical_net_gain)}
+          <span class="text-[10px] block opacity-80">${isNetGainPos ? '+' : ''}${window.formatNumber(item.net_gain_pct)}%</span>
         </td>
         <td class="px-3 py-2.5 text-center">
           <input type="number" step="0.01" min="0" 
