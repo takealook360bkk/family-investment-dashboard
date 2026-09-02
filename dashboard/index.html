@@ -1,17 +1,21 @@
 <!DOCTYPE html>
 <html lang="th">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Family Investment Portfolio Dashboard</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Prompt:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="css/styles.css">
 </head>
+
 <body>
 
   <!-- Top Navigation Header -->
@@ -22,15 +26,19 @@
         <h1 class="brand-title">Family Investment Portfolio</h1>
         <p class="text-xs text-gray-400 font-normal flex items-center gap-1.5">
           <span>PP &amp; JJ Wealth Growth Engine</span>
-          <span class="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-cyan-950/80 text-cyan-400 border border-cyan-800/60">v3.4.2</span>
+          <span
+            class="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-cyan-950/80 text-cyan-400 border border-cyan-800/60">v3.4.2</span>
         </p>
       </div>
     </div>
     <nav class="nav-tabs">
       <button class="nav-tab-btn active" data-view="view-overview"><span>✨</span> Overview</button>
-      <button class="nav-tab-btn" data-view="view-allocation"><span>📊</span> Allocation <span class="hidden sm:inline">&amp; Holdings</span></button>
-      <button class="nav-tab-btn" data-view="view-owner"><span>⚔️</span> Owner Race <span class="hidden sm:inline">(PP vs JJ)</span></button>
-      <button class="nav-tab-btn" data-view="view-simulator"><span>🚀</span> <span class="hidden sm:inline">Retirement </span>Simulator</button>
+      <button class="nav-tab-btn" data-view="view-allocation"><span>📊</span> Allocation <span
+          class="hidden sm:inline">&amp; Holdings</span></button>
+      <button class="nav-tab-btn" data-view="view-owner"><span>⚔️</span> Owner Race <span class="hidden sm:inline">(PP
+          vs JJ)</span></button>
+      <button class="nav-tab-btn" data-view="view-simulator"><span>🚀</span> <span class="hidden sm:inline">Retirement
+        </span>Simulator</button>
       <button class="nav-tab-btn" data-view="view-thai-hub"><span>🇹🇭</span> Thai Stock Hub</button>
     </nav>
     <div class="auth-controls">
@@ -38,7 +46,8 @@
       <button id="btn-theme-toggle" class="theme-toggle-btn" aria-label="Toggle theme">
         <div class="theme-toggle-slider"></div>
         <span class="theme-icon sun">
-          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="12" r="5"></circle>
             <line x1="12" y1="1" x2="12" y2="3"></line>
             <line x1="12" y1="21" x2="12" y2="23"></line>
@@ -51,7 +60,8 @@
           </svg>
         </span>
         <span class="theme-icon moon">
-          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
             <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
           </svg>
         </span>
@@ -59,10 +69,14 @@
 
       <button id="btn-google-login" class="btn-google">
         <svg class="w-4 h-4" viewBox="0 0 24 24">
-          <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-          <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-          <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
-          <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+          <path fill="#4285F4"
+            d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+          <path fill="#34A853"
+            d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+          <path fill="#FBBC05"
+            d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" />
+          <path fill="#EA4335"
+            d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" />
         </svg>
         Sign in with Google
       </button>
@@ -78,12 +92,14 @@
   <div id="demo-mode-banner" class="demo-banner" style="display: none;">
     <div class="flex items-center gap-2">
       <span>💡</span>
-      <span><strong>Demo Mode Active:</strong> กำลังแสดงข้อมูลจำลอง — กด Sign in with Google เพื่อดึงข้อมูลจริงจาก Google Sheet</span>
+      <span><strong>Demo Mode Active:</strong> กำลังแสดงข้อมูลจำลอง — กด Sign in with Google เพื่อดึงข้อมูลจริงจาก
+        Google Sheet</span>
     </div>
   </div>
 
   <!-- Loading Overlay -->
-  <div id="global-loading-spinner" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center" style="display: none;">
+  <div id="global-loading-spinner"
+    class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center" style="display: none;">
     <div class="text-center">
       <div class="w-12 h-12 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
       <p class="text-gray-300 font-medium text-sm">กำลังโหลดข้อมูลพอร์ตการลงทุน...</p>
@@ -157,17 +173,23 @@
             <div class="milestone-param-card flex items-center gap-1.5 px-3 py-1.5 rounded-lg border">
               <span class="milestone-param-label text-xs">เป้าหมายเกษียณ (฿):</span>
               <!-- v3.1 Update: Default to 27,500,000 -->
-              <input id="milestone-target-input" type="text" class="milestone-param-input bg-transparent text-xs font-bold w-28 outline-none border-b" value="27,500,000">
+              <input id="milestone-target-input" type="text"
+                class="milestone-param-input bg-transparent text-xs font-bold w-28 outline-none border-b"
+                value="27,500,000">
             </div>
             <div class="milestone-param-card flex items-center gap-1.5 px-3 py-1.5 rounded-lg border">
               <span class="milestone-param-label text-xs">ผลตอบแทนคาดหวัง (% p.a.):</span>
               <!-- v3.1 Update: Default to 5.0 -->
-              <input id="milestone-return-input" type="number" class="milestone-param-input bg-transparent text-xs font-bold w-12 outline-none border-b" value="5.0" step="0.5">
+              <input id="milestone-return-input" type="number"
+                class="milestone-param-input bg-transparent text-xs font-bold w-12 outline-none border-b" value="5.0"
+                step="0.5">
             </div>
             <div class="milestone-param-card flex items-center gap-1.5 px-3 py-1.5 rounded-lg border">
               <span class="milestone-param-label text-xs">ปีที่เหลือก่อนเกษียณ:</span>
               <!-- v3.1 Update: Default to 20 -->
-              <input id="milestone-years-input" type="number" class="milestone-param-input bg-transparent text-xs font-bold w-10 outline-none border-b" value="20" step="1">
+              <input id="milestone-years-input" type="number"
+                class="milestone-param-input bg-transparent text-xs font-bold w-10 outline-none border-b" value="20"
+                step="1">
             </div>
           </div>
         </div>
@@ -175,8 +197,10 @@
           <div id="milestone-progress-bar" class="progress-fill" style="width: 0%;"></div>
         </div>
         <div class="flex justify-between items-center text-xs mt-1">
-          <span class="milestone-subtext text-gray-300 font-medium">FV ของพอร์ตปัจจุบัน คิดเป็น <strong id="milestone-progress-pct" class="text-cyan-400 font-bold">0.0%</strong> ของเป้าหมาย</span>
-          <span class="milestone-subtext-right text-gray-400">FV พอร์ตปัจจุบัน (ยังไม่ออม): <strong id="milestone-fv-val" class="text-emerald-300 font-bold">฿0</strong></span>
+          <span class="milestone-subtext text-gray-300 font-medium">FV ของพอร์ตปัจจุบัน คิดเป็น <strong
+              id="milestone-progress-pct" class="text-cyan-400 font-bold">0.0%</strong> ของเป้าหมาย</span>
+          <span class="milestone-subtext-right text-gray-400">FV พอร์ตปัจจุบัน (ยังไม่ออม): <strong
+              id="milestone-fv-val" class="text-emerald-300 font-bold">฿0</strong></span>
         </div>
       </div>
 
@@ -204,7 +228,8 @@
         <div class="flex flex-wrap items-center justify-between mb-3 gap-3">
           <div>
             <h3 id="savings-inflow-title" class="chart-title">Monthly Savings Inflow (เงินออมเติมใหม่รายเดือน)</h3>
-            <p id="savings-inflow-sub" class="text-xs text-gray-400">วินัยการเติมเงินออมเพิ่มในแต่ละเดือน (ย้อนหลังตามช่วงเวลาที่เลือก)</p>
+            <p id="savings-inflow-sub" class="text-xs text-gray-400">วินัยการเติมเงินออมเพิ่มในแต่ละเดือน
+              (ย้อนหลังตามช่วงเวลาที่เลือก)</p>
           </div>
           <div class="flex gap-1.5 bg-slate-900/60 p-1 rounded-xl border border-gray-800">
             <button class="chart-range-btn active" data-inflow-mode="monthly">Monthly</button>
@@ -245,7 +270,8 @@
             <h3 class="view-section-header text-base font-bold flex items-center gap-2">
               <span>📈</span> Asset Class Allocation History (วิวัฒนาการสัดส่วนสินทรัพย์ตามกาลเวลา)
             </h3>
-            <p class="text-xs text-gray-400">กราฟพื้นที่ซ้อนกัน (Stacked Area Chart) แสดงการเติบโตและการปรับพอร์ตของแต่ละประเภทสินทรัพย์ตั้งแต่อดีตจนถึงปัจจุบัน</p>
+            <p class="text-xs text-gray-400">กราฟพื้นที่ซ้อนกัน (Stacked Area Chart)
+              แสดงการเติบโตและการปรับพอร์ตของแต่ละประเภทสินทรัพย์ตั้งแต่อดีตจนถึงปัจจุบัน</p>
           </div>
           <div class="flex gap-1.5 bg-slate-900/60 p-1 rounded-xl border border-gray-800">
             <button class="chart-range-btn active" data-range="ALL" data-chart="asset-history">ALL</button>
@@ -254,7 +280,7 @@
             <button class="chart-range-btn" data-range="1Y" data-chart="asset-history">1Y</button>
           </div>
         </div>
-        <div style="height:380px; position:relative;">
+        <div style="height:520px; position:relative;">
           <canvas id="assetHistoryChart"></canvas>
         </div>
       </div>
@@ -265,7 +291,9 @@
           <div>
             <h3 class="view-section-header text-base font-bold flex items-center gap-2">
               <span>📋</span> Asset Performance & Holdings
-              <span id="asset-count-badge" class="ml-2 px-2.5 py-0.5 bg-cyan-950/60 border border-cyan-500/30 text-cyan-300 text-xs font-semibold rounded-lg">0 Assets</span>
+              <span id="asset-count-badge"
+                class="ml-2 px-2.5 py-0.5 bg-cyan-950/60 border border-cyan-500/30 text-cyan-300 text-xs font-semibold rounded-lg">0
+                Assets</span>
             </h3>
             <p class="text-xs text-gray-400">รายละเอียดรายการสินทรัพย์ ราคาตลาด ต้นทุนเฉลี่ย และกำไรขาดทุน</p>
           </div>
@@ -274,21 +302,27 @@
           <div class="flex flex-wrap items-center gap-2">
             <!-- Owner Filter -->
             <div class="flex bg-slate-900/80 p-0.5 rounded-lg border border-gray-800 text-xs">
-              <button class="alloc-owner-btn px-3 py-1 rounded-md font-semibold text-gray-300 active" data-owner="TOTAL">Family</button>
-              <button class="alloc-owner-btn px-3 py-1 rounded-md font-semibold text-cyan-400" data-owner="PP">PP</button>
-              <button class="alloc-owner-btn px-3 py-1 rounded-md font-semibold text-amber-400" data-owner="JJ">JJ</button>
+              <button class="alloc-owner-btn px-3 py-1 rounded-md font-semibold text-gray-300 active"
+                data-owner="TOTAL">Family</button>
+              <button class="alloc-owner-btn px-3 py-1 rounded-md font-semibold text-cyan-400"
+                data-owner="PP">PP</button>
+              <button class="alloc-owner-btn px-3 py-1 rounded-md font-semibold text-amber-400"
+                data-owner="JJ">JJ</button>
             </div>
             <!-- Class Filter -->
             <div class="relative z-30">
-              <button id="class-filter-btn" class="flex items-center gap-1.5 px-3 py-1.5 bg-slate-900/80 border border-gray-800 rounded-lg text-xs text-gray-300 hover:border-cyan-500 transition-all">
+              <button id="class-filter-btn"
+                class="flex items-center gap-1.5 px-3 py-1.5 bg-slate-900/80 border border-gray-800 rounded-lg text-xs text-gray-300 hover:border-cyan-500 transition-all">
                 <span>🔽</span> Asset Class
               </button>
-              <div id="class-filter-dropdown" class="hidden absolute right-0 top-10 z-50 bg-slate-900 border border-gray-700 rounded-xl p-3 min-w-[180px] shadow-2xl">
+              <div id="class-filter-dropdown"
+                class="hidden absolute right-0 top-10 z-50 bg-slate-900 border border-gray-700 rounded-xl p-3 min-w-[180px] shadow-2xl">
                 <div id="class-filter-options" class="flex flex-col gap-1.5"></div>
               </div>
             </div>
             <!-- Search -->
-            <input id="asset-search-input" type="text" placeholder="🔍 ค้นหา..." class="bg-slate-900/80 border border-gray-800 rounded-lg px-3 py-1.5 text-xs text-white outline-none focus:border-cyan-400 w-40">
+            <input id="asset-search-input" type="text" placeholder="🔍 ค้นหา..."
+              class="bg-slate-900/80 border border-gray-800 rounded-lg px-3 py-1.5 text-xs text-white outline-none focus:border-cyan-400 w-40">
           </div>
         </div>
 
@@ -297,17 +331,23 @@
           <table class="w-full text-left text-xs">
             <thead id="asset-holdings-thead" class="sticky top-0 z-20 backdrop-blur-md">
               <tr class="holdings-header-row bg-slate-900/95 text-gray-400 font-semibold border-b border-gray-800">
-                <th class="px-4 py-3 sortable-th" data-sort="asset_name">Asset Name <span class="sort-icon">⇅</span></th>
+                <th class="px-4 py-3 sortable-th" data-sort="asset_name">Asset Name <span class="sort-icon">⇅</span>
+                </th>
                 <th class="px-4 py-3 sortable-th" data-sort="class">Class <span class="sort-icon">⇅</span></th>
                 <th class="px-4 py-3 sortable-th" data-sort="owner">Owner <span class="sort-icon">⇅</span></th>
                 <th class="px-4 py-3 text-right">Units</th>
                 <th class="px-4 py-3 text-right">Avg Cost</th>
                 <th class="px-4 py-3 text-right">Price</th>
-                <th class="px-4 py-3 text-right sortable-th" data-sort="total_cost">Total Cost <span class="sort-icon">⇅</span></th>
-                <th class="px-4 py-3 text-right sortable-th active-sort" data-sort="market_value">Market Value <span class="sort-icon">▼</span></th>
-                <th class="px-4 py-3 text-right sortable-th" data-sort="unrealized_pl">Unrealized P&L <span class="sort-icon">⇅</span></th>
-                <th class="px-4 py-3 text-right sortable-th" data-sort="unrealized_pl_pct">Unrealized % <span class="sort-icon">⇅</span></th>
-                <th class="px-4 py-3 text-right sortable-th" data-sort="realized_pl">Realized P&L <span class="sort-icon">⇅</span></th>
+                <th class="px-4 py-3 text-right sortable-th" data-sort="total_cost">Total Cost <span
+                    class="sort-icon">⇅</span></th>
+                <th class="px-4 py-3 text-right sortable-th active-sort" data-sort="market_value">Market Value <span
+                    class="sort-icon">▼</span></th>
+                <th class="px-4 py-3 text-right sortable-th" data-sort="unrealized_pl">Unrealized P&L <span
+                    class="sort-icon">⇅</span></th>
+                <th class="px-4 py-3 text-right sortable-th" data-sort="unrealized_pl_pct">Unrealized % <span
+                    class="sort-icon">⇅</span></th>
+                <th class="px-4 py-3 text-right sortable-th" data-sort="realized_pl">Realized P&L <span
+                    class="sort-icon">⇅</span></th>
               </tr>
               <tr id="holdings-summary-row" class="font-bold border-b-2">
                 <td class="px-4 py-3">Total</td>
@@ -338,12 +378,19 @@
         <div class="flex items-center gap-2">
           <span class="portfolio-view-label text-sm font-semibold">มุมมองพอร์ต:</span>
           <div class="flex bg-slate-900/80 p-1 rounded-xl border border-gray-800">
-            <button class="owner-filter-btn px-4 py-1.5 text-xs font-semibold rounded-lg text-gray-300 hover:text-white transition-all active" data-owner="TOTAL">Total Family</button>
-            <button class="owner-filter-btn px-4 py-1.5 text-xs font-semibold rounded-lg text-cyan-400 hover:text-cyan-300 transition-all" data-owner="PP">PP Only</button>
-            <button class="owner-filter-btn px-4 py-1.5 text-xs font-semibold rounded-lg text-amber-400 hover:text-amber-300 transition-all" data-owner="JJ">JJ Only</button>
+            <button
+              class="owner-filter-btn px-4 py-1.5 text-xs font-semibold rounded-lg text-gray-300 hover:text-white transition-all active"
+              data-owner="TOTAL">Total Family</button>
+            <button
+              class="owner-filter-btn px-4 py-1.5 text-xs font-semibold rounded-lg text-cyan-400 hover:text-cyan-300 transition-all"
+              data-owner="PP">PP Only</button>
+            <button
+              class="owner-filter-btn px-4 py-1.5 text-xs font-semibold rounded-lg text-amber-400 hover:text-amber-300 transition-all"
+              data-owner="JJ">JJ Only</button>
           </div>
         </div>
-        <div id="race-leader-banner" class="px-4 py-2 bg-gradient-to-r from-amber-500/20 to-cyan-500/20 border border-amber-500/30 text-amber-300 font-bold text-sm rounded-xl">
+        <div id="race-leader-banner"
+          class="px-4 py-2 bg-gradient-to-r from-amber-500/20 to-cyan-500/20 border border-amber-500/30 text-amber-300 font-bold text-sm rounded-xl">
           🏆 PP vs JJ Competitive Savings Race
         </div>
       </div>
@@ -400,7 +447,8 @@
         <div class="flex flex-wrap items-center justify-between mb-3 gap-3">
           <div>
             <h3 class="chart-title">PP vs JJ Growth Race (กราฟเส้นแข่งขันเปรียบเทียบการออม)</h3>
-            <p class="text-xs text-gray-400">เส้นเงินต้นและมูลค่าพอร์ตของ PP และ JJ วิ่งคู่กันตั้งแต่เริ่มต้นถึงปัจจุบัน</p>
+            <p class="text-xs text-gray-400">เส้นเงินต้นและมูลค่าพอร์ตของ PP และ JJ วิ่งคู่กันตั้งแต่เริ่มต้นถึงปัจจุบัน
+            </p>
           </div>
           <div class="flex gap-1.5 bg-slate-900/60 p-1 rounded-xl border border-gray-800">
             <button class="chart-range-btn active" data-range="ALL" data-chart="race">ALL</button>
@@ -503,7 +551,8 @@
             </div>
           </div>
 
-          <p class="text-xs text-gray-500 mt-2">* ค่าใช้จ่ายหลังเกษียณคำนวณจากปัจจุบัน ทบต้นตามเงินเฟ้อจนถึงวันเกษียณ</p>
+          <p class="text-xs text-gray-500 mt-2">* ค่าใช้จ่ายหลังเกษียณคำนวณจากปัจจุบัน ทบต้นตามเงินเฟ้อจนถึงวันเกษียณ
+          </p>
         </div>
 
         <!-- Results & Chart -->
@@ -526,7 +575,8 @@
           <div class="glass-card p-5 flex-1">
             <div class="mb-3">
               <h3 class="chart-title">Retirement Freedom Projection (3 ช่วงชีวิต)</h3>
-              <p class="text-xs text-gray-400">Historical → Wealth Accumulation → Retirement Freedom (หักค่าใช้จ่ายปรับเงินเฟ้อทุกปี)</p>
+              <p class="text-xs text-gray-400">Historical → Wealth Accumulation → Retirement Freedom
+                (หักค่าใช้จ่ายปรับเงินเฟ้อทุกปี)</p>
             </div>
             <div style="height:380px; position:relative;">
               <canvas id="retirementSimChart"></canvas>
@@ -536,7 +586,7 @@
       </div>
 
     </section>
-    
+
     <!-- ===== VIEW 5: THAI STOCK HUB & DIVIDEND / DRIP SIMULATOR ===== -->
     <section id="view-thai-hub" class="view-container hidden">
 
@@ -702,26 +752,41 @@
           <div class="flex items-center justify-between mb-2">
             <h4 class="th-pp-card-title text-sm font-bold flex items-center gap-2">
               <span>PP Thai Stock Holdings</span>
-              <span id="th-pp-count-badge" class="px-2 py-0.5 rounded text-[11px] bg-cyan-950/60 border border-cyan-800/60 text-cyan-400">0 Stocks</span>
+              <span id="th-pp-count-badge"
+                class="px-2 py-0.5 rounded text-[11px] bg-cyan-950/60 border border-cyan-800/60 text-cyan-400">0
+                Stocks</span>
             </h4>
           </div>
           <div class="holdings-table-wrap">
             <table class="w-full text-left text-xs">
               <thead class="sticky top-0 z-20 backdrop-blur-md">
                 <tr class="holdings-header-row bg-slate-900/95 text-gray-400 font-semibold border-b border-gray-800">
-                  <th class="px-3 py-2.5 th-sortable-th active-sort" data-sort="symbol">Stock <span class="th-sort-icon">▲</span></th>
-                  <th class="px-3 py-2.5 text-right th-sortable-th" data-sort="quantity">Qty <span class="th-sort-icon">⇅</span></th>
-                  <th class="px-3 py-2.5 text-right th-sortable-th" data-sort="avg_cost_price">Avg Cost <span class="th-sort-icon">⇅</span></th>
-                  <th class="px-3 py-2.5 text-right th-sortable-th" data-sort="current_price">Price <span class="th-sort-icon">⇅</span></th>
-                  <th class="px-3 py-2.5 text-right th-sortable-th" data-sort="market_value">Market Value <span class="th-sort-icon">⇅</span></th>
-                  <th class="px-3 py-2.5 text-right th-sortable-th" data-sort="unrealized_pl">Unrealized P&amp;L <span class="th-sort-icon">⇅</span></th>
-                  <th class="px-3 py-2.5 text-right th-sortable-th" data-sort="historical_net_gain">Net Gain <span class="th-sort-icon">⇅</span></th>
-                  <th class="px-3 py-2.5 text-center bg-amber-950/30 text-amber-300 th-sortable-th" data-sort="expected_dps">Exp. DPS ✏️ <span class="th-sort-icon">⇅</span></th>
-                  <th class="px-3 py-2.5 text-right text-emerald-400 th-sortable-th" data-sort="yearly_expected_dividend">Exp. Div/Yr <span class="th-sort-icon">⇅</span></th>
-                  <th class="px-3 py-2.5 text-right th-sortable-th" data-sort="yield_on_cost">YoC % <span class="th-sort-icon">⇅</span></th>
-                  <th class="px-3 py-2.5 text-right th-sortable-th" data-sort="current_price_yield">Mkt Yield % <span class="th-sort-icon">⇅</span></th>
-                  <th class="px-3 py-2.5 text-center th-sortable-th" data-sort="note_consensus">Consensus ✏️ <span class="th-sort-icon">⇅</span></th>
-                  <th class="px-3 py-2.5 text-center th-sortable-th" data-sort="company_perform">Company Performance ✏️ <span class="th-sort-icon">⇅</span></th>
+                  <th class="px-3 py-2.5 th-sortable-th active-sort" data-sort="symbol">Stock <span
+                      class="th-sort-icon">▲</span></th>
+                  <th class="px-3 py-2.5 text-right th-sortable-th" data-sort="quantity">Qty <span
+                      class="th-sort-icon">⇅</span></th>
+                  <th class="px-3 py-2.5 text-right th-sortable-th" data-sort="avg_cost_price">Avg Cost <span
+                      class="th-sort-icon">⇅</span></th>
+                  <th class="px-3 py-2.5 text-right th-sortable-th" data-sort="current_price">Price <span
+                      class="th-sort-icon">⇅</span></th>
+                  <th class="px-3 py-2.5 text-right th-sortable-th" data-sort="market_value">Market Value <span
+                      class="th-sort-icon">⇅</span></th>
+                  <th class="px-3 py-2.5 text-right th-sortable-th" data-sort="unrealized_pl">Unrealized P&amp;L <span
+                      class="th-sort-icon">⇅</span></th>
+                  <th class="px-3 py-2.5 text-right th-sortable-th" data-sort="historical_net_gain">Net Gain <span
+                      class="th-sort-icon">⇅</span></th>
+                  <th class="px-3 py-2.5 text-center bg-amber-950/30 text-amber-300 th-sortable-th"
+                    data-sort="expected_dps">Exp. DPS ✏️ <span class="th-sort-icon">⇅</span></th>
+                  <th class="px-3 py-2.5 text-right text-emerald-400 th-sortable-th"
+                    data-sort="yearly_expected_dividend">Exp. Div/Yr <span class="th-sort-icon">⇅</span></th>
+                  <th class="px-3 py-2.5 text-right th-sortable-th" data-sort="yield_on_cost">YoC % <span
+                      class="th-sort-icon">⇅</span></th>
+                  <th class="px-3 py-2.5 text-right th-sortable-th" data-sort="current_price_yield">Mkt Yield % <span
+                      class="th-sort-icon">⇅</span></th>
+                  <th class="px-3 py-2.5 text-center th-sortable-th" data-sort="note_consensus">Consensus ✏️ <span
+                      class="th-sort-icon">⇅</span></th>
+                  <th class="px-3 py-2.5 text-center th-sortable-th" data-sort="company_perform">Company Performance ✏️
+                    <span class="th-sort-icon">⇅</span></th>
                 </tr>
                 <tr id="th-pp-summary-row" class="font-bold border-b-2">
                   <td class="px-3 py-2.5">Total PP</td>
@@ -751,26 +816,41 @@
           <div class="flex items-center justify-between mb-2">
             <h4 class="th-jj-card-title text-sm font-bold flex items-center gap-2">
               <span>JJ Thai Stock Holdings</span>
-              <span id="th-jj-count-badge" class="px-2 py-0.5 rounded text-[11px] bg-amber-950/60 border border-amber-800/60 text-amber-400">0 Stocks</span>
+              <span id="th-jj-count-badge"
+                class="px-2 py-0.5 rounded text-[11px] bg-amber-950/60 border border-amber-800/60 text-amber-400">0
+                Stocks</span>
             </h4>
           </div>
           <div class="holdings-table-wrap">
             <table class="w-full text-left text-xs">
               <thead class="sticky top-0 z-20 backdrop-blur-md">
                 <tr class="holdings-header-row bg-slate-900/95 text-gray-400 font-semibold border-b border-gray-800">
-                  <th class="px-3 py-2.5 th-sortable-th active-sort" data-sort="symbol">Stock <span class="th-sort-icon">▲</span></th>
-                  <th class="px-3 py-2.5 text-right th-sortable-th" data-sort="quantity">Qty <span class="th-sort-icon">⇅</span></th>
-                  <th class="px-3 py-2.5 text-right th-sortable-th" data-sort="avg_cost_price">Avg Cost <span class="th-sort-icon">⇅</span></th>
-                  <th class="px-3 py-2.5 text-right th-sortable-th" data-sort="current_price">Price <span class="th-sort-icon">⇅</span></th>
-                  <th class="px-3 py-2.5 text-right th-sortable-th" data-sort="market_value">Market Value <span class="th-sort-icon">⇅</span></th>
-                  <th class="px-3 py-2.5 text-right th-sortable-th" data-sort="unrealized_pl">Unrealized P&amp;L <span class="th-sort-icon">⇅</span></th>
-                  <th class="px-3 py-2.5 text-right th-sortable-th" data-sort="historical_net_gain">Net Gain <span class="th-sort-icon">⇅</span></th>
-                  <th class="px-3 py-2.5 text-center bg-amber-950/30 text-amber-300 th-sortable-th" data-sort="expected_dps">Exp. DPS ✏️ <span class="th-sort-icon">⇅</span></th>
-                  <th class="px-3 py-2.5 text-right text-emerald-400 th-sortable-th" data-sort="yearly_expected_dividend">Exp. Div/Yr <span class="th-sort-icon">⇅</span></th>
-                  <th class="px-3 py-2.5 text-right th-sortable-th" data-sort="yield_on_cost">YoC % <span class="th-sort-icon">⇅</span></th>
-                  <th class="px-3 py-2.5 text-right th-sortable-th" data-sort="current_price_yield">Mkt Yield % <span class="th-sort-icon">⇅</span></th>
-                  <th class="px-3 py-2.5 text-center th-sortable-th" data-sort="note_consensus">Consensus ✏️ <span class="th-sort-icon">⇅</span></th>
-                  <th class="px-3 py-2.5 text-center th-sortable-th" data-sort="company_perform">Company Performance ✏️ <span class="th-sort-icon">⇅</span></th>
+                  <th class="px-3 py-2.5 th-sortable-th active-sort" data-sort="symbol">Stock <span
+                      class="th-sort-icon">▲</span></th>
+                  <th class="px-3 py-2.5 text-right th-sortable-th" data-sort="quantity">Qty <span
+                      class="th-sort-icon">⇅</span></th>
+                  <th class="px-3 py-2.5 text-right th-sortable-th" data-sort="avg_cost_price">Avg Cost <span
+                      class="th-sort-icon">⇅</span></th>
+                  <th class="px-3 py-2.5 text-right th-sortable-th" data-sort="current_price">Price <span
+                      class="th-sort-icon">⇅</span></th>
+                  <th class="px-3 py-2.5 text-right th-sortable-th" data-sort="market_value">Market Value <span
+                      class="th-sort-icon">⇅</span></th>
+                  <th class="px-3 py-2.5 text-right th-sortable-th" data-sort="unrealized_pl">Unrealized P&amp;L <span
+                      class="th-sort-icon">⇅</span></th>
+                  <th class="px-3 py-2.5 text-right th-sortable-th" data-sort="historical_net_gain">Net Gain <span
+                      class="th-sort-icon">⇅</span></th>
+                  <th class="px-3 py-2.5 text-center bg-amber-950/30 text-amber-300 th-sortable-th"
+                    data-sort="expected_dps">Exp. DPS ✏️ <span class="th-sort-icon">⇅</span></th>
+                  <th class="px-3 py-2.5 text-right text-emerald-400 th-sortable-th"
+                    data-sort="yearly_expected_dividend">Exp. Div/Yr <span class="th-sort-icon">⇅</span></th>
+                  <th class="px-3 py-2.5 text-right th-sortable-th" data-sort="yield_on_cost">YoC % <span
+                      class="th-sort-icon">⇅</span></th>
+                  <th class="px-3 py-2.5 text-right th-sortable-th" data-sort="current_price_yield">Mkt Yield % <span
+                      class="th-sort-icon">⇅</span></th>
+                  <th class="px-3 py-2.5 text-center th-sortable-th" data-sort="note_consensus">Consensus ✏️ <span
+                      class="th-sort-icon">⇅</span></th>
+                  <th class="px-3 py-2.5 text-center th-sortable-th" data-sort="company_perform">Company Performance ✏️
+                    <span class="th-sort-icon">⇅</span></th>
                 </tr>
                 <tr id="th-jj-summary-row" class="font-bold border-b-2">
                   <td class="px-3 py-2.5">Total JJ</td>
@@ -798,7 +878,8 @@
 
       <!-- ZONE 5: DIVIDEND SIMULATOR (MATCHING VIEW 4 DESIGN) -->
       <div class="glass-card p-5">
-        <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-4 pb-3 border-b border-slate-800/80">
+        <div
+          class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-4 pb-3 border-b border-slate-800/80">
           <div>
             <h3 class="text-lg font-bold text-gray-100">
               Dividend Simulator
@@ -809,8 +890,10 @@
           </div>
           <div class="flex items-center gap-3">
             <span class="text-xs text-gray-400">โหมดการจำลอง:</span>
-            <label class="flex items-center gap-2 cursor-pointer bg-slate-900/80 px-3 py-1.5 rounded-lg border border-slate-800 text-xs font-semibold th-drip-label">
-              <input type="checkbox" id="drip-toggle" checked class="form-checkbox h-4 w-4 text-emerald-500 rounded focus:ring-0">
+            <label
+              class="flex items-center gap-2 cursor-pointer bg-slate-900/80 px-3 py-1.5 rounded-lg border border-slate-800 text-xs font-semibold th-drip-label">
+              <input type="checkbox" id="drip-toggle" checked
+                class="form-checkbox h-4 w-4 text-emerald-500 rounded focus:ring-0">
               <span>นำเงินปันผลกลับมา Reinvest ต่อ (DRIP)</span>
             </label>
           </div>
@@ -821,7 +904,8 @@
           <div class="glass-card p-5">
             <div class="flex items-center justify-between mb-4">
               <h4 class="sim-header text-sm font-bold">Simulation Parameters</h4>
-              <button id="th-sim-reset-btn" class="text-xs text-cyan-400 hover:underline">รีเซ็ตค่าพอร์ตปัจจุบัน</button>
+              <button id="th-sim-reset-btn"
+                class="text-xs text-cyan-400 hover:underline">รีเซ็ตค่าพอร์ตปัจจุบัน</button>
             </div>
 
             <div class="sim-input-group">
@@ -887,15 +971,18 @@
               </div>
             </div>
 
-            <div class="glass-card p-4 flex-1 flex flex-col">
-              <div class="mb-3 flex justify-between items-center">
+            <div class="glass-card p-5">
+              <div class="mb-3 flex flex-wrap justify-between items-center gap-2">
                 <div>
                   <h4 class="chart-title text-sm font-bold">Dividend Snowball &amp; Wealth Trajectory</h4>
-                  <p class="text-xs text-gray-400">การเติบโตของมูลค่าพอร์ตและปันผลสุทธิสะสมตามอายุ (Reinvest + DCA ล้วนๆ)</p>
+                  <p class="text-xs text-gray-400">การเติบโตของมูลค่าพอร์ตและปันผลสุทธิสะสมตามอายุ (Reinvest + DCA
+                    ล้วนๆ)</p>
                 </div>
-                <span id="drip-result-future-yoc" class="text-xs font-semibold text-cyan-400 bg-cyan-950/60 border border-cyan-800/60 px-2.5 py-1 rounded-lg">YoC: 0.0%</span>
+                <span id="drip-result-future-yoc"
+                  class="text-xs font-semibold text-cyan-400 bg-cyan-950/60 border border-cyan-800/60 px-2.5 py-1 rounded-lg whitespace-nowrap">YoC:
+                  0.0%</span>
               </div>
-              <div style="height:320px; position:relative;" class="flex-1">
+              <div style="height:380px; min-height:350px; position:relative;">
                 <canvas id="dripTrajectoryChart"></canvas>
               </div>
             </div>
@@ -919,4 +1006,5 @@
   <script src="js/app.js"></script>
 
 </body>
+
 </html>

@@ -37,6 +37,12 @@ The project is built around a hybrid architecture using Google Sheets as the pri
 - **Security**: Google Identity Services (OAuth 2.0).
 
 ## Version Log
+- **Version 3.4.3** *(September 2, 2026)*: View 2 In-Area Labels, Light Theme Badge Contrast, and View 5 Mobile Dividend Simulator Chart Fix.
+  - **View 2 Stacked Area In-Area Labels**: Added custom Chart.js plugin (`stackedAreaLabelsPlugin`) rendering dark, high-contrast Asset Class name labels directly inside each colored band of the historical area chart, dynamically placed by band thickness without obstructing mouse hover tooltips.
+  - **View 2 Graph Height Expansion**: Expanded Stacked Area Chart container height to `520px` for spacious, clear visualization.
+  - **View 2 SEMIFUND Badge & Light Theme Contrast**: Added `.tag-SEMIFUND` badge style in matching purple, and enhanced contrast for all Asset Class and Owner (`PP`, `JJ`) badges in Light Theme with 15-20% darker tones.
+  - **View 5 Mobile Chart Collapse Fix**: Resolved flexbox container collapse on mobile in Zone 5 Dividend Simulator by removing conflicting nested `flex-1 flex flex-col` rules, establishing a solid `380px` height with responsive X-axis tick limits (`maxTicksLimit: 8`) and `beginAtZero: true` on both Y-axes.
+
 - **Version 3.4.2** *(September 1, 2026)*: View 5 Thai Stock Hub — Unrealized P&L % Precision Bug Fix & Historical Net Gain Column Integration.
   - **Unrealized P&L % Bug Fix**: Resolved decimal ratio scaling bug in View 5 table where percentages were rendered without scale conversion (displaying 100x smaller, e.g. +0.01% instead of +1.24%). All `% Unrealized P&L` values are now accurately computed directly against total cost or scaled from API data.
   - **Historical Net Gain & Net Gain % Column**: Added dedicated "Net Gain" column placed immediately to the right of Unrealized P&L in both PP and JJ Thai Stock Holdings tables (stacked 2-row layout with amount in ฿ and percentage in %, color-coded by positive/negative profit).
@@ -44,10 +50,10 @@ The project is built around a hybrid architecture using Google Sheets as the pri
   - **Interactive Sorting**: Added column sorting support for `historical_net_gain` across both dual tables.
 
 - **Version 3.4.1** *(August 30, 2026)*: View 5 Thai Stock Hub — Visual Overhaul, Monotone Pie Charts, Dual-Table Sort, and Light Theme Restoration.
-  - **Demo Data Privacy**: Replaced all Thai stock demo data in `state.js` with anonymized, randomized SET tickers (`MC`, `FTREIT`, `ICHI`, `KCG`, `BDMS`, `TISCO`, `KJL`, `HTC`, `SABINA`, etc.) and reduced total portfolio valuation to ~฿488K to prevent information leakage.
+  - **Demo Data Privacy**: Anonymized all equity demo data with randomized generic sample tickers and standardized mock valuations to ensure complete data privacy.
   - **Card Header Cleanup**: Removed all emoji icons from all Card headers in View 5 for a cleaner, professional typographic look.
   - **Card 1.1 (Thai Stock Amount) Restructure**: Streamlined to left/right split layout — Market Value (฿) large left block (emerald) + 3 compact right sub-boxes: Real Capital, Cost Amount, Total Net Gain. Removed the Portfolio Total badge and outer blue border.
-  - **Card 1.2 (Annual Dividend Yield) Restructure**: Streamlined to left/right split — Expected Dividend (฿) large left block (emerald) + 2 compact right sub-boxes: YoC % (emerald) and Market Yield (neutral). Removed description text and orange outer border.
+  - **Card 1.2 (Annual Dividend Yield) Restructure**: Streamlined to left/right split layout — Expected Dividend (฿) large left block (emerald) + 2 compact right sub-boxes: YoC % (emerald) and Market Yield (neutral). Removed description text and orange outer border.
   - **Card 2.1 & 2.2 (PP & JJ Owner Hub) Restructure**: Market Value occupies left 50%; right 50% shows Cost Amount and Exp. Div/Yr. Pie chart sized equally for both sides.
   - **Monotone Pie Chart Color Palettes**: Replaced multi-hue rainbow pie slices with cohesive monotone palettes — PP uses Shades of Blue/Cyan (`#0284C7` → `#1E3A8A`); JJ uses Shades of Amber/Bronze/Warm Gold (`#D97706` → `#713F12`).
   - **Pie Chart Tooltip Layer Fix**: Changed in-slice ticker label drawing from `afterDraw` to `afterDatasetsDraw` hook, ensuring Chart.js renders hover tooltips above canvas text at all times.
@@ -71,7 +77,7 @@ The project is built around a hybrid architecture using Google Sheets as the pri
     - PP accent in Light Theme: Deep Blue `#0369A1`; JJ accent: Deep Amber `#B45309`; Dividend/Gain color: Deep Emerald `#047857`.
     - "รีเซ็ตค่าพอร์ตปัจจุบัน" button in Light Theme: Deep Blue `#0369A1`.
     - DRIP Reinvest label locked to Emerald `#10B981` in both themes via `.th-drip-label` class.
-  - **Scoped Edit Verification**: `git diff` confirmed all changes are strictly within `<section id="view-thai-hub">`, `dashboard/js/views/thai_hub.js`, `dashboard/js/state.js`, and `dashboard/css/styles.css`. Views 1, 2, 3, and 4 remain 100% unmodified.
+  - **Scoped Edit Verification**: Verified all changes are strictly scoped to the intended dashboard components without regression.
 
 - **Version 3.4.0** *(August 18, 2026)*: View 5 Thai Stock Hub & Dividend / DRIP Wealth Simulator with 2-Way Live Sync & Real Capital Cost Basis.
   - **View 5 (Thai Stock Hub & Dividend Simulator)**:
@@ -79,13 +85,13 @@ The project is built around a hybrid architecture using Google Sheets as the pri
     - **Zone 2 & 3 (Owner Hubs & Dividend Contribution Donut Charts)**: Dedicated PP and JJ sub-hubs with individual Real Capital Cost Basis, Net Gains, and Chart.js Doughnut visualizations (`Chart 3.1` & `Chart 3.2`) breaking down dividend contribution by ticker.
     - **Zone 4 (Strategic Holdings Table with 2-Way Live Sync)**: 13-column interactive table supporting owner filtering (`All`, `PP`, `JJ`), live Expected DPS inline input with 500ms debounce + optimistic UI recalculations, Consensus rating dropdown pills (🟢 Buy / 🟡 Hold / 🔴 Sell), Company Performance dropdowns (5 tiers), and real-time Google Sheet sync indicator (🔄 Syncing / 🟢 Saved / 🔴 Error).
     - **Zone 5 (DRIP Wealth Retirement Simulator)**: Interactive snowball growth engine with parameter sliders (Monthly DCA, Retirement Age, Dividend Growth %, Capital Growth %) and dynamic multi-axis trajectory chart (`Chart 5.1`) comparing Projected Portfolio, Cumulative Capital, and Annual Dividend.
-  - **Backend & Data Pipeline (`api_code.js` & `THStock_Master_V3`)**:
-    - Introduced `THStock_Master_V3` side-by-side sheet layout with `Col X` (`Real Capital Cost Basis` = Total Cost - Historical Net Gain).
-    - Added `?action=thai_stocks` route in `doGet` and `action=update_thai_stock` handler in `doPost` for secure row-level updates based on `account` + `symbol`.
+  - **Backend & Data Pipeline**:
+    - Integrated Real Capital Cost Basis tracking (`Real Capital Cost Basis` = Total Cost - Historical Net Gain).
+    - Added `?action=thai_stocks` route in `doGet` and `action=update_thai_stock` handler in `doPost` for secure row-level updates based on account and symbol.
     - Added Thai stock normalization layer and `ApiService.updateThaiStock()` in frontend.
 - **Version 3.3.1**: Savings Inflow Time Range Synchronization, Yearly/Monthly Granularity Toggle, Dynamic Color Scaling, and Light Theme Filter Button Contrast Fix.
   - **View 1 (Overview)**:
-    - **Synchronized Time Range**: Savings Inflow bar chart is now dynamically synchronized and horizontally aligned with the Wealth Growth History line chart above (`ALL` starting from Dec 2016 inception, `5Y`, `3Y`, `1Y`).
+    - **Synchronized Time Range**: Savings Inflow bar chart is now dynamically synchronized and horizontally aligned with the Wealth Growth History line chart above (`ALL` starting from inception, `5Y`, `3Y`, `1Y`).
     - **Yearly / Monthly Granularity Toggle**: Added an interactive segmented switch (`Monthly` vs `Yearly`) allowing users to switch between monthly inflow tracking and cumulative annual savings sums per calendar year.
     - **Dynamic Value Color Scale**: Implemented dynamic bar coloring where higher positive savings scale up into vibrant deep emerald (`#10b981`), while negative net inflows (capital withdrawals) scale into rose/red (`#f43f5e`) for rapid visual assessment.
   - **Design System & Contrast Enhancement**:
@@ -97,8 +103,8 @@ The project is built around a hybrid architecture using Google Sheets as the pri
     - **View 2.3**: *Asset Performance & Holdings* - Reordered to the 3rd section and resolved the sticky table header overlap bug by integrating the `Total` summary row directly into `<thead>`. Header titles and Total sum now freeze seamlessly at the top in order (`Header -> Total Sum -> Asset Rows`) during vertical table scrolling.
     - **Unified Design System & Palette**: Synchronized color palette across Donut chart slices, Stacked Area layers, badges, and table indicators.
   - **API & Data Engine**:
-    - Expanded `handleSnapshot` in `api_code.js` and `api.js` normalization layer to ingest columns `AA:AI` (indices 26-34) from `Daily Snapshort_V3`.
-    - Updated offline demo mock data generator in `state.js` to simulate realistic historical asset class breakdowns across all 116 snapshot months.
+    - Expanded API normalization layer to ingest historical asset class columns from backend snapshots.
+    - Updated offline demo mock data generator in `state.js` to simulate realistic historical asset class breakdowns across all snapshot months.
 - **Version 3.2.3**: Accounting Logic Fix & True Principal Cost Tracking (`Net_Capital_Deposit` & `Net_Gain`).
   - Separated external net cash injected (`Net_Capital_Deposit`) from compounded gains (`Cost_Current_Asset`) to resolve reinvestment calculation distortion.
   - **View 1 (Overview)**:
@@ -109,7 +115,7 @@ The project is built around a hybrid architecture using Google Sheets as the pri
     - Updated *Capital Deposited* card metric to `PP_Net_Capital_Deposit` and `JJ_Net_Capital_Deposit`.
     - Updated *PP vs JJ Growth Race* chart dashed lines to track `PP_Net_Capital_Deposit` and `JJ_Net_Capital_Deposit` respectively (solid lines remain `Ondate_Amount`).
   - **API & Data Engine**:
-    - Expanded API normalization layer for 26-column schema (`Daily Snapshort_V3`) and `Master_Asset` summary matrix (Q3:V5).
+    - Expanded API normalization layer for multi-column snapshot schema and master asset matrix.
     - Synced demo mock data generators and documentation files across `/docs`.
 - **Version 3.2.2**: UI/UX Contrast enhancements, theme toggle redesign, and interactive component fixes.
   - Replaced theme toggle icons with clean minimalist SVGs and standardized height matching the Sign In button.
@@ -133,7 +139,7 @@ The project is built around a hybrid architecture using Google Sheets as the pri
   - Isolated filter states between views to prevent global state conflicts.
   - Standardized code documentation with Version 3.2 Patch annotations.
 - **Version 3.1**: UI bug fixes, default parameter updates, and API latency optimization.
-  - Scaled down demo mode mock data to realistic ~1M THB portfolio base.
+  - Calibrated demo mode mock data for privacy.
   - Fixed mobile overflow for retirement year selector.
   - Added dynamic footer summary row for Holdings table with auto-calculating totals.
   - Updated default FIRE target metrics and retirement simulator parameters.
@@ -144,4 +150,4 @@ The project is built around a hybrid architecture using Google Sheets as the pri
 This repository contains the application structure and logic. No private financial data, API keys, or personal credentials should be committed to this repository. All sensitive configuration is handled via environment-specific setup or local configuration files excluded from version control.
 
 ---
-*Last Updated: August 30, 2026 (v3.4.1)*
+*Last Updated: September 2, 2026 (v3.4.3)*

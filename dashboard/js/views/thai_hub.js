@@ -893,12 +893,19 @@ window.ThaiHubView = {
         scales: {
           x: {
             grid: { color: gridColor },
-            ticks: { color: textColor, font: { family: 'Inter', size: 10 } }
+            ticks: {
+              color: textColor,
+              font: { family: 'Inter', size: 10 },
+              maxTicksLimit: 8,
+              maxRotation: 45,
+              minRotation: 0
+            }
           },
           y: {
             type: 'linear',
             display: true,
             position: 'left',
+            beginAtZero: true,
             grid: { color: gridColor },
             ticks: {
               color: textColor,
@@ -910,6 +917,7 @@ window.ThaiHubView = {
             type: 'linear',
             display: true,
             position: 'right',
+            beginAtZero: true,
             grid: { drawOnChartArea: false },
             ticks: {
               color: isDark ? '#F59E0B' : '#B45309',

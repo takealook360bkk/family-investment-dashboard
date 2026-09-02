@@ -330,12 +330,85 @@ window.AllocationView = {
     const gridColor = isLight ? 'rgba(0,0,0,0.05)' : 'rgba(255,255,255,0.04)';
     const textColor = isLight ? '#6B7280' : '#8E95A2';
 
+    // Plugin to render Asset Class text directly inside each colored area
+    const stackedAreaLabelsPlugin = {
+      id: 'stackedAreaLabels',
+      afterDatasetsDraw(chart) {
+        const { ctx, chartArea, scales } = chart;
+        if (!scales.x || !scales.y || !chartArea) return;
+
+        const metaList = chart.data.datasets.map((_, i) => chart.getDatasetMeta(i));
+        const pointCount = chart.data.labels.length;
+        if (pointCount === 0) return;
+
+        ctx.save();
+        ctx.font = '600 11px "Inter", "Prompt", -apple-system, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+
+        metaList.forEach((meta, datasetIdx) => {
+          if (meta.hidden) return;
+          const label = chart.data.datasets[datasetIdx].label;
+          if (!label) return;
+
+          // Scan points from 40% to 95% of timeline to find widest/thickest visible spot
+          const startScan = Math.floor(pointCount * 0.35);
+          const endScan = Math.min(pointCount - 1, Math.floor(pointCount * 0.95));
+
+          let bestIdx = -1;
+          let maxThickness = 0;
+          let bestX = 0;
+          let bestY = 0;
+
+          for (let j = startScan; j <= endScan; j++) {
+            const currPoint = meta.data[j];
+            if (!currPoint) continue;
+
+            const currY = currPoint.y;
+            let baselineY;
+            if (datasetIdx === 0) {
+              baselineY = scales.y.getPixelForValue(0);
+            } else {
+              const prevPoint = metaList[datasetIdx - 1]?.data[j];
+              baselineY = prevPoint ? prevPoint.y : scales.y.getPixelForValue(0);
+            }
+
+            const thickness = baselineY - currY;
+            if (thickness > maxThickness) {
+              maxThickness = thickness;
+              bestIdx = j;
+              bestX = currPoint.x;
+              bestY = currY + (thickness / 2);
+            }
+          }
+
+          // Render label if the band thickness is sufficiently large (>= 15px)
+          if (maxThickness >= 15 && bestIdx !== -1) {
+            if (bestX >= chartArea.left + 25 && bestX <= chartArea.right - 25) {
+              // Subtle white contrast glow for clear readability on tinted background
+              ctx.shadowColor = 'rgba(255, 255, 255, 0.6)';
+              ctx.shadowBlur = 4;
+              ctx.fillStyle = '#0f172a'; // Bold dark text
+              ctx.fillText(label, bestX, bestY);
+
+              // Reset shadow
+              ctx.shadowColor = 'transparent';
+              ctx.shadowBlur = 0;
+            }
+          }
+        });
+
+        ctx.restore();
+      }
+    };
+
     this.assetHistoryChart = new Chart(ctx, {
       type: 'line',
       data: {
         labels,
         datasets
       },
+      plugins: [stackedAreaLabelsPlugin],
       options: {
         responsive: true,
         maintainAspectRatio: false,
