@@ -75,7 +75,7 @@ window.AuthService = {
     window.AppState.token = accessToken;
     window.AppState.isLoggedIn = true;
 
-    // Fetch user profile from Google to check email
+    // Fetch user profile from Google to display user info
     try {
       const res = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
         headers: { Authorization: `Bearer ${accessToken}` }
@@ -86,19 +86,13 @@ window.AuthService = {
         userInfo = await res.json();
       }
 
-      if (userInfo.email && !this.isEmailAllowed(userInfo.email) && userInfo.email !== 'Authorized User') {
-        alert(`Access Denied: Email (${userInfo.email}) is not authorized.`);
-        this.logout();
-        return;
-      }
-
       window.AppState.user = userInfo;
       localStorage.setItem(window.APP_CONFIG.STORAGE_KEYS.AUTH_TOKEN, accessToken);
       localStorage.setItem(window.APP_CONFIG.STORAGE_KEYS.USER_INFO, JSON.stringify(userInfo));
 
       this.updateAuthUI(true, userInfo);
 
-      // Fetch live data with token
+      // Fetch live data with token (backend Apps Script will verify email whitelist)
       if (window.ApiService) {
         window.ApiService.fetchAllData();
       }
@@ -119,12 +113,6 @@ window.AuthService = {
 
     const accessToken = response.access_token;
     await this.verifyAndSetToken(accessToken);
-  },
-
-  isEmailAllowed(email) {
-    if (!email) return false;
-    const allowed = window.APP_CONFIG.ALLOWED_EMAILS || [];
-    return allowed.map(e => e.toLowerCase()).includes(email.toLowerCase());
   },
 
   logout() {

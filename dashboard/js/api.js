@@ -60,8 +60,12 @@ window.ApiService = {
         const errMsg = typeof anyError === 'string' ? anyError : JSON.stringify(anyError);
         console.warn('[API] Error response:', errMsg);
 
-        // If token expired → clear session, force re-login, show clear message
-        if (errMsg.toLowerCase().includes('unauthorized') || errMsg.toLowerCase().includes('invalid')) {
+        // If unauthorized email → access denied, logout and return to demo
+        if (errMsg.toLowerCase().includes('forbidden') || errMsg.toLowerCase().includes('not allowed')) {
+          console.warn('[API] Email unauthorized:', errMsg);
+          if (window.AuthService) window.AuthService.logout();
+          alert('🚫 ปฏิเสธการเข้าถึง (Access Denied):\n\nบัญชี Google นี้ไม่ได้รับอนุญาตให้เข้าถึงข้อมูลพอร์ตการลงทุน ระบบจะแสดงผลในโหมดจำลอง (Demo Mode)');
+        } else if (errMsg.toLowerCase().includes('unauthorized') || errMsg.toLowerCase().includes('invalid')) {
           console.warn('[API] Token appears expired. Clearing session...');
           // Clear bad token
           localStorage.removeItem(window.APP_CONFIG.STORAGE_KEYS.AUTH_TOKEN);
