@@ -14,6 +14,7 @@
 # ==========================================
 PATCH_VERSIONING_GUIDE.md
 *.json
+!dashboard/manifest.json
 *.key
 *.env
 

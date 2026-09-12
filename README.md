@@ -19,6 +19,9 @@ The project is built around a hybrid architecture using Google Sheets as the pri
 /
 ├── dashboard/              # Web Frontend Source Code
 │   ├── index.html          # Main SPA Entry Point
+│   ├── manifest.json       # Web App Manifest (PWA & Add to Home Screen)
+│   ├── favicon.ico         # Browser Tab & Bookmark Icon
+│   ├── icons/              # Multi-resolution App Icons & Favicons
 │   ├── css/                # Stylesheets (Glassmorphism design)
 │   └── js/                 # JavaScript Logic
 │       ├── views/          # Specific Dashboard View Logic
@@ -37,6 +40,12 @@ The project is built around a hybrid architecture using Google Sheets as the pri
 - **Security**: Google Identity Services (OAuth 2.0).
 
 ## Version Log
+- **Version 3.4.4** *(September 12, 2026)*: Modern App Icon, Favicon Suite & PWA Web App Manifest Integration.
+  - **Modern Fintech Logo Design**: Designed custom high-contrast logo featuring geometric rising vertical bar charts intersected by a glowing upward-trending dynamic line graph and peak arrow in vivid emerald green and electric cyan on a dark navy slate squircle.
+  - **Comprehensive Favicon Suite**: Generated multi-resolution icon assets including `favicon.ico` (16/32/48px), `favicon-16x16.png`, `favicon-32x32.png`, and high-res master `logo.png`.
+  - **PWA & Mobile Add-to-Home-Screen Support**: Added `apple-touch-icon.png` (180x180px) and `manifest.json` with Android maskable icons (192x192px and 512x512px) for a seamless native-app experience on both iOS Safari and Android Chrome.
+  - **Navbar Brand Icon Enhancement**: Updated header brand icon to integrate the high-resolution logo, providing consistent branding across browser tabs, bookmarks, home screens, and the in-app interface.
+
 - **Version 3.4.3** *(September 2, 2026)*: View 2 In-Area Labels, Light Theme Badge Contrast, and View 5 Mobile Dividend Simulator Chart Fix.
   - **View 2 Stacked Area In-Area Labels**: Added custom Chart.js plugin (`stackedAreaLabelsPlugin`) rendering dark, high-contrast Asset Class name labels directly inside each colored band of the historical area chart, dynamically placed by band thickness without obstructing mouse hover tooltips.
   - **View 2 Graph Height Expansion**: Expanded Stacked Area Chart container height to `520px` for spacious, clear visualization.
