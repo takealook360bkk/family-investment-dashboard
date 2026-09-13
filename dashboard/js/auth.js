@@ -9,8 +9,14 @@ window.AuthService = {
   },
 
   checkStoredAuth() {
-    const savedToken = localStorage.getItem(window.APP_CONFIG.STORAGE_KEYS.AUTH_TOKEN);
-    const savedUser = localStorage.getItem(window.APP_CONFIG.STORAGE_KEYS.USER_INFO);
+    // ใช้ sessionStorage เพื่อความปลอดภัย (Security Hardening):
+    // Token จะถูกล้างทิ้งอัตโนมัติเมื่อปิดแท็บเบราว์เซอร์ ป้องกัน Token ค้างบนเครื่อง
+    const savedToken = sessionStorage.getItem(window.APP_CONFIG.STORAGE_KEYS.AUTH_TOKEN);
+    const savedUser = sessionStorage.getItem(window.APP_CONFIG.STORAGE_KEYS.USER_INFO);
+    
+    // ล้าง Token เดิมที่อาจเคยค้างใน localStorage จากเวอร์ชันก่อน
+    localStorage.removeItem(window.APP_CONFIG.STORAGE_KEYS.AUTH_TOKEN);
+    localStorage.removeItem(window.APP_CONFIG.STORAGE_KEYS.USER_INFO);
     
     if (savedToken && savedUser) {
       try {
@@ -19,9 +25,7 @@ window.AuthService = {
         window.AppState.token = savedToken;
         window.AppState.isLoggedIn = true;
         this.updateAuthUI(true, userInfo);
-        // IMPORTANT: Token is restored from localStorage — mark as ready for API fetch
-        // app.js will call ApiService.fetchAllData() after init() which will use this token
-        console.info('Restored auth session from localStorage for:', userInfo.email);
+        console.info('Restored auth session from sessionStorage for:', userInfo.email);
       } catch (e) {
         console.error('Failed to parse saved user', e);
         this.logout();
@@ -87,8 +91,9 @@ window.AuthService = {
       }
 
       window.AppState.user = userInfo;
-      localStorage.setItem(window.APP_CONFIG.STORAGE_KEYS.AUTH_TOKEN, accessToken);
-      localStorage.setItem(window.APP_CONFIG.STORAGE_KEYS.USER_INFO, JSON.stringify(userInfo));
+      // บันทึก Token และ User Profile ลงใน sessionStorage เพื่อตัดความเสี่ยง Token ค้างข้ามวัน
+      sessionStorage.setItem(window.APP_CONFIG.STORAGE_KEYS.AUTH_TOKEN, accessToken);
+      sessionStorage.setItem(window.APP_CONFIG.STORAGE_KEYS.USER_INFO, JSON.stringify(userInfo));
 
       this.updateAuthUI(true, userInfo);
 
@@ -120,6 +125,9 @@ window.AuthService = {
     window.AppState.token = null;
     window.AppState.isLoggedIn = false;
 
+    // ล้างข้อมูลเซสชันทั้งใน sessionStorage และ localStorage ให้หมดจด
+    sessionStorage.removeItem(window.APP_CONFIG.STORAGE_KEYS.AUTH_TOKEN);
+    sessionStorage.removeItem(window.APP_CONFIG.STORAGE_KEYS.USER_INFO);
     localStorage.removeItem(window.APP_CONFIG.STORAGE_KEYS.AUTH_TOKEN);
     localStorage.removeItem(window.APP_CONFIG.STORAGE_KEYS.USER_INFO);
 

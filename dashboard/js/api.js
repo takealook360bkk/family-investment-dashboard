@@ -39,7 +39,13 @@ window.ApiService = {
     try {
       // v3.1 Update: Added timestamp cache buster (_t) and fetch options (no-store) to prevent stale data
       const authParam = `&access_token=${encodeURIComponent(token)}&_t=${Date.now()}`;
-      const fetchOpts = { cache: 'no-store' };
+      
+      // กำหนด Timeout 12 วินาที ป้องกันหน้าเว็บค้างตลอดกาลหาก Google Apps Script ตอบสนองช้า
+      const timeoutSignal = typeof AbortSignal !== 'undefined' && AbortSignal.timeout ? AbortSignal.timeout(12000) : null;
+      const fetchOpts = { 
+        cache: 'no-store',
+        ...(timeoutSignal ? { signal: timeoutSignal } : {})
+      };
 
       const [summaryRes, assetsRes, snapshotRes, thaiStocksRes] = await Promise.all([
         fetch(`${baseUrl}?action=summary${authParam}`, fetchOpts).then(r => r.json()).catch(e => ({ error: e.message })),
@@ -60,14 +66,20 @@ window.ApiService = {
         const errMsg = typeof anyError === 'string' ? anyError : JSON.stringify(anyError);
         console.warn('[API] Error response:', errMsg);
 
-        // If unauthorized email → access denied, logout and return to demo
-        if (errMsg.toLowerCase().includes('forbidden') || errMsg.toLowerCase().includes('not allowed')) {
+        // ตรวจสอบกรณีเกิด Timeout หรือเครือข่ายถูกตัดการเชื่อมต่อ
+        if (errMsg.toLowerCase().includes('timeout') || errMsg.toLowerCase().includes('aborted')) {
+          console.warn('[API] Request timed out after 12s');
+          alert('⏱️ การเชื่อมต่อใช้เวลานานเกินไป (Connection Timeout):\n\nเซิร์ฟเวอร์ Google Apps Script ตอบสนองช้ากว่า 12 วินาที ระบบจะสลับไปแสดงผลในโหมดจำลอง (Demo Mode)');
+        } else if (errMsg.toLowerCase().includes('forbidden') || errMsg.toLowerCase().includes('not allowed')) {
+          // If unauthorized email → access denied, logout and return to demo
           console.warn('[API] Email unauthorized:', errMsg);
           if (window.AuthService) window.AuthService.logout();
           alert('🚫 ปฏิเสธการเข้าถึง (Access Denied):\n\nบัญชี Google นี้ไม่ได้รับอนุญาตให้เข้าถึงข้อมูลพอร์ตการลงทุน ระบบจะแสดงผลในโหมดจำลอง (Demo Mode)');
         } else if (errMsg.toLowerCase().includes('unauthorized') || errMsg.toLowerCase().includes('invalid')) {
           console.warn('[API] Token appears expired. Clearing session...');
-          // Clear bad token
+          // ล้าง Token ทั้งใน sessionStorage และ localStorage
+          sessionStorage.removeItem(window.APP_CONFIG.STORAGE_KEYS.AUTH_TOKEN);
+          sessionStorage.removeItem(window.APP_CONFIG.STORAGE_KEYS.USER_INFO);
           localStorage.removeItem(window.APP_CONFIG.STORAGE_KEYS.AUTH_TOKEN);
           localStorage.removeItem(window.APP_CONFIG.STORAGE_KEYS.USER_INFO);
           window.AppState.token = null;
@@ -308,9 +320,12 @@ window.ApiService = {
       ...updates
     };
 
+    // กำหนด Timeout 10 วินาทีสำหรับการอัปเดตข้อมูลหุ้น
+    const timeoutSignal = typeof AbortSignal !== 'undefined' && AbortSignal.timeout ? AbortSignal.timeout(10000) : null;
     const response = await fetch(baseUrl, {
       method: 'POST',
-      body: JSON.stringify(payload)
+      body: JSON.stringify(payload),
+      ...(timeoutSignal ? { signal: timeoutSignal } : {})
     });
 
     const result = await response.json();
