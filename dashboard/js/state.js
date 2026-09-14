@@ -96,16 +96,17 @@ window.generateMockData = function() {
     const totalPL = totalOndate - totalCapital;
     
     // Realistic asset class distribution over time (sums to totalOndate)
-    // 9 classes: THSTOCK (28%), USAFUND (19%), GOLD (21%), GOLDFUND (9%), ASIAFUND (8%), FCD (5%), CHIFUND (4%), BOND (3%), SEMIFUND (3%)
-    const thstockAmt  = Math.round(totalOndate * (0.28 + Math.sin(i / 8) * 0.03));
-    const usafundAmt  = Math.round(totalOndate * (0.19 + Math.cos(i / 10) * 0.02));
-    const goldAmt     = Math.round(totalOndate * (0.21 + Math.sin(i / 6) * 0.02));
+    // 10 classes: CASH (2%), THSTOCK (27%), USAFUND (18%), GOLD (20%), GOLDFUND (9%), ASIAFUND (8%), FCD (5%), CHIFUND (4%), BOND (4%), SEMIFUND (3%)
+    const cashAmt     = Math.round(totalOndate * (0.02 + (i > 60 ? 0.01 : 0))); // สภาพคล่อง Cash
+    const thstockAmt  = Math.round(totalOndate * (0.27 + Math.sin(i / 8) * 0.03));
+    const usafundAmt  = Math.round(totalOndate * (0.18 + Math.cos(i / 10) * 0.02));
+    const goldAmt     = Math.round(totalOndate * (0.20 + Math.sin(i / 6) * 0.02));
     const goldfundAmt = Math.round(totalOndate * 0.09);
     const asiafundAmt = Math.round(totalOndate * 0.08);
     const fcdAmt      = Math.round(totalOndate * 0.05);
     const chifundAmt  = Math.round(totalOndate * 0.04);
-    const bondAmt     = Math.round(totalOndate * 0.03);
-    const semifundAmt = Math.max(0, totalOndate - (thstockAmt + usafundAmt + goldAmt + goldfundAmt + asiafundAmt + fcdAmt + chifundAmt + bondAmt));
+    const bondAmt     = Math.round(totalOndate * 0.04);
+    const semifundAmt = Math.max(0, totalOndate - (cashAmt + thstockAmt + usafundAmt + goldAmt + goldfundAmt + asiafundAmt + fcdAmt + chifundAmt + bondAmt));
 
     snapshot.push({
       date: dateStr,
@@ -133,16 +134,17 @@ window.generateMockData = function() {
       pp_inflow: ppInflow,
       jj_inflow: jjInflow,
       total_inflow: ppInflow + jjInflow,
-      // v3.3.0 Asset Class Breakdown
+      // v3.4.1 Asset Class Breakdown (รองรับ 10 คลาสรวม CASH)
       asset_classes: {
-        THSTOCK:  thstockAmt,
-        USAFUND:  usafundAmt,
+        CASH:     cashAmt,
+        BOND:     bondAmt,
+        FCD:      fcdAmt,
         GOLD:     goldAmt,
         GOLDFUND: goldfundAmt,
+        THSTOCK:  thstockAmt,
         ASIAFUND: asiafundAmt,
-        FCD:      fcdAmt,
         CHIFUND:  chifundAmt,
-        BOND:     bondAmt,
+        USAFUND:  usafundAmt,
         SEMIFUND: semifundAmt
       }
     });
@@ -150,8 +152,8 @@ window.generateMockData = function() {
     curr.setMonth(curr.getMonth() + 1);
   }
 
-  // 74 Mock Assets matching portfolio asset classes
-  const assetClasses = ['GOLD', 'GOLDFUND', 'USAFUND', 'ASIAFUND', 'CHIFUND', 'THFUND', 'THSTOCK', 'BOND', 'FCD'];
+  // 74 Mock Assets matching portfolio asset classes (รวม CASH)
+  const assetClasses = ['CASH', 'BOND', 'FCD', 'GOLD', 'GOLDFUND', 'USAFUND', 'ASIAFUND', 'CHIFUND', 'THFUND', 'THSTOCK'];
   const owners = ['PP', 'JJ'];
   const assetNames = [
     'SCBSP500', 'K-US500X', 'ONE-UGG-RA', 'SCBNDQ', 'KF-US', 'B-INNOTECH',

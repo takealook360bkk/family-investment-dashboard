@@ -40,6 +40,21 @@ The project is built around a hybrid architecture using Google Sheets as the pri
 - **Security**: Google Identity Services (OAuth 2.0).
 
 ## Version Log
+- **Version 3.5.0** *(September 14, 2026)*: CASH Asset Class Integration, Google Sheets Col AC Shift Fix, Semantic Color System & Macroeconomic Asset Hierarchy Reordering.
+  - **CASH Asset Class Integration & Historical Area Chart**: Added `CASH` to View 2.2 Stacked Area Chart (`Asset Class Allocation History`) positioned as the ground base layer, showing monthly cash accumulation and liquid reserves with full timeline filtering (ALL, 5Y, 3Y, 1Y).
+  - **Google Sheets Column AC Insertion & Shift Fix (v3.4.1 API)**: Handled critical column shift caused by inserting `CASH_amount` at Column `AC` (Index 28). Updated `api/api_code.js` to parse indices 26–35 (AA to AJ), shifting `CHIFUND`, `FCD`, `GOLD`, `GOLDFUND`, `SEMIFUND`, `THSTOCK`, and `USAFUND` safely to ensure zero data corruption or field mismatch.
+  - **Semantic Color System (3-Way Consistency)**: Standardized color identity across Donut Chart, Stacked Area Chart, and Holdings Table Badges:
+    - `CASH`: Slate Dark Gray (`#475569`) — crisp, distinct reserve liquidity.
+    - `BOND`: Slate Light Gray (`#94a3b8`) — lighter shade, high readability.
+    - `GOLD` & `GOLDFUND`: Amber/Warm Gold (`#f59e0b`, `#d97706`).
+    - `THSTOCK` & `THFUND`: Deep Thai Navy Blue (`#0f4c81`) — patriotic Thai identity contrasting distinctly from US assets.
+    - `ASIAFUND`: Mandarin/Coral Orange-Red (`#f97316`) — regional Asian warmth near China.
+    - `CHIFUND`: Crimson Red (`#ef4444`).
+    - `USAFUND`, `FCD`, `SEMIFUND`: American Cobalt Blue (`#2563eb`), USD Cyan (`#0ea5e9`), and Tech Indigo (`#6366f1`).
+  - **Deterministic Golden-Ratio Fallback for Future Assets**: Replaced arbitrary random-purple defaults with an algorithmic Golden-Ratio HSL generator that dynamically produces vibrant, non-colliding colors for any future asset class added to the portfolio.
+  - **Macroeconomic Risk Hierarchy & Near-to-Far Sorting**: Synchronized sorting order across Donut slices, Area layers, Filter dropdown, and Table: Low Risk (`CASH` → `BOND` → `FCD`) → Store of Value (`GOLD` → `GOLDFUND`) → Equities Near-to-Far (`THSTOCK` → `ASIAFUND` → `CHIFUND` → `USAFUND` → `SEMIFUND`).
+  - **Offline & Dry-Run Tooling**: Updated `src/backfill_daily_snapshot.py` to support range `AA:AJ` and executed 100% read-only verification dry run confirming perfect data parity against live Google Sheet.
+
 - **Version 3.4.4** *(September 12, 2026)*: Modern App Icon, Favicon Suite & PWA Web App Manifest Integration.
   - **Modern Fintech Logo Design**: Designed custom high-contrast logo featuring geometric rising vertical bar charts intersected by a glowing upward-trending dynamic line graph and peak arrow in vivid emerald green and electric cyan on a dark navy slate squircle.
   - **Comprehensive Favicon Suite**: Generated multi-resolution icon assets including `favicon.ico` (16/32/48px), `favicon-16x16.png`, `favicon-32x32.png`, and high-res master `logo.png`.

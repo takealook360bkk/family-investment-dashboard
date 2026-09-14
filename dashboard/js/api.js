@@ -227,10 +227,10 @@ window.ApiService = {
           pp_inflow:    Number(s.pp_net_inflow !== undefined ? s.pp_net_inflow : (s.pp_inflow || 0)),
           jj_inflow:    Number(s.jj_net_inflow !== undefined ? s.jj_net_inflow : (s.jj_inflow || 0)),
           total_inflow: Number(s.total_net_inflow !== undefined ? s.total_net_inflow : (s.total_inflow || 0)),
-          // v3.3.0 Asset Class Breakdown
-          // NOTE: Use ?? (nullish coalescing), NOT || (OR), because 0 is a valid amount
-          // and || treats 0 as falsy, causing correct 0-values to be ignored.
+          // v3.4.1 สัดส่วนสินทรัพย์รายหมวดหมู่ (รวมสินทรัพย์สภาพคล่อง CASH จาก Col AC)
+          // ใช้ ?? (nullish coalescing) เพื่อให้ค่า 0 ไม่ถูกมองข้ามเป็นค่าว่าง
           asset_classes: {
+            CASH:     parseVal(s.cash_amount     ?? s.asset_classes?.CASH     ?? 0),
             ASIAFUND: parseVal(s.asiafund_amount ?? s.asset_classes?.ASIAFUND ?? 0),
             BOND:     parseVal(s.bond_amount     ?? s.asset_classes?.BOND     ?? 0),
             CHIFUND:  parseVal(s.chifund_amount  ?? s.asset_classes?.CHIFUND  ?? 0),

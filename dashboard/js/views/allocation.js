@@ -1,4 +1,4 @@
-// View 2: Portfolio Allocation & Performance (v3.3.0)
+// View 2: Portfolio Allocation & Performance (v3.4.1 - CASH Integration & Semantic Palette)
 
 window.AllocationView = {
   allocationChart: null,
@@ -10,19 +10,64 @@ window.AllocationView = {
   selectedOwner: 'TOTAL',
   selectedClasses: null, // null = show all; Set = specific classes
 
-  // Standard Unified Color Palette for Asset Classes across View 2
+  // ลำดับมาตรฐาน (Canonical Hierarchy Order)
+  // เรียงจาก: เสี่ยงต่ำสุด > Store of Value > ตราสารทุน (ใกล้ตัว > ไกลตัว)
+  orderedClassKeys: [
+    'CASH',      // 1. เงินสดสภาพคล่อง (เสี่ยงต่ำสุด)
+    'BOND',      // 2. ตราสารหนี้
+    'FCD',       // 3. บัญชีเงินฝากต่างประเทศ USD
+    'GOLD',      // 4. ทองคำแท่ง (Store of Value)
+    'GOLDFUND',  // 5. กองทุนทองคำ
+    'THSTOCK',   // 6. หุ้นไทย (ตราสารทุน - ใกล้ตัวที่สุด)
+    'THFUND',    // 7. กองทุนหุ้นไทย
+    'ASIAFUND',  // 8. กองทุนเอเชีย (ภูมิภาคใกล้เคียง)
+    'CHIFUND',   // 9. กองทุนจีน
+    'USAFUND',   // 10. กองทุนสหรัฐฯ (ต่างประเทศ/Global)
+    'SEMIFUND'   // 11. กองทุนเซมิคอนดักเตอร์/เทคโนโลยี
+  ],
+
+  // ระบบสีสากลที่มีความหมาย (Semantic Unified Color Palette)
   colorPalette: {
-    'GOLD':      '#f59e0b',
-    'GOLDFUND':  '#d97706',
-    'USAFUND':   '#3b82f6',
-    'ASIAFUND':  '#06b6d4',
-    'CHIFUND':   '#ef4444',
-    'THFUND':    '#10b981',
-    'THSTOCK':   '#8b5cf6',
-    'BOND':      '#64748b',
-    'FCD':       '#ec4899',
-    'SEMIFUND':  '#a855f7',
-    'OTHER':     '#9ca3af'
+    'CASH':      '#475569', // เทาเข้ม (เข้มกว่า Bond ชัดเจน)
+    'BOND':      '#94a3b8', // เทาสว่าง (ต่างเฉดกับ Cash ไม่กลืนกับพื้นหลัง)
+    'FCD':       '#0ea5e9', // ฟ้าดอลลาร์ USD (ตระกูลฟ้า-น้ำเงิน เชื่อมกับสหรัฐฯ)
+    'GOLD':      '#f59e0b', // เหลืองทอง
+    'GOLDFUND':  '#d97706', // เหลืองทองเข้ม
+    'THSTOCK':   '#0f4c81', // น้ำเงินกรมท่าธงชาติไทย (สื่ออัตลักษณ์ไทย ชัดเจน)
+    'THFUND':    '#1e40af', // น้ำเงินไทย
+    'ASIAFUND':  '#f97316', // ส้มอมแดง Mandarin/Coral (โทนอุ่นใกล้เคียงจีน)
+    'CHIFUND':   '#ef4444', // แดงจีน
+    'USAFUND':   '#2563eb', // น้ำเงินสด American Cobalt Blue
+    'SEMIFUND':  '#6366f1', // ครามไฮเทค Indigo (โทนเดียวกับ USA)
+    'OTHER':     '#64748b'  // เทากลาง
+  },
+
+  // ตรรกะกำหนดสีสำหรับสินทรัพย์ (พร้อมคำนวณสีอัตโนมัติสำหรับสินทรัพย์ใหม่ในอนาคต)
+  getAssetColor(assetClass) {
+    if (!assetClass) return '#94a3b8';
+    const upper = assetClass.toUpperCase();
+    if (this.colorPalette[upper]) return this.colorPalette[upper];
+
+    // สินทรัพย์ใหม่ในอนาคต: คำนวณสีแบบคงที่ (Deterministic HSL Hash)
+    // ใช้ Golden Angle เพื่อกระจายสีอย่างสม่ำเสมอ และล็อกความสว่าง/ความสดไม่ให้เพี้ยนเป็นสีม่วงสุ่ม
+    let hash = 0;
+    for (let i = 0; i < upper.length; i++) {
+      hash = upper.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    const hue = Math.abs((hash * 137.5) % 360);
+    return `hsl(${hue.toFixed(0)}, 70%, 52%)`;
+  },
+
+  // Helper: แปลง Hex หรือ HSL เป็น RGBA พร้อมค่าความโปร่งแสง (Alpha)
+  hexToRgba(colorStr, alpha) {
+    if (!colorStr) return `rgba(148, 163, 184, ${alpha})`;
+    if (colorStr.startsWith('hsl')) {
+      return colorStr.replace('hsl', 'hsla').replace(')', `, ${alpha})`);
+    }
+    let c = colorStr.replace('#', '');
+    if (c.length === 3) c = c.split('').map(x => x + x).join('');
+    const num = parseInt(c, 16);
+    return `rgba(${(num >> 16) & 255}, ${(num >> 8) & 255}, ${num & 255}, ${alpha})`;
   },
 
   init() {
@@ -93,8 +138,15 @@ window.AllocationView = {
     const container = document.getElementById('class-filter-options');
     if (!container) return;
 
-    // Get unique classes from actual data (dynamic)
-    const classes = [...new Set(allAssets.map(a => a.class).filter(Boolean))].sort();
+    // ดึงประเภทสินทรัพย์ที่ไม่ซ้ำจากข้อมูลจริง พร้อมเรียงลำดับตามความเสี่ยง orderedClassKeys
+    const classes = [...new Set(allAssets.map(a => a.class).filter(Boolean))].sort((a, b) => {
+      const idxA = this.orderedClassKeys.indexOf(a);
+      const idxB = this.orderedClassKeys.indexOf(b);
+      if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+      if (idxA !== -1) return -1;
+      if (idxB !== -1) return 1;
+      return a.localeCompare(b);
+    });
 
     // Determine current state — null = all shown
     const isAllSelected = this.selectedClasses === null;
@@ -191,12 +243,19 @@ window.AllocationView = {
       grandTotal += val;
     });
 
-    const labels = Object.keys(classTotals);
-    const data   = labels.map(l => classTotals[l]);
+    // เรียงลำดับประเภทสินทรัพย์ตามลำดับความเสี่ยงและภูมิศาสตร์ (เสี่ยงต่ำสุด > Store of Value > ตราสารทุน)
+    const labels = Object.keys(classTotals).sort((a, b) => {
+      const idxA = this.orderedClassKeys.indexOf(a);
+      const idxB = this.orderedClassKeys.indexOf(b);
+      if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+      if (idxA !== -1) return -1;
+      if (idxB !== -1) return 1;
+      return a.localeCompare(b);
+    });
+    const data = labels.map(l => classTotals[l]);
 
-    const fallbackColors = ['#a78bfa','#fb923c','#38bdf8','#f472b6','#84cc16','#e879f9'];
-    let fallbackIdx = 0;
-    const backgroundColors = labels.map(l => this.colorPalette[l] || fallbackColors[fallbackIdx++ % fallbackColors.length]);
+    // ใช้ระบบสีมาตรฐานและระบบคำนวณสีอัตโนมัติ getAssetColor
+    const backgroundColors = labels.map(l => this.getAssetColor(l));
 
     if (this.allocationChart) this.allocationChart.destroy();
 
@@ -259,7 +318,7 @@ window.AllocationView = {
     }
   },
 
-  // View 2.2: Stacked Area Chart (Historical Asset Class Allocation Evolution) - v3.3.0
+  // View 2.2: Stacked Area Chart (Historical Asset Class Allocation Evolution) - v3.4.1
   renderAssetHistoryChart(snapshot) {
     const ctx = document.getElementById('assetHistoryChart');
     if (!ctx || !snapshot || snapshot.length === 0) return;
@@ -273,36 +332,11 @@ window.AllocationView = {
 
     const labels = filtered.map(s => s.year_month || s.date);
 
-    // List of 9 standard asset classes in consistent visual stacking order
-    const classKeys = ['THSTOCK', 'USAFUND', 'GOLD', 'GOLDFUND', 'ASIAFUND', 'CHIFUND', 'SEMIFUND', 'BOND', 'FCD'];
-
-    // Helper: convert hex to rgba
-    const hexToRgba = (hex, alpha) => {
-      let c = hex.replace('#', '');
-      if (c.length === 3) c = c.split('').map(x => x + x).join('');
-      const num = parseInt(c, 16);
-      return `rgba(${(num >> 16) & 255}, ${(num >> 8) & 255}, ${num & 255}, ${alpha})`;
-    };
-
-    // Build dataset for each asset class
-    // ---- DEBUG: Log to console to verify non-zero values ----
-    const debugLast = filtered[filtered.length - 1];
-    console.log('[AllocationChart] Filtered rows:', filtered.length, 'Last date:', debugLast?.date);
-    console.log('[AllocationChart] Last row asset_classes:', JSON.stringify(debugLast?.asset_classes));
-    // Check if ALL values are zero (indicates data mapping issue)
-    const totalAllClasses = filtered.reduce((sum, s) => {
-      if (!s.asset_classes) return sum;
-      return sum + Object.values(s.asset_classes).reduce((a, b) => a + (Number(b) || 0), 0);
-    }, 0);
-    console.log('[AllocationChart] Grand total across all rows:', totalAllClasses);
-    if (totalAllClasses === 0) {
-      console.warn('[AllocationChart] WARNING: All asset_class values are 0. Check API field names.');
-      // Fallback: try to derive from total_ondate for visualization
-      console.warn('[AllocationChart] Sample snapshot keys:', Object.keys(filtered[0] || {}));
-    }
+    // รายการ 10 สินทรัพย์มาตรฐาน เรียงจากฐานล่างสุด (เสี่ยงต่ำสุด CASH) ขึ้นไปบนสุด (เสี่ยงสูงสุด SEMIFUND)
+    const classKeys = ['CASH', 'BOND', 'FCD', 'GOLD', 'GOLDFUND', 'THSTOCK', 'ASIAFUND', 'CHIFUND', 'USAFUND', 'SEMIFUND'];
 
     const datasets = classKeys.map(cls => {
-      const color = this.colorPalette[cls] || '#9ca3af';
+      const color = this.getAssetColor(cls);
       const seriesData = filtered.map(s => {
         if (s.asset_classes && s.asset_classes[cls] !== undefined) {
           return Number(s.asset_classes[cls]) || 0;
@@ -314,7 +348,7 @@ window.AllocationView = {
         label: cls,
         data: seriesData,
         borderColor: color,
-        backgroundColor: hexToRgba(color, 0.65),
+        backgroundColor: this.hexToRgba(color, 0.70),
         borderWidth: 1.5,
         fill: true,
         tension: 0.3,
@@ -551,11 +585,16 @@ window.AllocationView = {
         const plCls = isPos ? 'text-emerald-400' : 'text-rose-400';
         const plPctStr = `${isPos ? '+' : ''}${plPct.toFixed(2)}%`;
 
+        // ตรวจสอบว่าเป็นคลาสที่กำหนดไว้ใน CSS หรือไม่ หากเป็นคลาสใหม่ให้ใช้สีไดนามิก
+        const assetColor = this.getAssetColor(a.class);
+        const isKnownClass = this.orderedClassKeys.includes((a.class || '').toUpperCase());
+        const inlineTagStyle = isKnownClass ? '' : `style="background: ${this.hexToRgba(assetColor, 0.2)}; color: ${assetColor}; border: 1px solid ${this.hexToRgba(assetColor, 0.35)};"`;
+
         const tr = document.createElement('tr');
         tr.className = 'holdings-data-row hover:bg-slate-800/20 transition-colors border-b border-gray-800/30';
         tr.innerHTML = `
           <td class="px-4 py-3 font-semibold asset-name-cell">${a.asset_name}</td>
-          <td class="px-4 py-3"><span class="badge-tag tag-${a.class || 'OTHER'}">${a.class || 'OTHER'}</span></td>
+          <td class="px-4 py-3"><span class="badge-tag tag-${a.class || 'OTHER'}" ${inlineTagStyle}>${a.class || 'OTHER'}</span></td>
           <td class="px-4 py-3"><span class="badge-owner owner-${a.owner}">${a.owner}</span></td>
           <td class="px-4 py-3 text-right asset-data-cell">${window.formatNumber(a.units)}</td>
           <td class="px-4 py-3 text-right asset-data-cell">฿${window.formatNumber(a.avg_cost)}</td>
