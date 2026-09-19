@@ -34,14 +34,15 @@ window.ApiService = {
     }
 
     // Show loading state
-    this.showLoading(true);
+    this.showLoading(true, 'กำลังโหลดข้อมูลพอร์ตการลงทุนจาก Google Sheets...');
 
     try {
       // v3.1 Update: Added timestamp cache buster (_t) and fetch options (no-store) to prevent stale data
       const authParam = `&access_token=${encodeURIComponent(token)}&_t=${Date.now()}`;
       
-      // กำหนด Timeout 12 วินาที ป้องกันหน้าเว็บค้างตลอดกาลหาก Google Apps Script ตอบสนองช้า
-      const timeoutSignal = typeof AbortSignal !== 'undefined' && AbortSignal.timeout ? AbortSignal.timeout(12000) : null;
+      // กำหนด Timeout (ดึงจาก APP_CONFIG หรือค่าเริ่มต้น 60 วินาที เพื่อรองรับ Cold Start ของ Google Apps Script)
+      const fetchTimeout = (window.APP_CONFIG && window.APP_CONFIG.FETCH_TIMEOUT_MS) || 60000;
+      const timeoutSignal = typeof AbortSignal !== 'undefined' && AbortSignal.timeout ? AbortSignal.timeout(fetchTimeout) : null;
       const fetchOpts = { 
         cache: 'no-store',
         ...(timeoutSignal ? { signal: timeoutSignal } : {})
@@ -65,17 +66,18 @@ window.ApiService = {
       if (anyError) {
         const errMsg = typeof anyError === 'string' ? anyError : JSON.stringify(anyError);
         console.warn('[API] Error response:', errMsg);
+        const lowerErr = errMsg.toLowerCase();
 
-        // ตรวจสอบกรณีเกิด Timeout หรือเครือข่ายถูกตัดการเชื่อมต่อ
-        if (errMsg.toLowerCase().includes('timeout') || errMsg.toLowerCase().includes('aborted')) {
-          console.warn('[API] Request timed out after 12s');
-          alert('⏱️ การเชื่อมต่อใช้เวลานานเกินไป (Connection Timeout):\n\nเซิร์ฟเวอร์ Google Apps Script ตอบสนองช้ากว่า 12 วินาที ระบบจะสลับไปแสดงผลในโหมดจำลอง (Demo Mode)');
-        } else if (errMsg.toLowerCase().includes('forbidden') || errMsg.toLowerCase().includes('not allowed')) {
+        // ตรวจสอบกรณีเกิด Timeout หรือเครือข่ายถูกตัดการเชื่อมต่อ (รองรับทั้ง timeout, timed out, aborted)
+        if (lowerErr.includes('timeout') || lowerErr.includes('timed out') || lowerErr.includes('aborted') || lowerErr.includes('time out')) {
+          console.warn(`[API] Request timed out after ${Math.round(fetchTimeout / 1000)}s`);
+          alert(`⏱️ การเชื่อมต่อใช้เวลานานเกินไป (Connection Timeout):\n\nเซิร์ฟเวอร์ Google Apps Script ตอบสนองช้ากว่า ${Math.round(fetchTimeout / 1000)} วินาที ระบบจะสลับไปแสดงผลในโหมดจำลอง (Demo Mode) ชั่วคราวครับ`);
+        } else if (lowerErr.includes('forbidden') || lowerErr.includes('not allowed')) {
           // If unauthorized email → access denied, logout and return to demo
           console.warn('[API] Email unauthorized:', errMsg);
           if (window.AuthService) window.AuthService.logout();
           alert('🚫 ปฏิเสธการเข้าถึง (Access Denied):\n\nบัญชี Google นี้ไม่ได้รับอนุญาตให้เข้าถึงข้อมูลพอร์ตการลงทุน ระบบจะแสดงผลในโหมดจำลอง (Demo Mode)');
-        } else if (errMsg.toLowerCase().includes('unauthorized') || errMsg.toLowerCase().includes('invalid')) {
+        } else if (lowerErr.includes('unauthorized') || lowerErr.includes('invalid')) {
           console.warn('[API] Token appears expired. Clearing session...');
           // ล้าง Token ทั้งใน sessionStorage และ localStorage
           sessionStorage.removeItem(window.APP_CONFIG.STORAGE_KEYS.AUTH_TOKEN);
@@ -320,8 +322,9 @@ window.ApiService = {
       ...updates
     };
 
-    // กำหนด Timeout 10 วินาทีสำหรับการอัปเดตข้อมูลหุ้น
-    const timeoutSignal = typeof AbortSignal !== 'undefined' && AbortSignal.timeout ? AbortSignal.timeout(10000) : null;
+    // กำหนด Timeout สำหรับการอัปเดตข้อมูลหุ้น (ดึงจาก APP_CONFIG หรือค่าเริ่มต้น 30 วินาที)
+    const syncTimeout = (window.APP_CONFIG && window.APP_CONFIG.SYNC_TIMEOUT_MS) || 30000;
+    const timeoutSignal = typeof AbortSignal !== 'undefined' && AbortSignal.timeout ? AbortSignal.timeout(syncTimeout) : null;
     const response = await fetch(baseUrl, {
       method: 'POST',
       body: JSON.stringify(payload),
@@ -332,8 +335,14 @@ window.ApiService = {
     return result;
   },
 
-  showLoading(isLoading) {
+  showLoading(isLoading, message = 'กำลังโหลดข้อมูลพอร์ตการลงทุน...') {
     const spinner = document.getElementById('global-loading-spinner');
-    if (spinner) spinner.style.display = isLoading ? 'flex' : 'none';
+    if (spinner) {
+      spinner.style.display = isLoading ? 'flex' : 'none';
+      const textEl = spinner.querySelector('p');
+      if (textEl && message) {
+        textEl.textContent = message;
+      }
+    }
   }
 };
