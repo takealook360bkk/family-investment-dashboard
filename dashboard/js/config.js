@@ -10,7 +10,9 @@ window.APP_CONFIG = {
   STORAGE_KEYS: {
     AUTH_TOKEN: 'family_portfolio_auth_token',
     USER_INFO: 'family_portfolio_user_info',
-    RETIREMENT_PARAMS: 'family_portfolio_retire_params'
+    RETIREMENT_PARAMS: 'family_portfolio_retire_params',
+    DATA_CACHE: 'family_portfolio_data_cache',
+    CACHE_TIMESTAMP: 'family_portfolio_cache_time'
   },
 
   // Timeout Configurations (milliseconds)

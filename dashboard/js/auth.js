@@ -125,11 +125,13 @@ window.AuthService = {
     window.AppState.token = null;
     window.AppState.isLoggedIn = false;
 
-    // ล้างข้อมูลเซสชันทั้งใน sessionStorage และ localStorage ให้หมดจด
+    // ล้างข้อมูลเซสชันและแคชข้อมูลในเครื่องให้หมดจด
     sessionStorage.removeItem(window.APP_CONFIG.STORAGE_KEYS.AUTH_TOKEN);
     sessionStorage.removeItem(window.APP_CONFIG.STORAGE_KEYS.USER_INFO);
     localStorage.removeItem(window.APP_CONFIG.STORAGE_KEYS.AUTH_TOKEN);
     localStorage.removeItem(window.APP_CONFIG.STORAGE_KEYS.USER_INFO);
+    localStorage.removeItem(window.APP_CONFIG.STORAGE_KEYS.DATA_CACHE);
+    localStorage.removeItem(window.APP_CONFIG.STORAGE_KEYS.CACHE_TIMESTAMP);
 
     this.updateAuthUI(false, null);
     

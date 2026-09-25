@@ -1,4 +1,11 @@
 // Data API Service for Family Investment Portfolio
+// Architecture: Single-Batch Payload + Stale-While-Revalidate Instant Local Cache
+// 
+// [ARCHITECTURAL RULE / กฎเหล็กด้านสถาปัตยกรรม]:
+// หากในอนาคตต้องการดึงข้อมูลจาก Google Sheet เพิ่มเติม (Request ที่ 5, 6, 7, 8, 9 ฯลฯ)
+// ห้ามสร้าง fetch() แยกใน Promise.all หรือสร้าง network request ย่อยเพิ่มเด็ดขาด!
+// ต้องไปเพิ่ม field ใน Apps Script handleAll (?action=all) เพื่อให้ Dashboard ดึงข้อมูลจบใน 1 request เดียวเสมอ
+// เพื่อป้องกัน Google Apps Script เกิด Concurrency Queueing, Cold Start ซ้ำซ้อน และ Error 429/503 HTML Drop
 
 function parseVal(val) {
   if (val === null || val === undefined || val === '') return 0;
@@ -13,11 +20,49 @@ function parseVal(val) {
 }
 
 window.ApiService = {
+  /**
+   * ดึงข้อมูลจาก Local Cache ในเครื่อง (ถ้ามี) เพื่อเปิดหน้าเว็บได้ทันที 0.05 วินาที
+   */
+  loadCachedData() {
+    try {
+      const cacheKey = window.APP_CONFIG?.STORAGE_KEYS?.DATA_CACHE || 'family_portfolio_data_cache';
+      const cached = localStorage.getItem(cacheKey);
+      if (!cached) return null;
+      const data = JSON.parse(cached);
+      if (data && data.summary && data.assets && data.snapshot) {
+        console.info('[API Cache] Loaded instant cached portfolio data');
+        return data;
+      }
+    } catch (e) {
+      console.warn('[API Cache] Failed to parse local cache:', e);
+    }
+    return null;
+  },
+
+  /**
+   * บันทึกข้อมูลที่ Normalization แล้วลง Local Cache สำหรับการเปิดครั้งถัดไป
+   */
+  saveCachedData(data) {
+    try {
+      const cacheKey = window.APP_CONFIG?.STORAGE_KEYS?.DATA_CACHE || 'family_portfolio_data_cache';
+      const timeKey = window.APP_CONFIG?.STORAGE_KEYS?.CACHE_TIMESTAMP || 'family_portfolio_cache_time';
+      localStorage.setItem(cacheKey, JSON.stringify(data));
+      localStorage.setItem(timeKey, String(Date.now()));
+      console.info('[API Cache] Successfully saved fresh portfolio snapshot to local cache');
+    } catch (e) {
+      console.warn('[API Cache] Failed to save local cache:', e);
+    }
+  },
+
+  /**
+   * ดึงข้อมูลพอร์ตการลงทุนทั้งหมดแบบ Single Batch Request (?action=all)
+   * ผสานกลยุทธ์ Stale-While-Revalidate: แสดงแคชทันที แล้วแอบซิงก์ข้อมูลสดอยู่เบื้องหลัง
+   */
   async fetchAllData() {
     const baseUrl = window.APP_CONFIG.API_BASE_URL;
     const token = window.AppState.token;
 
-    // Check if API endpoint is valid
+    // ตรวจสอบว่าได้ตั้งค่า URL หรือยัง หากไม่มีให้โหลด Demo Data
     if (!baseUrl || baseUrl.includes('YOUR_SCRIPT_ID') || baseUrl === '') {
       console.info('API_BASE_URL not configured. Loading realistic demo data.');
       const mock = window.generateMockData();
@@ -25,7 +70,7 @@ window.ApiService = {
       return;
     }
 
-    // If no token at all, go demo immediately (no alert needed)
+    // หากไม่มี Token ให้แสดงผล Demo Data ทันที
     if (!token) {
       console.info('No auth token. Loading demo data.');
       const mock = window.generateMockData();
@@ -33,96 +78,109 @@ window.ApiService = {
       return;
     }
 
-    // Show loading state
-    this.showLoading(true, 'กำลังโหลดข้อมูลพอร์ตการลงทุนจาก Google Sheets...');
+    // 1. ตรวจสอบและแสดงผลจากแคชทันที (Instant Render 0.05 วินาที)
+    const cachedData = this.loadCachedData();
+    const hasCache = !!cachedData;
+
+    if (hasCache) {
+      // เรนเดอร์ข้อมูลจากแคชขึ้นหน้าจอทันที ไม่ต้องให้ผู้ใช้ยืนรอนาน
+      window.AppState.setData({ ...cachedData, isDemo: false });
+      this.showSyncStatus(true, 'กำลังซิงก์ข้อมูลล่าสุดจาก Google Sheets...');
+    } else {
+      // กรณีเพิ่งเข้าใช้งานครั้งแรกและยังไม่มีแคช ให้แสดง Spinner หมุนแบบเดิม
+      this.showLoading(true, 'กำลังโหลดข้อมูลพอร์ตการลงทุนจาก Google Sheets...');
+    }
 
     try {
-      // v3.1 Update: Added timestamp cache buster (_t) and fetch options (no-store) to prevent stale data
+      // 2. ยิง Single Batch Request เพียง 1 Network Call ไปยัง Google Apps Script
       const authParam = `&access_token=${encodeURIComponent(token)}&_t=${Date.now()}`;
-      
-      // กำหนด Timeout (ดึงจาก APP_CONFIG หรือค่าเริ่มต้น 60 วินาที เพื่อรองรับ Cold Start ของ Google Apps Script)
       const fetchTimeout = (window.APP_CONFIG && window.APP_CONFIG.FETCH_TIMEOUT_MS) || 60000;
       const timeoutSignal = typeof AbortSignal !== 'undefined' && AbortSignal.timeout ? AbortSignal.timeout(fetchTimeout) : null;
+      
       const fetchOpts = { 
         cache: 'no-store',
         ...(timeoutSignal ? { signal: timeoutSignal } : {})
       };
 
-      const [summaryRes, assetsRes, snapshotRes, thaiStocksRes] = await Promise.all([
-        fetch(`${baseUrl}?action=summary${authParam}`, fetchOpts).then(r => r.json()).catch(e => ({ error: e.message })),
-        fetch(`${baseUrl}?action=assets${authParam}`, fetchOpts).then(r => r.json()).catch(e => ({ error: e.message })),
-        fetch(`${baseUrl}?action=snapshot${authParam}`, fetchOpts).then(r => r.json()).catch(e => ({ error: e.message })),
-        fetch(`${baseUrl}?action=thai_stocks${authParam}`, fetchOpts).then(r => r.json()).catch(e => ({ error: e.message }))
-      ]);
+      const requestUrl = `${baseUrl}?action=all${authParam}`;
+      console.log('[API] Fetching single batch payload from:', `${baseUrl}?action=all`);
+      
+      const response = await fetch(requestUrl, fetchOpts);
+      const responseText = await response.text();
 
-      // Log raw responses for debugging
-      console.log('[API] summary raw:', summaryRes);
-      console.log('[API] assets count:', Array.isArray(assetsRes.data) ? assetsRes.data.length : 'N/A');
-      console.log('[API] snapshot count:', Array.isArray(snapshotRes.data) ? snapshotRes.data.length : 'N/A');
-      console.log('[API] thai_stocks items count:', thaiStocksRes?.data?.items ? thaiStocksRes.data.items.length : 'N/A');
+      // 3. Safe Parser ป้องกัน Error HTML จาก Google Gateway (429, 503, 302 Redirect)
+      if (responseText.trim().startsWith('<') || responseText.includes('<!DOCTYPE') || responseText.includes('<html')) {
+        console.warn('[API] Received HTML error page from Google instead of JSON:', responseText.slice(0, 300));
+        
+        if (hasCache) {
+          // หากมีแคชอยู่แล้ว ให้ใช้ข้อมูลแคชต่อไปพร้อมแจ้งเตือนแบบนุ่มนวล ไม่บล็อกการใช้งาน
+          this.showSyncStatus(true, '⚡ ใช้ข้อมูลล่าสุดในเครื่อง (Google Apps Script กำลังเริ่มทำงาน)');
+          setTimeout(() => this.showSyncStatus(false), 4000);
+          return;
+        } else {
+          alert('⏱️ เซิร์ฟเวอร์ Google Apps Script ตอบสนองช้าหรือกำลังเริ่มทำงาน (Cold Start):\n\nระบบจะสลับไปแสดงผลในโหมดจำลอง (Demo Mode) ชั่วคราว กรุณารอสักครู่แล้วกด Refresh หน้าเว็บอีกครั้งครับ');
+          const mock = window.generateMockData();
+          window.AppState.setData({ ...mock, isDemo: true });
+          return;
+        }
+      }
 
-      // Check for authorization / token errors
-      const anyError = summaryRes.error || assetsRes.error || snapshotRes.error;
-      if (anyError) {
-        const errMsg = typeof anyError === 'string' ? anyError : JSON.stringify(anyError);
-        console.warn('[API] Error response:', errMsg);
+      let result;
+      try {
+        result = JSON.parse(responseText);
+      } catch (parseErr) {
+        console.error('[API] JSON Parse Error on payload:', responseText.slice(0, 200), parseErr);
+        if (hasCache) return;
+        throw new Error('Invalid JSON format received from server.');
+      }
+
+      // 4. ตรวจสอบ Error Response จาก Backend
+      if (!result.success || result.error) {
+        const errMsg = typeof result.error === 'string' ? result.error : JSON.stringify(result.error || 'Unknown Error');
+        console.warn('[API] Server returned error:', errMsg);
         const lowerErr = errMsg.toLowerCase();
 
-        // ตรวจสอบกรณีเกิด Timeout หรือเครือข่ายถูกตัดการเชื่อมต่อ (รองรับทั้ง timeout, timed out, aborted)
-        if (lowerErr.includes('timeout') || lowerErr.includes('timed out') || lowerErr.includes('aborted') || lowerErr.includes('time out')) {
-          console.warn(`[API] Request timed out after ${Math.round(fetchTimeout / 1000)}s`);
-          alert(`⏱️ การเชื่อมต่อใช้เวลานานเกินไป (Connection Timeout):\n\nเซิร์ฟเวอร์ Google Apps Script ตอบสนองช้ากว่า ${Math.round(fetchTimeout / 1000)} วินาที ระบบจะสลับไปแสดงผลในโหมดจำลอง (Demo Mode) ชั่วคราวครับ`);
-        } else if (lowerErr.includes('forbidden') || lowerErr.includes('not allowed')) {
-          // If unauthorized email → access denied, logout and return to demo
-          console.warn('[API] Email unauthorized:', errMsg);
+        if (lowerErr.includes('forbidden') || lowerErr.includes('not allowed')) {
           if (window.AuthService) window.AuthService.logout();
-          alert('🚫 ปฏิเสธการเข้าถึง (Access Denied):\n\nบัญชี Google นี้ไม่ได้รับอนุญาตให้เข้าถึงข้อมูลพอร์ตการลงทุน ระบบจะแสดงผลในโหมดจำลอง (Demo Mode)');
+          alert('🚫 ปฏิเสธการเข้าถึง (Access Denied):\n\nบัญชี Google นี้ไม่ได้รับอนุญาตให้เข้าถึงข้อมูลพอร์ตการลงทุน');
+          return;
         } else if (lowerErr.includes('unauthorized') || lowerErr.includes('invalid')) {
           console.warn('[API] Token appears expired. Clearing session...');
-          // ล้าง Token ทั้งใน sessionStorage และ localStorage
-          sessionStorage.removeItem(window.APP_CONFIG.STORAGE_KEYS.AUTH_TOKEN);
-          sessionStorage.removeItem(window.APP_CONFIG.STORAGE_KEYS.USER_INFO);
-          localStorage.removeItem(window.APP_CONFIG.STORAGE_KEYS.AUTH_TOKEN);
-          localStorage.removeItem(window.APP_CONFIG.STORAGE_KEYS.USER_INFO);
-          window.AppState.token = null;
-          window.AppState.isLoggedIn = false;
-
-          // Update UI to show login button again
-          if (window.AuthService) window.AuthService.updateAuthUI(false, null);
-
-          // Show user-friendly message
+          if (window.AuthService) window.AuthService.logout();
           alert('⚠️ Session หมดอายุ: กรุณากด "Sign in with Google" อีกครั้งเพื่อดึงข้อมูลจริงจาก Google Sheet ครับ');
+          return;
         } else {
-          alert('[API Error] ' + errMsg);
+          if (!hasCache) {
+            alert('[API Error] ' + errMsg);
+          }
         }
 
-        const mock = window.generateMockData();
-        window.AppState.setData({ ...mock, isDemo: true });
+        if (!hasCache) {
+          const mock = window.generateMockData();
+          window.AppState.setData({ ...mock, isDemo: true });
+        }
+        return;
+      }
+
+      // 5. ดึงข้อมูลจาก Batch Payload (รองรับทั้ง Batch ใหม่และ Single Fallback)
+      const rawData = result.data || {};
+      const rawSummary = rawData.summary || {};
+      const rawAssets = Array.isArray(rawData.assets) ? rawData.assets : [];
+      const rawSnapshot = Array.isArray(rawData.snapshot) ? rawData.snapshot : [];
+      const rawThaiStocks = rawData.thai_stocks || { summary: null, items: [] };
+
+      if (rawSnapshot.length === 0 || rawAssets.length === 0) {
+        console.warn('[API] Empty dataset received from sheets.');
+        if (!hasCache) {
+          const mock = window.generateMockData();
+          window.AppState.setData({ ...mock, isDemo: true });
+        }
         return;
       }
 
       // ---- Data Normalization ----
-      const rawSummary = summaryRes.data || summaryRes;
-      const rawAssets = Array.isArray(assetsRes.data) ? assetsRes.data : (Array.isArray(assetsRes) ? assetsRes : []);
-      const rawSnapshot = Array.isArray(snapshotRes.data) ? snapshotRes.data : (Array.isArray(snapshotRes) ? snapshotRes : []);
 
-      // DEBUG: Log raw snapshot to see what field names the Apps Script sends
-      if (rawSnapshot.length > 0) {
-        const rawLast = rawSnapshot[rawSnapshot.length - 1];
-        console.log('[API RAW] Snapshot last row keys:', Object.keys(rawLast).join(', '));
-        console.log('[API RAW] Last row date field:', rawLast.date);
-        console.log('[API RAW] asiafund_amount:', rawLast.asiafund_amount, '| thstock_amount:', rawLast.thstock_amount);
-        console.log('[API RAW] Full last row:', JSON.stringify(rawLast));
-      }
-
-      if (rawSnapshot.length === 0 || rawAssets.length === 0) {
-        console.warn('[API] Empty data returned. Falling back to demo.');
-        const mock = window.generateMockData();
-        window.AppState.setData({ ...mock, isDemo: true });
-        return;
-      }
-
-      // Normalize summary (Master_Asset Q3:V5) - v3.2.3
+      // 1. Normalize summary (Master_Asset Q3:V5)
       const normalizedSummary = {
         total: {
           net_capital_deposit: Number(rawSummary.total?.net_capital_deposit || rawSummary.total?.net_capital || rawSummary.total?.cost_amount || rawSummary.total?.cost || 0),
@@ -147,7 +205,7 @@ window.ApiService = {
         }
       };
 
-      // Normalize assets (Master_Asset)
+      // 2. Normalize assets (Master_Asset)
       const normalizedAssets = rawAssets.map((a, i) => {
         const acc = (a.account || '').toUpperCase();
         let owner = 'PP';
@@ -180,7 +238,7 @@ window.ApiService = {
         };
       });
 
-      // Normalize snapshot (Daily Snapshort_V3 - 26 cols) - v3.2.3
+      // 3. Normalize snapshot (Daily Snapshort_V3 - 26 cols + CASH Col AC)
       const normalizedSnapshot = rawSnapshot.map(s => {
         const dStr = String(s.date || '');
         const ppCapital = Number(s.pp_net_capital_deposit !== undefined ? s.pp_net_capital_deposit : (s.pp_cost || 0));
@@ -206,19 +264,15 @@ window.ApiService = {
         return {
           date: dStr,
           year_month: dStr.length >= 7 ? dStr.substring(0, 7) : dStr,
-          // v3.2.3 Net Capital Deposits (Actual External Cash)
           pp_net_capital_deposit: ppCapital,
           jj_net_capital_deposit: jjCapital,
           total_net_capital_deposit: totCapital,
-          // Ondate amounts (Market value / Net worth)
           pp_ondate: ppOndate,
           jj_ondate: jjOndate,
           total_ondate: totOndate,
-          // Net Gain (Unrealized + Cumulative Realized + Dividends)
           pp_net_gain: ppNetGain,
           jj_net_gain: jjNetGain,
           total_net_gain: totNetGain,
-          // P&L & Cost
           pp_cost: ppCost,
           jj_cost: jjCost,
           total_cost: totCost,
@@ -229,8 +283,6 @@ window.ApiService = {
           pp_inflow:    Number(s.pp_net_inflow !== undefined ? s.pp_net_inflow : (s.pp_inflow || 0)),
           jj_inflow:    Number(s.jj_net_inflow !== undefined ? s.jj_net_inflow : (s.jj_inflow || 0)),
           total_inflow: Number(s.total_net_inflow !== undefined ? s.total_net_inflow : (s.total_inflow || 0)),
-          // v3.4.1 สัดส่วนสินทรัพย์รายหมวดหมู่ (รวมสินทรัพย์สภาพคล่อง CASH จาก Col AC)
-          // ใช้ ?? (nullish coalescing) เพื่อให้ค่า 0 ไม่ถูกมองข้ามเป็นค่าว่าง
           asset_classes: {
             CASH:     parseVal(s.cash_amount     ?? s.asset_classes?.CASH     ?? 0),
             ASIAFUND: parseVal(s.asiafund_amount ?? s.asset_classes?.ASIAFUND ?? 0),
@@ -246,42 +298,42 @@ window.ApiService = {
         };
       });
 
-      console.log('[API] Normalized summary total NW:', normalizedSummary.total.market_value);
-      console.log('[API] Snapshot rows loaded:', normalizedSnapshot.length);
-      console.log('[API] Assets loaded:', normalizedAssets.length);
-      // Debug: Log first and last snapshot asset_classes to verify data
-      if (normalizedSnapshot.length > 0) {
-        const last = normalizedSnapshot[normalizedSnapshot.length - 1];
-        console.log('[API] Last snapshot date:', last.date, 'asset_classes:', last.asset_classes);
-        // Also log raw to cross-check field names
-        const rawLast = rawSnapshot[rawSnapshot.length - 1];
-        console.log('[API] Raw last snapshot keys:', Object.keys(rawLast || {}));
-      }
-
-      // Normalize Thai Stocks Hub data
+      // 4. Normalize Thai Stocks Hub data
       let normalizedThaiStocks = { summary: null, items: [] };
-      if (thaiStocksRes && thaiStocksRes.success && thaiStocksRes.data) {
-        normalizedThaiStocks = thaiStocksRes.data;
+      if (rawThaiStocks && (rawThaiStocks.summary || (rawThaiStocks.items && rawThaiStocks.items.length > 0))) {
+        normalizedThaiStocks = rawThaiStocks;
       } else {
-        // Fallback to mock thaiStocks if not yet populated or error
         const mock = window.generateMockData();
         normalizedThaiStocks = mock.thaiStocks;
       }
 
-      window.AppState.setData({
+      const freshStatePayload = {
         summary:    normalizedSummary,
         assets:     normalizedAssets,
         snapshot:   normalizedSnapshot,
-        thaiStocks: normalizedThaiStocks,
-        isDemo:     false
+        thaiStocks: normalizedThaiStocks
+      };
+
+      // 6. บันทึกข้อมูลสดลง Local Cache เพื่อให้เปิดเว็บครั้งถัดไปเร็วแบบ Instant (0.05 วินาที)
+      this.saveCachedData(freshStatePayload);
+
+      // 7. อัปเดต UI ด้วยข้อมูลสดล่าสุด
+      window.AppState.setData({
+        ...freshStatePayload,
+        isDemo: false
       });
+
+      console.info('[API] Fresh portfolio data synchronized successfully in 1 batch');
 
     } catch (err) {
       console.error('[API] Fetch failed:', err);
-      const mock = window.generateMockData();
-      window.AppState.setData({ ...mock, isDemo: true });
+      if (!hasCache) {
+        const mock = window.generateMockData();
+        window.AppState.setData({ ...mock, isDemo: true });
+      }
     } finally {
       this.showLoading(false);
+      this.showSyncStatus(false);
     }
   },
 
@@ -291,12 +343,10 @@ window.ApiService = {
   async updateThaiStock(account, symbol, updates) {
     if (window.AppState.isDemoMode) {
       console.log('[API Mock] updateThaiStock received:', { account, symbol, updates });
-      // Update local state in mock mode
       if (window.AppState.thaiStocks && window.AppState.thaiStocks.items) {
         const item = window.AppState.thaiStocks.items.find(i => i.account === account && i.symbol === symbol);
         if (item) {
           Object.assign(item, updates);
-          // Recalculate dependent metrics if expected_dps changed
           if (updates.expected_dps !== undefined) {
             item.yearly_expected_dividend = item.quantity * item.expected_dps;
             item.yield_on_cost = item.avg_cost_price > 0 ? (item.expected_dps / item.avg_cost_price * 100) : 0;
@@ -322,9 +372,9 @@ window.ApiService = {
       ...updates
     };
 
-    // กำหนด Timeout สำหรับการอัปเดตข้อมูลหุ้น (ดึงจาก APP_CONFIG หรือค่าเริ่มต้น 30 วินาที)
     const syncTimeout = (window.APP_CONFIG && window.APP_CONFIG.SYNC_TIMEOUT_MS) || 30000;
     const timeoutSignal = typeof AbortSignal !== 'undefined' && AbortSignal.timeout ? AbortSignal.timeout(syncTimeout) : null;
+    
     const response = await fetch(baseUrl, {
       method: 'POST',
       body: JSON.stringify(payload),
@@ -335,6 +385,9 @@ window.ApiService = {
     return result;
   },
 
+  /**
+   * แสดง/ซ่อน Full Screen Loading Spinner
+   */
   showLoading(isLoading, message = 'กำลังโหลดข้อมูลพอร์ตการลงทุน...') {
     const spinner = document.getElementById('global-loading-spinner');
     if (spinner) {
@@ -343,6 +396,34 @@ window.ApiService = {
       if (textEl && message) {
         textEl.textContent = message;
       }
+    }
+  },
+
+  /**
+   * แสดง/ซ่อน แถบแจ้งเตือนการซิงก์ข้อมูลแบบ Non-intrusive ที่มุมจอ
+   */
+  showSyncStatus(isSyncing, message = 'กำลังซิงก์ข้อมูลล่าสุด...') {
+    let indicator = document.getElementById('bg-sync-indicator');
+    if (!indicator) {
+      indicator = document.createElement('div');
+      indicator.id = 'bg-sync-indicator';
+      indicator.className = 'fixed bottom-4 right-4 z-40 bg-slate-900/90 text-cyan-400 border border-cyan-800/80 px-3.5 py-1.5 rounded-full text-xs font-medium flex items-center gap-2 shadow-xl backdrop-blur-md transition-all duration-300 pointer-events-none opacity-0 translate-y-2';
+      indicator.innerHTML = `
+        <span class="inline-block w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
+        <span id="bg-sync-text">${message}</span>
+      `;
+      document.body.appendChild(indicator);
+    }
+
+    const textEl = indicator.querySelector('#bg-sync-text');
+    if (textEl && message) textEl.textContent = message;
+
+    if (isSyncing) {
+      indicator.classList.remove('opacity-0', 'translate-y-2');
+      indicator.classList.add('opacity-100', 'translate-y-0');
+    } else {
+      indicator.classList.remove('opacity-100', 'translate-y-0');
+      indicator.classList.add('opacity-0', 'translate-y-2');
     }
   }
 };
