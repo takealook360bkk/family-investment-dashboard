@@ -40,6 +40,12 @@ The project is built around a hybrid architecture using Google Sheets as the pri
 - **Security**: Google Identity Services (OAuth 2.0).
 
 ## Version Log
+- **Version 3.5.2** *(October 1, 2026)*: Automated Month-End Snapshot Engine, LINE Messaging API Integration & Security Hardening.
+  - **Automated Cloud Snapshot (`month_end_snapshot.js`)**: Developed standalone Google Apps Script module running on Google Cloud via Time-driven Trigger (Daily @ 18:00 Bangkok Time). Automatically evaluates month-end dates, appends new records or updates mid-month interim rows in `Daily Snapshort_V3` (36 columns A to AJ), and guarantees `=today()` formula continuity in `Master_Asset!Q1`.
+  - **LINE Messaging API Notification ("PJ Family Notify")**: Integrated automated push notification delivering executive summary cards (Total Portfolio, Net Gain, Unrealized P&L, NAV/Unit, PP/JJ Breakdown) into the family group "PJ Financial(3)" upon successful snapshot recording.
+  - **Security Hardening (Script Properties Vault)**: Protected LINE credentials using Google Apps Script's `PropertiesService` environment variables, ensuring zero sensitive tokens are committed to source code or version control.
+  - **Trigger Type-Coercion Bugfix & Timezone Safeguard**: Fixed critical Apps Script Trigger bug where event objects (`e = {authMode:...}`) triggered unintended runs on non-EOM days by enforcing strict boolean checking (`forceRun === true`) and Bangkok-specific timezone resolution (`Asia/Bangkok`).
+
 - **Version 3.5.1** *(September 25, 2026)*: High-Performance Single-Batch API Architecture & Stale-While-Revalidate Instant Local Cache.
   - **Single-Batch Payload Optimization (`?action=all`)**: Consolidated 4 parallel micro-requests (`summary`, `assets`, `snapshot`, `thai_stocks`) into 1 unified batch payload. Eliminated Google Apps Script concurrent execution bottlenecks, reducing network overhead by 75% and cutting server latency from 20–30s down to ~2–3s.
   - **Stale-While-Revalidate Instant Local Cache**: Implemented instant 0.05-second perceived load time by rendering cached portfolio state immediately upon page load, performing fresh data synchronization seamlessly in the background.
