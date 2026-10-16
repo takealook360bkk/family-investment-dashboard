@@ -20,37 +20,71 @@ function parseVal(val) {
 }
 
 window.ApiService = {
+  // อายุสูงสุดของข้อมูลแคชในเซสชัน (TTL: 8 ชั่วโมง ป้องกันแคชเก่าค้างข้ามวัน)
+  CACHE_TTL_MS: 8 * 60 * 60 * 1000,
+
   /**
-   * ดึงข้อมูลจาก Local Cache ในเครื่อง (ถ้ามี) เพื่อเปิดหน้าเว็บได้ทันที 0.05 วินาที
+   * ดึงข้อมูลจาก Session Cache ในเครื่อง (ถ้ามี) เพื่อเปิดหน้าเว็บได้ทันที 0.05 วินาที
+   * ปรับปรุงความปลอดภัยและความเป็นส่วนตัว (Privacy & Security Hardening):
+   * 1. ย้ายจาก localStorage มาใช้ sessionStorage เพื่อล้างข้อมูลการเงินทิ้งอัตโนมัติเมื่อปิดแท็บเบราว์เซอร์
+   * 2. ตรวจสอบอายุแคช (TTL) หากเกิน 8 ชั่วโมงจะล้างทิ้งเพื่อดึงข้อมูลสดใหม่
+   * 3. ล้างแคชการเงินเดิมที่อาจเคยค้างใน localStorage จากเวอร์ชันก่อนทิ้งทั้งหมด
    */
   loadCachedData() {
     try {
       const cacheKey = window.APP_CONFIG?.STORAGE_KEYS?.DATA_CACHE || 'family_portfolio_data_cache';
-      const cached = localStorage.getItem(cacheKey);
+      const timeKey = window.APP_CONFIG?.STORAGE_KEYS?.CACHE_TIMESTAMP || 'family_portfolio_cache_time';
+
+      // ล้างข้อมูลการเงินเดิมที่เคยค้างอยู่ใน localStorage เพื่อสุขอนามัยความเป็นส่วนตัว (Privacy Hygiene)
+      if (localStorage.getItem(cacheKey) || localStorage.getItem(timeKey)) {
+        localStorage.removeItem(cacheKey);
+        localStorage.removeItem(timeKey);
+        console.info('[API Cache] Eradicated plaintext financial cache from permanent localStorage');
+      }
+
+      // อ่านข้อมูลจาก sessionStorage (ปลอดภัย ไม่ค้างบนดิสก์ถาวรหลังปิดแท็บ)
+      const cached = sessionStorage.getItem(cacheKey);
+      const cacheTime = sessionStorage.getItem(timeKey);
       if (!cached) return null;
+
+      // ตรวจสอบอายุแคช (TTL)
+      if (cacheTime && (Date.now() - Number(cacheTime) > this.CACHE_TTL_MS)) {
+        console.info('[API Cache] Cached data expired (exceeded TTL). Discarding...');
+        sessionStorage.removeItem(cacheKey);
+        sessionStorage.removeItem(timeKey);
+        return null;
+      }
+
       const data = JSON.parse(cached);
       if (data && data.summary && data.assets && data.snapshot) {
-        console.info('[API Cache] Loaded instant cached portfolio data');
+        console.info('[API Cache] Loaded instant cached portfolio data from secure sessionStorage');
         return data;
       }
     } catch (e) {
-      console.warn('[API Cache] Failed to parse local cache:', e);
+      console.warn('[API Cache] Failed to parse secure session cache:', e);
     }
     return null;
   },
 
   /**
-   * บันทึกข้อมูลที่ Normalization แล้วลง Local Cache สำหรับการเปิดครั้งถัดไป
+   * บันทึกข้อมูลที่ Normalization แล้วลง Session Cache สำหรับการเปิดครั้งถัดไปในเซสชันเดียวกัน
+   * ใช้ sessionStorage เพื่อความปลอดภัยสูงสุด ข้อมูลจะถูกทำลายทิ้งทันทีเมื่อปิดแท็บ
    */
   saveCachedData(data) {
     try {
       const cacheKey = window.APP_CONFIG?.STORAGE_KEYS?.DATA_CACHE || 'family_portfolio_data_cache';
       const timeKey = window.APP_CONFIG?.STORAGE_KEYS?.CACHE_TIMESTAMP || 'family_portfolio_cache_time';
-      localStorage.setItem(cacheKey, JSON.stringify(data));
-      localStorage.setItem(timeKey, String(Date.now()));
-      console.info('[API Cache] Successfully saved fresh portfolio snapshot to local cache');
+
+      sessionStorage.setItem(cacheKey, JSON.stringify(data));
+      sessionStorage.setItem(timeKey, String(Date.now()));
+
+      // ล้างข้อมูลใน localStorage ออกอย่างเด็ดขาด ป้องกันข้อมูลรั่วไหลข้ามเซสชัน
+      localStorage.removeItem(cacheKey);
+      localStorage.removeItem(timeKey);
+
+      console.info('[API Cache] Successfully saved fresh portfolio snapshot to secure sessionStorage');
     } catch (e) {
-      console.warn('[API Cache] Failed to save local cache:', e);
+      console.warn('[API Cache] Failed to save secure session cache:', e);
     }
   },
 

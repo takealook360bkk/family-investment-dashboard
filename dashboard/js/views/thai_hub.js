@@ -453,10 +453,13 @@ window.ThaiHubView = {
     else if (perform.includes('Slowdown')) performClass = 'slowdown';
     else if (perform.includes('Impair')) performClass = 'impair';
 
+    const safeSymbol = window.escapeHtml(item.symbol);
+    const safeAccount = window.escapeHtml(item.account);
+
     return `
       <tr class="hover:bg-slate-800/30 transition-colors border-b border-gray-800/60 text-xs">
         <td class="px-3 py-2.5 font-bold">
-          <span class="th-stock-symbol font-semibold">${item.symbol}</span>
+          <span class="th-stock-symbol font-semibold">${safeSymbol}</span>
         </td>
         <td class="px-3 py-2.5 text-right th-stock-sec">${window.formatCurrency(item.quantity)}</td>
         <td class="px-3 py-2.5 text-right th-stock-sec">${window.formatNumber(item.avg_cost_price)}</td>
@@ -473,22 +476,22 @@ window.ThaiHubView = {
         <td class="px-3 py-2.5 text-center">
           <input type="number" step="0.01" min="0" 
             class="th-input-dps" 
-            data-account="${item.account}" 
-            data-symbol="${item.symbol}" 
+            data-account="${safeAccount}" 
+            data-symbol="${safeSymbol}" 
             value="${Number(item.expected_dps).toFixed(2)}">
         </td>
         <td class="px-3 py-2.5 text-right text-emerald-400 font-bold">฿${window.formatCurrency(item.yearly_expected_dividend)}</td>
         <td class="px-3 py-2.5 text-right th-stock-sec font-semibold">${window.formatNumber(item.yield_on_cost)}%</td>
         <td class="px-3 py-2.5 text-right th-stock-sec font-semibold">${window.formatNumber(item.current_price_yield)}%</td>
         <td class="px-3 py-2.5 text-center">
-          <select class="th-select-consensus ${consensusClass}" data-account="${item.account}" data-symbol="${item.symbol}">
+          <select class="th-select-consensus ${consensusClass}" data-account="${safeAccount}" data-symbol="${safeSymbol}">
             <option value="Buy" ${consensus === 'Buy' ? 'selected' : ''}>🟢 Buy</option>
             <option value="Hold" ${consensus === 'Hold' ? 'selected' : ''}>🟡 Hold</option>
             <option value="Sell" ${consensus === 'Sell' ? 'selected' : ''}>🔴 Sell</option>
           </select>
         </td>
         <td class="px-3 py-2.5 text-center">
-          <select class="th-select-perform ${performClass}" data-account="${item.account}" data-symbol="${item.symbol}">
+          <select class="th-select-perform ${performClass}" data-account="${safeAccount}" data-symbol="${safeSymbol}">
             <option value="High Growth" ${perform === 'High Growth' ? 'selected' : ''}>🚀 High Growth</option>
             <option value="Moderate Growth" ${perform === 'Moderate Growth' ? 'selected' : ''}>📈 Mod Growth</option>
             <option value="Neutral" ${perform === 'Neutral' ? 'selected' : ''}>⚖️ Neutral</option>

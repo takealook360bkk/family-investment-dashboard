@@ -161,9 +161,10 @@ window.AllocationView = {
 
     classes.forEach(cls => {
       const isChecked = isAllSelected || this.selectedClasses?.has(cls);
+      const safeCls = window.escapeHtml(cls);
       const label = document.createElement('label');
       label.className = 'flex items-center gap-2 cursor-pointer text-xs text-gray-300 py-0.5';
-      label.innerHTML = `<input type="checkbox" class="class-cb" data-class="${cls}" ${isChecked ? 'checked' : ''}> <span>${cls}</span>`;
+      label.innerHTML = `<input type="checkbox" class="class-cb" data-class="${safeCls}" ${isChecked ? 'checked' : ''}> <span>${safeCls}</span>`;
       container.appendChild(label);
     });
 
@@ -306,11 +307,12 @@ window.AllocationView = {
       legendContainer.innerHTML = '';
       labels.forEach((lbl, i) => {
         const pct = grandTotal > 0 ? ((classTotals[lbl] / grandTotal) * 100).toFixed(1) : 0;
+        const safeLbl = window.escapeHtml(lbl);
         const item = document.createElement('div');
         item.className = 'flex items-center gap-1.5 alloc-legend-item';
         item.innerHTML = `
           <span style="width:12px;height:12px;border-radius:3px;background:${backgroundColors[i]};display:inline-block;flex-shrink:0;"></span>
-          <span class="alloc-legend-label font-semibold">${lbl}</span>
+          <span class="alloc-legend-label font-semibold">${safeLbl}</span>
           <span class="alloc-legend-pct text-gray-400">${pct}% (฿${window.formatCurrency(classTotals[lbl])})</span>
         `;
         legendContainer.appendChild(item);
@@ -590,12 +592,16 @@ window.AllocationView = {
         const isKnownClass = this.orderedClassKeys.includes((a.class || '').toUpperCase());
         const inlineTagStyle = isKnownClass ? '' : `style="background: ${this.hexToRgba(assetColor, 0.2)}; color: ${assetColor}; border: 1px solid ${this.hexToRgba(assetColor, 0.35)};"`;
 
+        const safeName = window.escapeHtml(a.asset_name);
+        const safeClass = window.escapeHtml(a.class || 'OTHER');
+        const safeOwner = window.escapeHtml(a.owner || 'ALL');
+
         const tr = document.createElement('tr');
         tr.className = 'holdings-data-row hover:bg-slate-800/20 transition-colors border-b border-gray-800/30';
         tr.innerHTML = `
-          <td class="px-4 py-3 font-semibold asset-name-cell">${a.asset_name}</td>
-          <td class="px-4 py-3"><span class="badge-tag tag-${a.class || 'OTHER'}" ${inlineTagStyle}>${a.class || 'OTHER'}</span></td>
-          <td class="px-4 py-3"><span class="badge-owner owner-${a.owner}">${a.owner}</span></td>
+          <td class="px-4 py-3 font-semibold asset-name-cell">${safeName}</td>
+          <td class="px-4 py-3"><span class="badge-tag tag-${safeClass}" ${inlineTagStyle}>${safeClass}</span></td>
+          <td class="px-4 py-3"><span class="badge-owner owner-${safeOwner}">${safeOwner}</span></td>
           <td class="px-4 py-3 text-right asset-data-cell">${window.formatNumber(a.units)}</td>
           <td class="px-4 py-3 text-right asset-data-cell">฿${window.formatNumber(a.avg_cost)}</td>
           <td class="px-4 py-3 text-right asset-data-cell font-medium">฿${window.formatNumber(a.current_price)}</td>

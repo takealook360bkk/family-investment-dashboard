@@ -12,6 +12,17 @@ window.formatNumber = function(val, decimals = 2) {
   return Number(val).toLocaleString('en-US', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
 };
 
+// ฟังก์ชันแปลงอักขระพิเศษ (HTML Entity Escaping) เพื่อป้องกัน Stored/DOM XSS
+window.escapeHtml = function(str) {
+  if (str === null || str === undefined) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+};
+
 document.addEventListener('DOMContentLoaded', () => {
   // 1. Initialize View Router & Tabs
   const navTabs = document.querySelectorAll('.nav-tab-btn');

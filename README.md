@@ -1,189 +1,93 @@
-# Family Investment Dashboard
+# Family Investment Dashboard (แดชบอร์ดบริหารพอร์ตการเงินครอบครัว)
 
-A comprehensive asset management system and interactive dashboard for family wealth tracking. This system monitors growth, analyzes performance across various asset classes, and simulates retirement scenarios.
-
-## Project Overview
-The project is built around a hybrid architecture using Google Sheets as the primary data engine and a modern web frontend for visualization.
-
-- **Data Engine**: Powered by Google Sheets for transaction inputs and real-time valuations.
-- **Price Engine**: Automated price fetching via Google Apps Script (SEC Thailand, Yahoo Finance).
-- **Backend API (Single-Batch Standard)**: Secure REST API built with Google Apps Script. All dashboard queries (`summary`, `assets`, `snapshot`, `thai_stocks`, and future requests) **MUST** be batched through a single request (`?action=all`) to prevent serverless cold-start queueing and concurrency rate limits.
-- **Frontend**: A responsive Single Page Application (SPA) featuring:
-    - Overview Dashboard
-    - Asset Allocation Analysis
-    - Owner Breakdown (PP & JJ)
-    - Financial Independence (FIRE) Simulator
-
-## Directory Structure
-```
-/
-├── dashboard/              # Web Frontend Source Code
-│   ├── index.html          # Main SPA Entry Point
-│   ├── manifest.json       # Web App Manifest (PWA & Add to Home Screen)
-│   ├── favicon.ico         # Browser Tab & Bookmark Icon
-│   ├── icons/              # Multi-resolution App Icons & Favicons
-│   ├── css/                # Stylesheets (Glassmorphism design)
-│   └── js/                 # JavaScript Logic
-│       ├── views/          # Specific Dashboard View Logic
-│       ├── api.js          # API Communication Layer
-│       ├── app.js          # Main Application Controller
-│       ├── auth.js         # Google OAuth Logic
-│       ├── config.js       # Dashboard Configurations
-│       └── state.js        # Frontend State Management
-└── .gitignore              # Git ignore file
-```
-
-## Tech Stack
-- **Languages**: JavaScript (ES6+), HTML5, CSS3.
-- **Visualization**: Chart.js.
-- **Backend**: Google Sheets, Google Apps Script.
-- **Security**: Google Identity Services (OAuth 2.0).
-
-## Version Log
-- **Version 3.5.2** *(October 1, 2026)*: Automated Month-End Snapshot Engine, LINE Messaging API Integration & Security Hardening.
-  - **Automated Cloud Snapshot (`month_end_snapshot.js`)**: Developed standalone Google Apps Script module running on Google Cloud via Time-driven Trigger (Daily @ 18:00 Bangkok Time). Automatically evaluates month-end dates, appends new records or updates mid-month interim rows in `Daily Snapshort_V3` (36 columns A to AJ), and guarantees `=today()` formula continuity in `Master_Asset!Q1`.
-  - **LINE Messaging API Notification ("PJ Family Notify")**: Integrated automated push notification delivering executive summary cards (Total Portfolio, Net Gain, Unrealized P&L, NAV/Unit, PP/JJ Breakdown) into the family group "PJ Financial(3)" upon successful snapshot recording.
-  - **Security Hardening (Script Properties Vault)**: Protected LINE credentials using Google Apps Script's `PropertiesService` environment variables, ensuring zero sensitive tokens are committed to source code or version control.
-  - **Trigger Type-Coercion Bugfix & Timezone Safeguard**: Fixed critical Apps Script Trigger bug where event objects (`e = {authMode:...}`) triggered unintended runs on non-EOM days by enforcing strict boolean checking (`forceRun === true`) and Bangkok-specific timezone resolution (`Asia/Bangkok`).
-
-- **Version 3.5.1** *(September 25, 2026)*: High-Performance Single-Batch API Architecture & Stale-While-Revalidate Instant Local Cache.
-  - **Single-Batch Payload Optimization (`?action=all`)**: Consolidated 4 parallel micro-requests (`summary`, `assets`, `snapshot`, `thai_stocks`) into 1 unified batch payload. Eliminated Google Apps Script concurrent execution bottlenecks, reducing network overhead by 75% and cutting server latency from 20–30s down to ~2–3s.
-  - **Stale-While-Revalidate Instant Local Cache**: Implemented instant 0.05-second perceived load time by rendering cached portfolio state immediately upon page load, performing fresh data synchronization seamlessly in the background.
-  - **Safe Response Parser & HTML Error Guard**: Added resilient pre-parse detection preventing raw syntax errors (`Unexpected token '<', "<!DOCTYPE "...`) when Google Apps Script returns cold-start or gateway error pages, ensuring seamless fallback to local cache.
-  - **Enhanced Session Cleanup**: Synchronized cache invalidation across `localStorage` and `sessionStorage` upon user logout.
-
-- **Version 3.5.0** *(September 14, 2026)*: CASH Asset Class Integration, Google Sheets Col AC Shift Fix, Semantic Color System & Macroeconomic Asset Hierarchy Reordering.
-  - **CASH Asset Class Integration & Historical Area Chart**: Added `CASH` to View 2.2 Stacked Area Chart (`Asset Class Allocation History`) positioned as the ground base layer, showing monthly cash accumulation and liquid reserves with full timeline filtering (ALL, 5Y, 3Y, 1Y).
-  - **Google Sheets Column AC Insertion & Shift Fix (v3.4.1 API)**: Handled critical column shift caused by inserting `CASH_amount` at Column `AC` (Index 28). Updated `api/api_code.js` to parse indices 26–35 (AA to AJ), shifting `CHIFUND`, `FCD`, `GOLD`, `GOLDFUND`, `SEMIFUND`, `THSTOCK`, and `USAFUND` safely to ensure zero data corruption or field mismatch.
-  - **Semantic Color System (3-Way Consistency)**: Standardized color identity across Donut Chart, Stacked Area Chart, and Holdings Table Badges:
-    - `CASH`: Slate Dark Gray (`#475569`) — crisp, distinct reserve liquidity.
-    - `BOND`: Slate Light Gray (`#94a3b8`) — lighter shade, high readability.
-    - `GOLD` & `GOLDFUND`: Amber/Warm Gold (`#f59e0b`, `#d97706`).
-    - `THSTOCK` & `THFUND`: Deep Thai Navy Blue (`#0f4c81`) — patriotic Thai identity contrasting distinctly from US assets.
-    - `ASIAFUND`: Mandarin/Coral Orange-Red (`#f97316`) — regional Asian warmth near China.
-    - `CHIFUND`: Crimson Red (`#ef4444`).
-    - `USAFUND`, `FCD`, `SEMIFUND`: American Cobalt Blue (`#2563eb`), USD Cyan (`#0ea5e9`), and Tech Indigo (`#6366f1`).
-  - **Deterministic Golden-Ratio Fallback for Future Assets**: Replaced arbitrary random-purple defaults with an algorithmic Golden-Ratio HSL generator that dynamically produces vibrant, non-colliding colors for any future asset class added to the portfolio.
-  - **Macroeconomic Risk Hierarchy & Near-to-Far Sorting**: Synchronized sorting order across Donut slices, Area layers, Filter dropdown, and Table: Low Risk (`CASH` → `BOND` → `FCD`) → Store of Value (`GOLD` → `GOLDFUND`) → Equities Near-to-Far (`THSTOCK` → `ASIAFUND` → `CHIFUND` → `USAFUND` → `SEMIFUND`).
-  - **Offline & Dry-Run Tooling**: Updated `src/backfill_daily_snapshot.py` to support range `AA:AJ` and executed 100% read-only verification dry run confirming perfect data parity against live Google Sheet.
-
-- **Version 3.4.4** *(September 12, 2026)*: Modern App Icon, Favicon Suite & PWA Web App Manifest Integration.
-  - **Modern Fintech Logo Design**: Designed custom high-contrast logo featuring geometric rising vertical bar charts intersected by a glowing upward-trending dynamic line graph and peak arrow in vivid emerald green and electric cyan on a dark navy slate squircle.
-  - **Comprehensive Favicon Suite**: Generated multi-resolution icon assets including `favicon.ico` (16/32/48px), `favicon-16x16.png`, `favicon-32x32.png`, and high-res master `logo.png`.
-  - **PWA & Mobile Add-to-Home-Screen Support**: Added `apple-touch-icon.png` (180x180px) and `manifest.json` with Android maskable icons (192x192px and 512x512px) for a seamless native-app experience on both iOS Safari and Android Chrome.
-  - **Navbar Brand Icon Enhancement**: Updated header brand icon to integrate the high-resolution logo, providing consistent branding across browser tabs, bookmarks, home screens, and the in-app interface.
-
-- **Version 3.4.3** *(September 2, 2026)*: View 2 In-Area Labels, Light Theme Badge Contrast, and View 5 Mobile Dividend Simulator Chart Fix.
-  - **View 2 Stacked Area In-Area Labels**: Added custom Chart.js plugin (`stackedAreaLabelsPlugin`) rendering dark, high-contrast Asset Class name labels directly inside each colored band of the historical area chart, dynamically placed by band thickness without obstructing mouse hover tooltips.
-  - **View 2 Graph Height Expansion**: Expanded Stacked Area Chart container height to `520px` for spacious, clear visualization.
-  - **View 2 SEMIFUND Badge & Light Theme Contrast**: Added `.tag-SEMIFUND` badge style in matching purple, and enhanced contrast for all Asset Class and Owner (`PP`, `JJ`) badges in Light Theme with 15-20% darker tones.
-  - **View 5 Mobile Chart Collapse Fix**: Resolved flexbox container collapse on mobile in Zone 5 Dividend Simulator by removing conflicting nested `flex-1 flex flex-col` rules, establishing a solid `380px` height with responsive X-axis tick limits (`maxTicksLimit: 8`) and `beginAtZero: true` on both Y-axes.
-
-- **Version 3.4.2** *(September 1, 2026)*: View 5 Thai Stock Hub — Unrealized P&L % Precision Bug Fix & Historical Net Gain Column Integration.
-  - **Unrealized P&L % Bug Fix**: Resolved decimal ratio scaling bug in View 5 table where percentages were rendered without scale conversion (displaying 100x smaller, e.g. +0.01% instead of +1.24%). All `% Unrealized P&L` values are now accurately computed directly against total cost or scaled from API data.
-  - **Historical Net Gain & Net Gain % Column**: Added dedicated "Net Gain" column placed immediately to the right of Unrealized P&L in both PP and JJ Thai Stock Holdings tables (stacked 2-row layout with amount in ฿ and percentage in %, color-coded by positive/negative profit).
-  - **Table Summary Aggregation**: Added Historical Net Gain totals in sticky summary header rows (`Total PP` and `Total JJ`).
-  - **Interactive Sorting**: Added column sorting support for `historical_net_gain` across both dual tables.
-
-- **Version 3.4.1** *(August 30, 2026)*: View 5 Thai Stock Hub — Visual Overhaul, Monotone Pie Charts, Dual-Table Sort, and Light Theme Restoration.
-  - **Demo Data Privacy**: Anonymized all equity demo data with randomized generic sample tickers and standardized mock valuations to ensure complete data privacy.
-  - **Card Header Cleanup**: Removed all emoji icons from all Card headers in View 5 for a cleaner, professional typographic look.
-  - **Card 1.1 (Thai Stock Amount) Restructure**: Streamlined to left/right split layout — Market Value (฿) large left block (emerald) + 3 compact right sub-boxes: Real Capital, Cost Amount, Total Net Gain. Removed the Portfolio Total badge and outer blue border.
-  - **Card 1.2 (Annual Dividend Yield) Restructure**: Streamlined to left/right split layout — Expected Dividend (฿) large left block (emerald) + 2 compact right sub-boxes: YoC % (emerald) and Market Yield (neutral). Removed description text and orange outer border.
-  - **Card 2.1 & 2.2 (PP & JJ Owner Hub) Restructure**: Market Value occupies left 50%; right 50% shows Cost Amount and Exp. Div/Yr. Pie chart sized equally for both sides.
-  - **Monotone Pie Chart Color Palettes**: Replaced multi-hue rainbow pie slices with cohesive monotone palettes — PP uses Shades of Blue/Cyan (`#0284C7` → `#1E3A8A`); JJ uses Shades of Amber/Bronze/Warm Gold (`#D97706` → `#713F12`).
-  - **Pie Chart Tooltip Layer Fix**: Changed in-slice ticker label drawing from `afterDraw` to `afterDatasetsDraw` hook, ensuring Chart.js renders hover tooltips above canvas text at all times.
-  - **Dual Holdings Tables (PP & JJ)**: Split single combined table into two independent tables — PP Thai Stock Holdings and JJ Thai Stock Holdings — each with their own sticky Summary Row (Row Sum) showing Qty, Market Value, Unrealized P&L, Exp. Div/Yr, YoC %, and Mkt Yield %.
-  - **Table Typography Fix**: Replaced all `font-mono` / `ui-monospace` table cell fonts with `Inter` (same as View 2 Holdings at 12px/16px).
-  - **Table Default Sort (A–Z)**: Both PP and JJ tables default to sorting by Stock Symbol alphabetically (A → Z) on first render.
-  - **Interactive Table Header Sorting**: All 12 table columns support click-to-sort with directional indicators (`▲ / ▼ / ⇅`). Text columns toggle A→Z / Z→A; numeric columns toggle largest-first / smallest-first.
-  - **Table Text Color System**:
-    - Dark Theme: Stock symbols, prices, Market Value → White (`#F8FAFC`); Qty, Avg Cost → White (`#F8FAFC`).
-    - Light Theme: Stock symbols, prices, Market Value → Black (`#0F172A`); Qty, Avg Cost → Dark gray (`#334155`).
-    - Table header `<th>` forced to white (`#F8FAFC`, `font-weight: 700`) in both themes for legibility.
-  - **Dividend Simulator (Zone 5) Overhaul**:
-    - Converted all parameter controls from range sliders to typed `<input>` fields for precision.
-    - Removed Capital Appreciation parameter; simulator now models growth exclusively from Dividend Reinvestment (DRIP) + Step-up DCA compounding, reflecting real-world dividend portfolio behavior.
-    - Added Step-up DCA (% per year) parameter.
-    - Changed chart Legend style from color boxes to line indicators (`pointStyle: 'line'`).
-    - Added "Reset to Current Portfolio" button.
-  - **Light Theme Comprehensive Restoration**:
-    - `.th-kpi-subbox` CSS class replaces hardcoded `bg-slate-900/50` on all sub-boxes in Cards 1.1, 1.2, 2.1, 2.2 — Light Theme: `#F8FAFC` background, `#E2E8F0` border; Dark Theme: glass dark.
-    - `.th-chart-box` class for Pie Chart containers — Light Theme: off-white; Dark Theme: dark translucent.
-    - PP accent in Light Theme: Deep Blue `#0369A1`; JJ accent: Deep Amber `#B45309`; Dividend/Gain color: Deep Emerald `#047857`.
-    - "รีเซ็ตค่าพอร์ตปัจจุบัน" button in Light Theme: Deep Blue `#0369A1`.
-    - DRIP Reinvest label locked to Emerald `#10B981` in both themes via `.th-drip-label` class.
-  - **Scoped Edit Verification**: Verified all changes are strictly scoped to the intended dashboard components without regression.
-
-- **Version 3.4.0** *(August 18, 2026)*: View 5 Thai Stock Hub & Dividend / DRIP Wealth Simulator with 2-Way Live Sync & Real Capital Cost Basis.
-  - **View 5 (Thai Stock Hub & Dividend Simulator)**:
-    - **Zone 1 (Hero KPIs)**: Valuation & Profitability Matrix (Market Value, Real Capital Cost Basis, Total Net Gain & %, Book Cost, Unrealized P&L) and Annual Dividend & Yield Engine (Expected Dividend / Mo / Yr, YoC % based on Real Capital, Market Yield %).
-    - **Zone 2 & 3 (Owner Hubs & Dividend Contribution Donut Charts)**: Dedicated PP and JJ sub-hubs with individual Real Capital Cost Basis, Net Gains, and Chart.js Doughnut visualizations (`Chart 3.1` & `Chart 3.2`) breaking down dividend contribution by ticker.
-    - **Zone 4 (Strategic Holdings Table with 2-Way Live Sync)**: 13-column interactive table supporting owner filtering (`All`, `PP`, `JJ`), live Expected DPS inline input with 500ms debounce + optimistic UI recalculations, Consensus rating dropdown pills (🟢 Buy / 🟡 Hold / 🔴 Sell), Company Performance dropdowns (5 tiers), and real-time Google Sheet sync indicator (🔄 Syncing / 🟢 Saved / 🔴 Error).
-    - **Zone 5 (DRIP Wealth Retirement Simulator)**: Interactive snowball growth engine with parameter sliders (Monthly DCA, Retirement Age, Dividend Growth %, Capital Growth %) and dynamic multi-axis trajectory chart (`Chart 5.1`) comparing Projected Portfolio, Cumulative Capital, and Annual Dividend.
-  - **Backend & Data Pipeline**:
-    - Integrated Real Capital Cost Basis tracking (`Real Capital Cost Basis` = Total Cost - Historical Net Gain).
-    - Added `?action=thai_stocks` route in `doGet` and `action=update_thai_stock` handler in `doPost` for secure row-level updates based on account and symbol.
-    - Added Thai stock normalization layer and `ApiService.updateThaiStock()` in frontend.
-- **Version 3.3.1**: Savings Inflow Time Range Synchronization, Yearly/Monthly Granularity Toggle, Dynamic Color Scaling, and Light Theme Filter Button Contrast Fix.
-  - **View 1 (Overview)**:
-    - **Synchronized Time Range**: Savings Inflow bar chart is now dynamically synchronized and horizontally aligned with the Wealth Growth History line chart above (`ALL` starting from inception, `5Y`, `3Y`, `1Y`).
-    - **Yearly / Monthly Granularity Toggle**: Added an interactive segmented switch (`Monthly` vs `Yearly`) allowing users to switch between monthly inflow tracking and cumulative annual savings sums per calendar year.
-    - **Dynamic Value Color Scale**: Implemented dynamic bar coloring where higher positive savings scale up into vibrant deep emerald (`#10b981`), while negative net inflows (capital withdrawals) scale into rose/red (`#f43f5e`) for rapid visual assessment.
-  - **Design System & Contrast Enhancement**:
-    - **Light Theme Filter Button Legibility Fix**: Enhanced inactive Time Range and segmented filter buttons (`chart-range-btn`, `roi-btn`, `owner-filter-btn`, `alloc-owner-btn`) in Light Theme with high-contrast off-white text (`#D1D5DB`) and pure white hover state (`#FFFFFF` with `rgba(255, 255, 255, 0.15)` backdrop), resolving low contrast on dark slate pill containers without altering Dark Theme.
-- **Version 3.3.0**: Asset Class Historical Stacked Area Chart, View 2 Restructuring, and Table Sticky Header Overlap Bug Fix.
-  - **View 2 (Allocation & Holdings)**:
-    - **View 2.1**: *Asset Class Allocation* (Donut chart showing current snapshot portfolio distribution).
-    - **View 2.2**: *Asset Class Allocation History (วิวัฒนาการสัดส่วนสินทรัพย์ตามกาลเวลา)* - Introduced a high-contrast Stacked Area Chart visualizing historical growth and asset class evolution from inception to present across 9 asset classes (`THSTOCK`, `USAFUND`, `GOLD`, `GOLDFUND`, `ASIAFUND`, `CHIFUND`, `SEMIFUND`, `BOND`, `FCD`) with interactive time range buttons (`1Y`, `3Y`, `5Y`, `ALL`).
-    - **View 2.3**: *Asset Performance & Holdings* - Reordered to the 3rd section and resolved the sticky table header overlap bug by integrating the `Total` summary row directly into `<thead>`. Header titles and Total sum now freeze seamlessly at the top in order (`Header -> Total Sum -> Asset Rows`) during vertical table scrolling.
-    - **Unified Design System & Palette**: Synchronized color palette across Donut chart slices, Stacked Area layers, badges, and table indicators.
-  - **API & Data Engine**:
-    - Expanded API normalization layer to ingest historical asset class columns from backend snapshots.
-    - Updated offline demo mock data generator in `state.js` to simulate realistic historical asset class breakdowns across all snapshot months.
-- **Version 3.2.3**: Accounting Logic Fix & True Principal Cost Tracking (`Net_Capital_Deposit` & `Net_Gain`).
-  - Separated external net cash injected (`Net_Capital_Deposit`) from compounded gains (`Cost_Current_Asset`) to resolve reinvestment calculation distortion.
-  - **View 1 (Overview)**:
-    - Updated *Capital Deposited* KPI to use `Net_Capital_Deposit` (reflecting true principal).
-    - Updated *Wealth Growth History* chart dashed line to track `Total_Net_Capital_Deposit` (solid line remains `Total_Ondate_Amount`).
-  - **View 3 (Owner Race)**:
-    - Replaced *Unrealized P&L* card metric with *Net Gain* (`PP_Net_Gain` and `JJ_Net_Gain` = Unrealized + Realized + Dividends).
-    - Updated *Capital Deposited* card metric to `PP_Net_Capital_Deposit` and `JJ_Net_Capital_Deposit`.
-    - Updated *PP vs JJ Growth Race* chart dashed lines to track `PP_Net_Capital_Deposit` and `JJ_Net_Capital_Deposit` respectively (solid lines remain `Ondate_Amount`).
-  - **API & Data Engine**:
-    - Expanded API normalization layer for multi-column snapshot schema and master asset matrix.
-    - Synced demo mock data generators and documentation files across `/docs`.
-- **Version 3.2.2**: UI/UX Contrast enhancements, theme toggle redesign, and interactive component fixes.
-  - Replaced theme toggle icons with clean minimalist SVGs and standardized height matching the Sign In button.
-  - Fixed Google Auth button and user badge border radius (8px) and ensured black text visibility for user email in Light theme.
-  - Fixed filter button jumping layout shift by enforcing static dimensions with seamless hover state.
-  - Resolved missing/washed-out text across Light mode views (headers, parameter cards, table cells).
-  - Enhanced Pie chart layout with 5-6px inset padding to prevent hover clipping, and dynamic slice border colors.
-  - Added 80% opacity with backdrop blur on sticky Holdings summary row for both Light and Dark themes.
-  - Refined PP (deep blue) and JJ (deep amber) color palettes in Owner Race and Simulator views.
-- **Version 3.2.1**: UI Refinements, theme stabilization, and layout optimizations.
-  - Standardized Light/Dark theme variables with enhanced contrast.
-  - Replaced theme toggle with a monochrome sleek grayscale design.
-  - Optimized KPI headers with start-aligned icons for better readability.
-  - Enhanced Owner Race view with custom badges and optimized subgrid layouts.
-  - Fixed sticky header overlap and renamed summary labels in the Holdings table.
-  - Implemented persistent theme state defaulting to Light mode.
-- **Version 3.2**: Dual-theme support, UI modernization, and independent view states.
-  - Implemented Light & Dark Mode system with a global theme switcher.
-  - Relocated Holdings table summary row to the top for better visibility.
-  - Modernized Owner Breakdown toggle controls with segmented UI and micro-interactions.
-  - Isolated filter states between views to prevent global state conflicts.
-  - Standardized code documentation with Version 3.2 Patch annotations.
-- **Version 3.1**: UI bug fixes, default parameter updates, and API latency optimization.
-  - Calibrated demo mode mock data for privacy.
-  - Fixed mobile overflow for retirement year selector.
-  - Added dynamic footer summary row for Holdings table with auto-calculating totals.
-  - Updated default FIRE target metrics and retirement simulator parameters.
-  - Implemented timestamp cache busters and `no-store` fetch options for real-time data accuracy.
-- **Version 3.0**: Initial dashboard structure and core features implementation.
-
-## Security & Privacy
-This repository contains the application structure and logic. No private financial data, API keys, or personal credentials should be committed to this repository. All sensitive configuration is handled via environment-specific setup or local configuration files excluded from version control.
+ระบบบริหารจัดการสินทรัพย์และแดชบอร์ดติดตามความมั่งคั่งของครอบครัวแบบ interactive ออกแบบมาเพื่อติดตามการเติบโตของพอร์ตการลงทุน วิเคราะห์สัดส่วนและผลการดำเนินงานของสินทรัพย์แต่ละประเภท และจำลองเป้าหมายอิสรภาพทางการเงิน (FIRE)
 
 ---
-*Last Updated: September 2, 2026 (v3.4.3)*
+
+## 1. ภาพรวมของโครงการ (Project Overview)
+
+ระบบถูกออกแบบภายใต้สถาปัตยกรรมแบบไฮบริด (Hybrid Architecture) โดยใช้ Google Sheets เป็นฐานข้อมูลและระบบคำนวณหลัก ผสานกับ Web Application สมัยใหม่สำหรับการแสดงผลและวิเคราะห์ข้อมูล:
+
+- **เครื่องมือจัดการข้อมูล (Data Engine)**: ประมวลผลและจัดเก็บบันทึกธุรกรรมการเงิน รวมถึงการคำนวณมูลค่าสินทรัพย์แบบเรียลไทม์ผ่าน Google Sheets
+- **เครื่องมือดึงราคาสินทรัพย์ (Price Engine)**: ระบบดึงราคาอัตโนมัติผ่าน Google Apps Script (สำนักงาน ก.ล.ต. ไทย, Yahoo Finance, ธนาคารแห่งประเทศไทย)
+- **สถาปัตยกรรม API (Single-Batch Standard)**: REST API ความปลอดภัยสูงพัฒนาด้วย Google Apps Script โดยทุกคำขอดึงข้อมูลของแดชบอร์ด (`summary`, `assets`, `snapshot`, `thai_stocks`) จะถูกรวบรวมเป็น 1 คำขอเดียว (`?action=all`) เพื่อลดความหน่วงและป้องกันปัญหาขีดจำกัดการประมวลผลของคลาวด์
+- **ส่วนติดต่อผู้ใช้ (Frontend Web Dashboard)**: Single Page Application (SPA) รองรับการแสดงผลทั้งบนคอมพิวเตอร์และมือถือ ประกอบด้วย 5 มุมมองหลัก:
+    1. **Overview**: ภาพรวมมูลค่าพอร์ตสุทธิ เงินต้นสะสม ดอกผลเงินทำงาน และประวัติการเติบโตของเงินต้นเทียบมูลค่าจริง
+    2. **Allocation & Holdings**: สัดส่วนสินทรัพย์ปัจจุบัน กราฟวิวัฒนาการสัดส่วนตามกาลเวลา และตารางรายการสินทรัพย์พร้อมระบบค้นหาและกรองข้อมูล
+    3. **Owner Breakdown (PP vs JJ Race)**: เปรียบเทียบสถิติการเติบโต วินัยการออม และผลการดำเนินงานระหว่างสองเจ้าของพอร์ต
+    4. **Retirement Simulator**: ระบบจำลองเส้นทางเกษียณอายุและอิสรภาพทางการเงิน (FIRE) ตามเป้าหมายที่กำหนด
+    5. **Thai Stock Hub & DRIP Simulator**: ศูนย์วิเคราะห์หุ้นไทย กระแสเงินปันผล และระบบจำลองดอกเบี้ยทบต้น (DRIP) พร้อมระบบซิงก์ข้อมูล 2 ทาง (2-Way Live Sync)
+
+---
+
+## 2. โครงสร้างโฟลเดอร์ (Directory Structure)
+
+```
+/
+├── dashboard/              # ซอร์สโค้ดของ Web Frontend Dashboard
+│   ├── index.html          # หน้าเว็บหลัก (Single Page Application)
+│   ├── manifest.json       # Web App Manifest (รองรับ PWA & ติดตั้งบนจอมือถือ)
+│   ├── favicon.ico         # ไอคอนแท็บเบราว์เซอร์และบุ๊กมาร์ก
+│   ├── icons/              # ชุดไอคอนความละเอียดสูงทุกขนาด
+│   ├── css/                # สไตล์ชีตและการออกแบบ Glassmorphism
+│   └── js/                 # ตรรกะการทำงาน (JavaScript)
+│       ├── views/          # ตรรกะการแสดงผลของแต่ละหน้ามุมมอง (Views)
+│       ├── api.js          # เลเยอร์สื่อสารกับ API และระบบแคชในเครื่อง
+│       ├── app.js          # ตัวควบคุมหลักของแอปพลิเคชัน
+│       ├── auth.js         # ระบบความปลอดภัยและการยืนยันตัวตน Google OAuth
+│       ├── config.js       # ค่าคอนฟิกูเรชันของแดชบอร์ด
+│       └── state.js        # ตัวจัดการสถานะข้อมูล (State Management)
+├── docs/                   # เอกสารอ้างอิงสถาปัตยกรรมและคู่มือการพัฒนา
+├── api/                    # สคริปต์ต้นฉบับสำหรับนำไปวางใน Google Apps Script
+├── config/                 # ไฟล์คอนฟิกูเรชันระบบ
+└── src/                    # สคริปต์ช่วยเหลือด้านข้อมูลอัตโนมัติ (Python)
+```
+
+---
+
+## 3. เทคโนโลยีที่ใช้ (Tech Stack)
+
+- **ภาษาหลัก**: JavaScript (ES6+), HTML5, CSS3
+- **การแสดงผลกราฟิก (Visualization)**: Chart.js (ยืนยันความสมบูรณ์ด้วย Subresource Integrity)
+- **การจัดแต่งสไตล์ (Styling)**: Vanilla CSS ผสาน Tailwind CSS
+- **ระบบหลังบ้าน (Backend & Data)**: Google Sheets, Google Apps Script
+- **ระบบความปลอดภัย (Security)**: Google Identity Services (OAuth 2.0), Content Security Policy (CSP)
+
+---
+
+## 4. มาตรฐานความปลอดภัยและความเป็นส่วนตัว (Security & Privacy Standards)
+
+- **Zero Hardcoded Secrets**: ปราศจากการบันทึกกุญแจ API Key หรือ Token ใดๆ ฝังไว้ในโค้ดหรือ Git Repository โดยข้อมูลลับทั้งหมดจะถูกจัดเก็บใน Script Properties บนคลาวด์ของ Google อย่างปลอดภัย
+- **ความปลอดภัยของเซสชัน (Ephemeral Client Storage)**: ข้อมูลเซสชันการยืนยันตัวตนและแคชตัวเลขพอร์ตการลงทุนจะถูกจัดเก็บใน `sessionStorage` เท่านั้น ข้อมูลทั้งหมดจะถูกลบออกจากหน่วยความจำทันทีเมื่อปิดแท็บเบราว์เซอร์ เพื่อสุขอนามัยความเป็นส่วนตัวสูงสุด (Privacy Hygiene)
+- **การควบคุมทรัพยากร (Content Security Policy)**: กำหนดนโยบายความปลอดภัยของเบราว์เซอร์อย่างเข้มงวด อนุญาตการเชื่อมต่อเฉพาะโดเมนทางการและ API ที่ผ่านการรับรองเท่านั้น
+- **การป้องกันการแทรกแซงโค้ด (Subresource Integrity)**: ตรวจสอบความถูกต้องของไลบรารีภายนอกด้วยค่าแฮชเชิงคณิตศาสตร์ (SHA-512) ป้องกันการถูกแทรกแซงจาก CDN
+
+---
+
+## 5. บันทึกประวัติการพัฒนาและเวอร์ชัน (Version Log)
+
+### Version 3.5.3 *(16 ตุลาคม 2026)*: การยกระดับมาตรฐานความปลอดภัย ความเป็นส่วนตัว และความถูกต้องของข้อมูล (Zero-Trust Security & Privacy Hardening)
+- **การจัดเก็บแคชแบบชั่วคราวเพื่อความเป็นส่วนตัว (Ephemeral Client Privacy)**: ปรับปรุงระบบแคชข้อมูลพอร์ตการลงทุนโดยย้ายจาก `localStorage` ไปยัง `sessionStorage` พร้อมกำหนดอายุแคชอัตโนมัติ 8 ชั่วโมง (TTL) รับประกันว่าจะไม่มีข้อมูลตัวเลขทางการเงินค้างอยู่บนดิสก์ถาวรเมื่อปิดแท็บเบราว์เซอร์ พร้อมคำสั่งล้างข้อมูลแคชเก่าในระบบให้อัตโนมัติ
+- **การตรวจสอบความถูกต้องของสคริปต์ภายนอก (Subresource Integrity - SRI)**: เพิ่มการตรวจสอบแฮช SHA-512 ให้กับไลบรารีกราฟ Chart.js เพื่อยืนยันความแท้จริงของไฟล์แบบบิตต่อบิต ป้องกันความเสี่ยงจากการแทรกแซงโค้ดผ่าน CDN
+- **นโยบายความปลอดภัยเนื้อหา (Content Security Policy - CSP)**: เพิ่มแท็ก CSP ควบคุมขอบเขตการทำงานของเบราว์เซอร์อย่างรัดกุม บล็อกการส่งข้อมูลออกนอกระบบ และจำกัดการโหลดทรัพยากรให้เชื่อมต่อได้เฉพาะบริการที่อนุญาตเท่านั้น
+- **การเข้ารหัสและป้องกันข้อมูลนำเข้า (Output Encoding & XSS Defense)**: เพิ่มระบบแปลงอักขระพิเศษ (HTML Sanitization) สำหรับชื่อสินทรัพย์ รายชื่อหุ้น และบัญชี ป้องกันการแทรกสคริปต์ไม่พึงประสงค์ในหน้าแดชบอร์ด
+- **การปกป้องความปลอดภัยของสูตรคำนวณ (Formula Guard)**: เสริมระบบคัดกรองข้อมูลนำเข้าในฟังก์ชัน 2-Way Sync เพื่อรักษาความสมบูรณ์ของสูตรและโครงสร้างข้อมูลใน Google Sheets
+- **การแยกเก็บกุญแจลับบนคลาวด์ (Zero Hardcoded Secrets)**: ย้ายค่ากุญแจเชื่อมต่อภายนอกเข้าสู่ Script Properties ของ Google Apps Script โดยสมบูรณ์
+
+### Version 3.5.2 *(1 ตุลาคม 2026)*: ระบบบันทึกประวัติสิ้นเดือนอัตโนมัติบนคลาวด์ และการแจ้งเตือน LINE Notify
+- **ระบบบันทึกภาพรวมสิ้นเดือนอัตโนมัติ (`month_end_snapshot.js`)**: พัฒนาระบบทำงานบน Google Cloud อัตโนมัติทุกสิ้นวัน ประเมินวันสิ้นเดือนและบันทึกประวัติพอร์ตลงใน `Daily Snapshort_V3`
+- **การแจ้งเตือนผ่าน LINE ("PJ Family Notify")**: ส่งการ์ดสรุปผลการดำเนินงานพอร์ตรายเดือนเข้ากลุ่มครอบครัวทันทีเมื่อบันทึกข้อมูลสำเร็จ
+- **การรักษาความปลอดภัยโทเคน**: จัดเก็บโทเคนของ LINE ผ่าน `PropertiesService` ใน Google Cloud ป้องกันการหลุดเข้าสู่ Git
+
+### Version 3.5.1 *(25 กันยายน 2026)*: สถาปัตยกรรม Single-Batch API และระบบ Instant Cache
+- **การรวมคำขอดึงข้อมูล (`?action=all`)**: รวมการเรียกข้อมูลย่อย 4 เส้นทางเข้าเป็น 1 คำขอเดียว ลดเวลาตอบสนองจาก 20–30 วินาที เหลือเพียง 2–3 วินาที
+- **Instant Local Cache (Stale-While-Revalidate)**: แสดงผลข้อมูลในหน่วยความจำทันทีใน 0.05 วินาที พร้อมเชื่อมต่อข้อมูลสดใหม่เบื้องหลังอย่างราบรื่น
+- **ระบบป้องกันข้อผิดพลาด HTML Gateway**: ตรวจจับและรองรับหน้าจอข้อผิดพลาดของ Google อย่างนุ่มนวล ไม่ทำให้หน้าเว็บหยุดทำงาน
+
+### Version 3.5.0 *(14 กันยายน 2026)*: การรวมสินทรัพย์เงินสด (CASH) และระบบสีเชิงเศรษฐศาสตร์
+- **การเพิ่มประเภทสินทรัพย์ CASH**: แสดงสภาพคล่องเงินสดในกราฟวิวัฒนาการสัดส่วนตามกาลเวลา
+- **การปรับตำแหน่งคอลัมน์ชีต (Col AC Shift Fix)**: อัปเดตการอ่านข้อมูลใน API ให้ตรงกับโครงสร้างคอลัมน์ใหม่ ป้องกันข้อมูลคลาดเคลื่อน
+- **ระบบสีมาตรฐาน 3 มิติ**: กำหนดรหัสสีเฉพาะสำหรับแต่ละประเภทสินทรัพย์ให้สอดคล้องกันทุกกราฟและตาราง
+
+---
+*บันทึกเวอร์ชันล่าสุด: 16 ตุลาคม 2026 (v3.5.3)*
