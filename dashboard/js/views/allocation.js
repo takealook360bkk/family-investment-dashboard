@@ -1,4 +1,4 @@
-// View 2: Portfolio Allocation & Performance (v3.4.1 - CASH Integration & Semantic Palette)
+// View 2: Portfolio Allocation & Performance (v3.6.5 - Market Value vs Cost Coloring & High-Contrast Theme Sync)
 
 window.AllocationView = {
   allocationChart: null,
@@ -42,28 +42,18 @@ window.AllocationView = {
     'OTHER':     '#64748b'  // เทากลาง
   },
 
-  // ตรรกะกำหนดสีสำหรับสินทรัพย์ (พร้อมคำนวณสีอัตโนมัติสำหรับสินทรัพย์ใหม่ในอนาคต)
+  // ตรรกะกำหนดสีสำหรับสินทรัพย์ (เชื่อมต่อกับ ColorEngine กลางเพื่อมาตรฐานชุดสีเดียวกันทั้งระบบ)
   getAssetColor(assetClass) {
+    if (window.ColorEngine) return window.ColorEngine.getAssetColor(assetClass);
     if (!assetClass) return '#94a3b8';
     const upper = assetClass.toUpperCase();
-    if (this.colorPalette[upper]) return this.colorPalette[upper];
-
-    // สินทรัพย์ใหม่ในอนาคต: คำนวณสีแบบคงที่ (Deterministic HSL Hash)
-    // ใช้ Golden Angle เพื่อกระจายสีอย่างสม่ำเสมอ และล็อกความสว่าง/ความสดไม่ให้เพี้ยนเป็นสีม่วงสุ่ม
-    let hash = 0;
-    for (let i = 0; i < upper.length; i++) {
-      hash = upper.charCodeAt(i) + ((hash << 5) - hash);
-    }
-    const hue = Math.abs((hash * 137.5) % 360);
-    return `hsl(${hue.toFixed(0)}, 70%, 52%)`;
+    return this.colorPalette[upper] || '#64748b';
   },
 
   // Helper: แปลง Hex หรือ HSL เป็น RGBA พร้อมค่าความโปร่งแสง (Alpha)
   hexToRgba(colorStr, alpha) {
+    if (window.ColorEngine) return window.ColorEngine.hexToRgba(colorStr, alpha);
     if (!colorStr) return `rgba(148, 163, 184, ${alpha})`;
-    if (colorStr.startsWith('hsl')) {
-      return colorStr.replace('hsl', 'hsla').replace(')', `, ${alpha})`);
-    }
     let c = colorStr.replace('#', '');
     if (c.length === 3) c = c.split('').map(x => x + x).join('');
     const num = parseInt(c, 16);
@@ -495,7 +485,7 @@ window.AllocationView = {
     });
   },
 
-  // View 2.3: Holdings Table (with sticky header & sum fix)
+  // View 2.3: Holdings Table (with sticky header & View 5 high-contrast green/red color logic)
   renderTable(baseList) {
     const tbody = document.getElementById('asset-holdings-tbody');
     if (!tbody) return;
@@ -551,9 +541,14 @@ window.AllocationView = {
       realizedPlSum += (a.realized_pl || 0);
     });
 
+    const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+    // ใช้ชุดสีเดียวกับ View 5 (Thai Stock Hub) เพื่อให้สีเขียวและสีแดงใน Light Mode เข้มคมชัดอ่านง่าย
+    const posColorClass = isLight ? 'th-price-up text-emerald-700' : 'th-price-up text-emerald-400';
+    const negColorClass = isLight ? 'th-price-down text-rose-700' : 'th-price-down text-rose-400';
+
     const weightedAvgPlPct = totalCostSum > 0 ? (unrealizedPlSum / totalCostSum) * 100 : 0;
     const isWeightedPos = weightedAvgPlPct >= 0;
-    const weightedPlCls = isWeightedPos ? 'text-emerald-400' : 'text-rose-400';
+    const weightedPlCls = isWeightedPos ? posColorClass : negColorClass;
     const weightedAvgPlPctStr = `${isWeightedPos ? '+' : ''}${weightedAvgPlPct.toFixed(2)}%`;
 
     // Update Sticky thead Summary Row elements
@@ -564,14 +559,18 @@ window.AllocationView = {
     const sumRealplEl = document.getElementById('sum-col-realpl');
 
     if (sumCostEl)    sumCostEl.textContent = `฿${window.formatCurrency(totalCostSum)}`;
-    if (sumMvEl)      sumMvEl.textContent   = `฿${window.formatCurrency(marketValueSum)}`;
+    if (sumMvEl) {
+      sumMvEl.textContent = `฿${window.formatCurrency(marketValueSum)}`;
+      const sumMvColor = marketValueSum > totalCostSum ? posColorClass : (marketValueSum < totalCostSum ? negColorClass : '');
+      sumMvEl.className = `px-4 py-3 text-right font-extrabold ${sumMvColor}`;
+    }
     if (sumUnplEl) {
-      sumUnplEl.textContent = `฿${window.formatCurrency(unrealizedPlSum)}`;
-      sumUnplEl.className = `px-4 py-3 text-right ${unrealizedPlSum >= 0 ? 'text-emerald-400' : 'text-rose-400'}`;
+      sumUnplEl.textContent = `${unrealizedPlSum >= 0 ? '+' : ''}฿${window.formatCurrency(unrealizedPlSum)}`;
+      sumUnplEl.className = `px-4 py-3 text-right font-extrabold ${unrealizedPlSum >= 0 ? posColorClass : negColorClass}`;
     }
     if (sumUnplPctEl) {
       sumUnplPctEl.textContent = weightedAvgPlPctStr;
-      sumUnplPctEl.className = `px-4 py-3 text-right ${weightedPlCls}`;
+      sumUnplPctEl.className = `px-4 py-3 text-right font-extrabold ${weightedPlCls}`;
     }
     if (sumRealplEl)  sumRealplEl.textContent = `฿${window.formatCurrency(realizedPlSum)}`;
 
@@ -582,15 +581,31 @@ window.AllocationView = {
       tbody.innerHTML = `<tr><td colspan="11" class="text-center py-8 text-gray-500">ไม่พบข้อมูลสินทรัพย์ที่ตรงกัน</td></tr>`;
     } else {
       list.forEach(a => {
-        const plPct = a.unrealized_pl_pct || 0;
-        const isPos = plPct >= 0;
-        const plCls = isPos ? 'text-emerald-400' : 'text-rose-400';
-        const plPctStr = `${isPos ? '+' : ''}${plPct.toFixed(2)}%`;
+        const plVal = Number(a.unrealized_pl || 0);
+        const plPct = Number(a.unrealized_pl_pct || 0);
+        const isPos = plVal >= 0;
+        const plCls = isPos ? posColorClass : negColorClass;
+        const plPctStr = `${plPct >= 0 ? '+' : ''}${plPct.toFixed(2)}%`;
+
+        // เปรียบเทียบ Market Value กับ Total Cost:
+        // ถ้า Market Value > Total Cost แสดงสีเขียว, ถ้า Market Value < Total Cost แสดงสีแดง, ถ้าเท่ากันแสดงสีมาตรฐาน
+        const mvVal = Number(a.market_value || 0);
+        const costVal = Number(a.total_cost || 0);
+        let mvColorCls = 'asset-data-cell';
+        if (mvVal > costVal) {
+          mvColorCls = posColorClass;
+        } else if (mvVal < costVal) {
+          mvColorCls = negColorClass;
+        }
+
+        // สีของคอลัมน์ Realized P&L (ปรับให้เข้มขึ้นในโหมดสว่างเหมือน View 5)
+        const realizedVal = Number(a.realized_pl || 0);
+        const realizedCls = realizedVal > 0 ? 'alloc-realized-val font-semibold' : 'asset-data-cell opacity-75';
 
         // ตรวจสอบว่าเป็นคลาสที่กำหนดไว้ใน CSS หรือไม่ หากเป็นคลาสใหม่ให้ใช้สีไดนามิก
         const assetColor = this.getAssetColor(a.class);
         const isKnownClass = this.orderedClassKeys.includes((a.class || '').toUpperCase());
-        const inlineTagStyle = isKnownClass ? '' : `style="background: ${this.hexToRgba(assetColor, 0.2)}; color: ${assetColor}; border: 1px solid ${this.hexToRgba(assetColor, 0.35)};"`;
+        const inlineTagStyle = isKnownClass ? '' : (window.ColorEngine ? `style="${window.ColorEngine.getAssetBadgeStyle(a.class, isLight)}"` : `style="background: ${this.hexToRgba(assetColor, 0.2)}; color: ${assetColor}; border: 1px solid ${this.hexToRgba(assetColor, 0.35)};"`);
 
         const safeName = window.escapeHtml(a.asset_name);
         const safeClass = window.escapeHtml(a.class || 'OTHER');
@@ -606,10 +621,10 @@ window.AllocationView = {
           <td class="px-4 py-3 text-right asset-data-cell">฿${window.formatNumber(a.avg_cost)}</td>
           <td class="px-4 py-3 text-right asset-data-cell font-medium">฿${window.formatNumber(a.current_price)}</td>
           <td class="px-4 py-3 text-right asset-data-cell">฿${window.formatCurrency(a.total_cost)}</td>
-          <td class="px-4 py-3 text-right text-emerald-400 font-semibold">฿${window.formatCurrency(a.market_value)}</td>
-          <td class="px-4 py-3 text-right font-medium ${plCls}">฿${window.formatCurrency(a.unrealized_pl)}</td>
+          <td class="px-4 py-3 text-right ${mvColorCls} font-bold">฿${window.formatCurrency(a.market_value)}</td>
+          <td class="px-4 py-3 text-right font-semibold ${plCls}">${plVal >= 0 ? '+' : ''}฿${window.formatCurrency(a.unrealized_pl)}</td>
           <td class="px-4 py-3 text-right font-semibold ${plCls}">${plPctStr}</td>
-          <td class="px-4 py-3 text-right text-amber-400">฿${window.formatCurrency(a.realized_pl || 0)}</td>
+          <td class="px-4 py-3 text-right ${realizedCls}">฿${window.formatCurrency(realizedVal)}</td>
         `;
         tbody.appendChild(tr);
       });
@@ -620,4 +635,3 @@ window.AllocationView = {
     if (countBadge) countBadge.textContent = `${list.length} Assets`;
   }
 };
-

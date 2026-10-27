@@ -1,5 +1,5 @@
 // View 5: Thai Stock Hub & Dividend / DRIP Wealth Simulator
-// Patch v3.4.1: Upgraded dual-table layout, A-Z default sorting & interactive header sort, and refined light theme
+// Patch v3.6.4: Conditional Price coloring vs Avg Cost, dynamic palette & dual-table live sync
 
 window.ThaiHubView = {
   charts: {
@@ -441,6 +441,17 @@ window.ThaiHubView = {
     const unplClass = isUnplPos ? posColor : negColor;
     const netGainClass = isNetGainPos ? posColor : negColor;
 
+    // เปรียบเทียบราคาตลาดปัจจุบัน (Price) กับต้นทุนเฉลี่ย (Avg Cost):
+    // ถ้าราคาสูงกว่าต้นทุนแสดงสีเขียว (th-price-up) ถ้าต่ำกว่าต้นทุนแสดงสีแดง (th-price-down)
+    const currentPrice = Number(item.current_price || 0);
+    const avgCostPrice = Number(item.avg_cost_price || 0);
+    let priceColorClass = 'th-stock-price';
+    if (currentPrice > avgCostPrice) {
+      priceColorClass = 'th-price-up';
+    } else if (currentPrice < avgCostPrice) {
+      priceColorClass = 'th-price-down';
+    }
+
     const consensus = (item.note_consensus || 'Hold').trim();
     let consensusClass = 'hold';
     if (consensus.toLowerCase() === 'buy') consensusClass = 'buy';
@@ -463,7 +474,7 @@ window.ThaiHubView = {
         </td>
         <td class="px-3 py-2.5 text-right th-stock-sec">${window.formatCurrency(item.quantity)}</td>
         <td class="px-3 py-2.5 text-right th-stock-sec">${window.formatNumber(item.avg_cost_price)}</td>
-        <td class="px-3 py-2.5 text-right th-stock-price font-semibold">${window.formatNumber(item.current_price)}</td>
+        <td class="px-3 py-2.5 text-right ${priceColorClass} font-bold">${window.formatNumber(item.current_price)}</td>
         <td class="px-3 py-2.5 text-right th-stock-mv font-bold">฿${window.formatCurrency(item.market_value)}</td>
         <td class="px-3 py-2.5 text-right ${unplClass}">
           ${isUnplPos ? '+' : ''}฿${window.formatCurrency(item.unrealized_pl)}
@@ -677,13 +688,14 @@ window.ThaiHubView = {
       const values = ppSorted.map(i => i.market_value || 0);
       const totalMv = values.reduce((a, b) => a + b, 0);
 
+      const ppColors = window.ColorEngine ? window.ColorEngine.getOwnerStockPalette('PP', labels.length) : ppMonotoneColors.slice(0, labels.length);
       this.charts.ppPie = new Chart(ppCtx, {
         type: 'pie',
         data: {
           labels: labels,
           datasets: [{
             data: values,
-            backgroundColor: ppMonotoneColors.slice(0, labels.length),
+            backgroundColor: ppColors,
             borderWidth: 1.5,
             borderColor: borderColor
           }]
@@ -718,13 +730,14 @@ window.ThaiHubView = {
       const values = jjSorted.map(i => i.market_value || 0);
       const totalMv = values.reduce((a, b) => a + b, 0);
 
+      const jjColors = window.ColorEngine ? window.ColorEngine.getOwnerStockPalette('JJ', labels.length) : jjMonotoneColors.slice(0, labels.length);
       this.charts.jjPie = new Chart(jjCtx, {
         type: 'pie',
         data: {
           labels: labels,
           datasets: [{
             data: values,
-            backgroundColor: jjMonotoneColors.slice(0, labels.length),
+            backgroundColor: jjColors,
             borderWidth: 1.5,
             borderColor: borderColor
           }]
